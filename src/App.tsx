@@ -2,6 +2,7 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { Counter } from './features/counter/Counter';
+import { PublicMap } from './components/map';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           Learn React
         </a>
       </header>
+      <PublicMap />
     </div>
   );
 }
