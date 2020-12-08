@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from 'react';
+import React from 'react';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -32,7 +32,7 @@ type Props = {};
 //   );
 // };
 
-export class PublicMap extends React.Component {
+export class PublicMap extends React.Component<Props> {
   componentDidMount() {
     // create feature layer and vector source
     // var featuresLayer = new Vector({
@@ -52,8 +52,8 @@ export class PublicMap extends React.Component {
         // featuresLayer,
       ],
       view: new View({
-        center: [-11718716.28195593, 4869217.172379018], //Boulder, CO
-        zoom: 13,
+        center: [0, 0], //Boulder, CO
+        zoom: 0,
       }),
     });
 
