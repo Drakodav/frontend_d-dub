@@ -16,7 +16,7 @@ interface Props {
 export const MapWrapper = (props: Props) => {
   const [map, setMap] = useState({} as Map);
   const [featuresLayer, setFeaturesLayer] = useState({} as VectorLayer);
-  const [selectedCoord, setSelectedCoord] = useState({} as Coordinate);
+  const [selectedCoord, setSelectedCoord] = useState<Coordinate>();
 
   const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
   const mapRef = useRef({} as Map);
@@ -73,7 +73,7 @@ export const MapWrapper = (props: Props) => {
     const clickedCoord = mapRef.current.getCoordinateFromPixel(event.pixel);
     const transormedCoord = transform(clickedCoord, 'EPSG:3857', 'EPSG:4326');
     setSelectedCoord(transormedCoord);
-    console.log(selectedCoord);
+    console.log(transormedCoord);
   };
 
   return (
