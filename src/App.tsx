@@ -1,17 +1,8 @@
 import React from 'react';
-import {
-  Box,
-  Button,
-  Form,
-  FormField,
-  Grommet,
-  ResponsiveContext,
-  TextInput,
-} from 'grommet';
+import { Box, Grommet, ResponsiveContext } from 'grommet';
 import './App.css';
-import { Counter } from './features/counter/Counter';
-import { MapWrapper } from './components/map';
-import RouteForm from './components/routeForm';
+import { MapWrapper } from './components/MapWrapper';
+import { RouteInput } from './components/RouteInput';
 
 const theme = {
   global: {
@@ -47,11 +38,8 @@ function App() {
         {(size) => (
           <Box>
             <AppBar>Dynamo Dublin</AppBar>
-            <div>
-              <RouteForm />
-            </div>
-            <MapWrapper features={[]} />
-            <Counter />
+            <MapWrapper />
+            <RouteInput heading={'Bus Route'} />
           </Box>
         )}
       </ResponsiveContext.Consumer>
