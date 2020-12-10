@@ -3,18 +3,18 @@ import { ApiResult } from '../../model/api';
 import { RootState } from '../store';
 
 interface ApiState {
-  apiResults: ApiResult[];
+  apiResults: ApiResult;
 }
 
 const initialState: ApiState = {
-  apiResults: [],
+  apiResults: {} as ApiResult,
 };
 
 export const apiSlice = createSlice({
   name: 'apiQuery',
   initialState,
   reducers: {
-    setApiQuery: (state, action: PayloadAction<ApiResult[]>) => {
+    setApiQuery: (state, action: PayloadAction<ApiResult>) => {
       state.apiResults = action.payload;
     },
   },
@@ -22,6 +22,6 @@ export const apiSlice = createSlice({
 
 export const { setApiQuery } = apiSlice.actions;
 
-// export const selectApiResults = (state: RootState) => state.apiQuery.apiResults;
+export const selectApiResults = (state: RootState) => state.apiQuery.apiResults;
 
 export default apiSlice.reducer;
