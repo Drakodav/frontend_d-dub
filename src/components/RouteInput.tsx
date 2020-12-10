@@ -18,43 +18,28 @@ export const RouteInput = ({ heading }: Props) => {
   const [suggestions, setSuggestions] = useState<JSX.Element>();
   const dipatch = useDispatch();
 
-  // useEffect(() => {
-  //   const results = apiResults
-  //     .map((r) => r?.short_name)
-  //     .filter((s) => !!s) as string[];
-
-  //   setSuggestions(results);
-  // }, [apiResults]);
-
-  const getSuggestionComponents = (results: string[]): JSX.Element => {
+  const getSuggestionComponents = (
+    results: string[],
+    disable?: boolean
+  ): JSX.Element => {
+    if (disable === true) return <></>;
     let suggestionsListComponent: JSX.Element;
     if (results.length) {
       suggestionsListComponent = (
-        <ul className='suggestions'>
-          {results.map((suggestion, index) => {
-            let className;
-
-            // // Flag the active suggestion with a class
-            // if (index === activeSuggestion) {
-            //   className = "suggestion-active";
-            // }
-
-            return (
-              <li
-                className={className}
-                key={`${suggestion}${index}`}
-                onClick={() => {}}
-              >
-                {suggestion}
-              </li>
-            );
-          })}
-        </ul>
+        <datalist id='suggestions'>
+          {results.map((suggestion, index) => (
+            <option
+              key={`${suggestion}${index}`}
+              value={suggestion}
+              onClick={() => {}}
+            ></option>
+          ))}
+        </datalist>
       );
     } else {
       suggestionsListComponent = (
         <div className='no-suggestions'>
-          <em>No suggestions, you're on your own!</em>
+          <em>Result Not Found</em>
         </div>
       );
     }
@@ -67,14 +52,11 @@ export const RouteInput = ({ heading }: Props) => {
         value={value}
         onChange={async (nextValue) => {
           const input = (nextValue as FormType).value;
-          if (nextValue === value) return;
-          if (input.length > 5) {
-            console.log('User Input is too long'); // @TODO: proper user error message
-            return;
-          }
+          if (nextValue === value || input.length > 5) return;
+
           setValue(nextValue as FormType);
 
-          // set the autocomplete values now
+          // set the autocomplete values
           let results: string[] = (await getBusRoutes(input))
             .map((r) => r?.short_name)
             .filter((item) => !!item) as string[];
@@ -83,6 +65,7 @@ export const RouteInput = ({ heading }: Props) => {
           const suggestionCompList = getSuggestionComponents(results);
           setSuggestions(suggestionCompList);
         }}
+        onFocus={() => setSuggestions(suggestions)}
         validate='blur'
         onValidate={async () => {
           const input = (value as FormType).value;
@@ -90,11 +73,12 @@ export const RouteInput = ({ heading }: Props) => {
             const results = await getBusRoutes(input);
             const result = results.find((r) => r.short_name === input);
             result && dipatch(setApiQuery(result));
+            setSuggestions(getSuggestionComponents([], true));
           }
         }}
       >
         <FormField name='name' htmlFor='text-input-id' label={heading}>
-          <TextInput id='text-input-id' name='value' />
+          <TextInput id='text-input-id' name='value' list='suggestions' />
           {suggestions}
         </FormField>
       </Form>
