@@ -1,23 +1,23 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ApiResult } from '../../model/api';
+import { ApiResult } from '../../model/api.model';
 import { RootState } from '../store';
 
 interface ApiState {
-  apiResults: ApiResult;
+    apiResults: ApiResult;
 }
 
 const initialState: ApiState = {
-  apiResults: {} as ApiResult,
+    apiResults: {} as ApiResult,
 };
 
 export const apiSlice = createSlice({
-  name: 'apiQuery',
-  initialState,
-  reducers: {
-    setApiQuery: (state, action: PayloadAction<ApiResult>) => {
-      state.apiResults = action.payload;
+    name: 'apiQuery',
+    initialState,
+    reducers: {
+        setApiQuery: (state, action: PayloadAction<ApiResult>) => {
+            state.apiResults = action.payload;
+        },
     },
-  },
 });
 
 export const { setApiQuery } = apiSlice.actions;
