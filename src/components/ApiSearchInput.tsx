@@ -7,10 +7,6 @@ import { ApiResult } from '../model/api.model';
 import { setApiQuery } from '../store/reducers/apiQuery';
 import { filterApiReq, getApiResults, getSingleApiResult } from '../util/api.util';
 
-type FormType = {
-    value: string;
-};
-
 type Props = {
     heading: string;
     query: string;
@@ -27,6 +23,10 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
         result && dipatch(setApiQuery(result));
     };
 
+    useEffect(() => {
+        !!defaultOptions && setDefaultOptions(defaultOptions);
+    }, [defaultOptions, apiResults]);
+
     const loadOptions = async (input: string, callback: (options: OptionsType<OptionTypeBase>) => void) => {
         const newApiResults = await getApiResults(input, query);
         setApiResults(newApiResults);
@@ -38,10 +38,6 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
         setDefaultOptions(options);
         callback(options);
     };
-
-    useEffect(() => {
-        !!defaultOptions && setDefaultOptions(defaultOptions);
-    }, [defaultOptions, apiResults]);
 
     const handleInputChange = (newValue: string) => {
         !!newValue && setInputValue(newValue);
