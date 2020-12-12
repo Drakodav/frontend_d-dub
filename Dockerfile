@@ -2,6 +2,8 @@ FROM node:15.4
 
 RUN apt-get -y update && apt-get -y upgrade
 
+RUN npm install -g npm@7.1.2
+
 # Make a working directory in the image and set it as working dir
 RUN mkdir -p /user/src/app
 WORKDIR /usr/src/app
