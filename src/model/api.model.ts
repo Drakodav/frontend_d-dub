@@ -2,7 +2,7 @@ import { GeoJSONGeometry } from 'ol/format/GeoJSON';
 import { isLocalhost } from '../serviceWorkerRegistration';
 
 export const GtfsApiRoute = isLocalhost
-  ? 'http://na_dynamo_backend:8002'
+  ? 'http://localhost:8080/api/gtfs/'
   : 'http://127.0.0.1:8001/api/gtfs/';
 
 export enum ApiInputType {
