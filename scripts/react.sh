@@ -3,9 +3,6 @@
 # run from this directory
 cd "${BASH_SOURCE%/*}" || exit
 
-yarn install;
-yarn build;
-
 #react
 docker stop dynamo_frontend
 docker rm dynamo_frontend
