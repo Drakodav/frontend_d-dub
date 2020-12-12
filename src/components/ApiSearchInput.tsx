@@ -23,10 +23,6 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
         result && dipatch(setApiQuery(result));
     };
 
-    useEffect(() => {
-        !!defaultOptions && setDefaultOptions(defaultOptions);
-    }, [defaultOptions, apiResults]);
-
     const loadOptions = async (input: string, callback: (options: OptionsType<OptionTypeBase>) => void) => {
         const newApiResults = await getApiResults(input, query);
         setApiResults(newApiResults);
@@ -35,18 +31,20 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
         const options = filteredRes.map((r) => {
             return { value: r, label: r };
         });
-        setDefaultOptions(options);
-        callback(options);
+        if (!!options) {
+            setDefaultOptions(options);
+            callback(options);
+        }
     };
 
     const handleInputChange = (newValue: string) => {
         !!newValue && setInputValue(newValue);
     };
 
-    const handleChange = (selectedOption: ValueType<OptionTypeBase, false>) => {
+    const handleChange = async (selectedOption: ValueType<OptionTypeBase, false>) => {
         if (!!selectedOption?.value) {
             setInputValue(selectedOption.value);
-            selectedOption.value !== inputValue && setResultToMap(selectedOption.value);
+            setResultToMap(selectedOption.value);
         }
     };
 
