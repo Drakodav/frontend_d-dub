@@ -56,9 +56,10 @@ export const MapWrapper = (props: Props) => {
                 })
             );
 
-            // map.getView().fit(featuresLayer.getSource().getExtent(), {
-            //     padding: [100, 100, 100, 100],
-            // });
+            map.getView().fit(featuresLayer.getSource().getExtent(), {
+                padding: [100, 100, 100, 100],
+                maxZoom: 12,
+            });
         }
     }, [apiResult, featuresLayer, map]);
 
