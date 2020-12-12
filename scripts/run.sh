@@ -6,9 +6,13 @@
 # run from this directory
 cd "${BASH_SOURCE%/*}" || exit
 
+sudo echo "superuser permission granted"
+
 echo "installing & building project"
+cd ..
 yarn install
 yarn build
+cd scripts
 
 echo "########### connecting to server and run commands in sequence ###########"
 #create directories

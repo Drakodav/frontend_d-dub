@@ -1,9 +1,9 @@
 import { GeoJSONGeometry } from 'ol/format/GeoJSON';
-import { isLocalhost } from '../serviceWorkerRegistration';
 
-export const GtfsApiRoute = isLocalhost
-  ? 'http://localhost:8080/api/gtfs/'
-  : 'http://127.0.0.1:8001/api/gtfs/';
+export const GtfsApiRoute =
+  process.env.NODE_ENV === 'production'
+    ? 'https://api.thev-lad.com/api/gtfs/'
+    : 'http://127.0.0.1:8001/api/gtfs/';
 
 export enum ApiInputType {
   route = 'route/?short_name=',
