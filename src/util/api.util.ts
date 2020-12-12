@@ -56,7 +56,7 @@ export const apiTypeArrayValue = (r: ApiResult, query: string): string => {
 export const filterApiReq = (apiRes: ApiResult[], query: string): string[] => {
     let filteredRes: string[] = apiRes.map((r) => apiTypeArrayValue(r, query)).filter((item) => !!item) as string[];
     filteredRes = filteredRes.filter((item, i) => filteredRes.indexOf(item) === i); // remove any duplicate values
-    filteredRes = filteredRes.sort();
+    filteredRes = filteredRes.sort((a, b) => parseInt(a) - parseInt(b));
     return filteredRes;
 };
 

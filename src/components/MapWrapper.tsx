@@ -62,5 +62,5 @@ export const MapWrapper = (props: Props) => {
         }
     }, [apiResult, featuresLayer, map]);
 
-    return <div ref={mapElement} className="map-container" style={{ width: '100%', height: '500px' }}></div>;
+    return <div ref={mapElement} className='map-container' style={{ width: '100%', height: '500px' }}></div>;
 };
