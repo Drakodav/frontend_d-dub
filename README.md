@@ -1,6 +1,6 @@
 # Dynamo Dublin frontend
 
-Frontend [https://dynamo.thev-lad.com/]
+Frontend https://dynamo.thev-lad.com/
 
 ### Technologies
 
