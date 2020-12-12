@@ -1,12 +1,11 @@
-import { Form, FormField, TextInput } from 'grommet';
 import PropTypes from 'prop-types';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import AsyncSelect from 'react-select/async';
+import { OptionsType, OptionTypeBase, ValueType } from 'react-select/src/types';
 import { ApiResult } from '../model/api.model';
 import { setApiQuery } from '../store/reducers/apiQuery';
 import { filterApiReq, getApiResults, getSingleApiResult } from '../util/api.util';
-import AsyncSelect from 'react-select/async';
-import { OptionsType, OptionTypeBase, ValueType } from 'react-select/src/types';
 
 type FormType = {
     value: string;
