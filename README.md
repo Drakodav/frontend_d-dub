@@ -28,3 +28,35 @@ Frontend https://dynamo.thev-lad.com/
 npm install
 npm run start
 ```
+
+### cordova
+
+-   installing android sdk
+
+```
+apt-get update
+apt-get install default-jdk
+sudo apt update && sudo apt install android-sdk
+
+export ANDROID_HOME=/usr/android-sdk
+export PATH=$PATH:$ANDROID_HOME/tools/bin
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+
+sudo chown -R $(whoami) $ANDROID_HOME
+
+cd $ANDROID_HOME
+
+wget https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
+unzip sdk-tools-linux-4333796.zip
+rm sdk-tools-linux-4333796.zip
+```
+
+-   android sdk ownership
+    `sudo chown -R $(whoami) $ANDROID_HOME`
+
+-   licences
+
+```
+cd $ANDROID_HOME/tools/bin
+sudo ./sdkmanager --licenses
+```
