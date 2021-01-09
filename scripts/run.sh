@@ -18,7 +18,7 @@ echo "########### connecting to server and run commands in sequence ###########"
 #create directories
 sudo ssh -i ../../web-mapping_key.pem azureuser@40.121.42.196 \
 '
-mkdir -p frontend_d-dub/{build, scripts};
+mkdir -p frontend_d-dub/{build,scripts};
 '
 
 # copy build folder
