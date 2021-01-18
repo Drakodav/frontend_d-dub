@@ -5,7 +5,7 @@ import AsyncSelect from 'react-select/async';
 import { OptionTypeBase, ValueType } from 'react-select/src/types';
 import { ApiResult } from '../model/api.model';
 import { setApiQuery } from '../store/reducers/apiQuery';
-import { filterApiReq, getApiResults, getSingleApiResult } from '../util/api.util';
+import { GtfsHandler } from '../handler/gtfsHandler';
 
 type Props = {
     heading: string;
@@ -18,20 +18,22 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
     const [defaultOptions, setDefaultOptions] = useState<{}[]>();
     const dipatch = useDispatch();
 
+    const gtfsHandler = new GtfsHandler(query);
+
     const setResultToMap = (value: string) => {
-        const result = getSingleApiResult(apiResults, query, value);
+        const result = gtfsHandler.getSingleApiResult(apiResults, value);
         result && dipatch(setApiQuery(result));
     };
 
-    const loadOptions = (inputValue: string) =>
+    const loadOptions = (value: string) =>
         new Promise(async (resolve) => {
-            const newApiResults = await getApiResults(inputValue, query);
-            setApiResults(newApiResults);
+            let newApiResults = apiResults;
+            if (gtfsHandler.getSingleApiResult(apiResults, value) === undefined) {
+                newApiResults = await gtfsHandler.fetchApiResults(value);
+                setApiResults([...apiResults, ...(await gtfsHandler.fetchApiResults(value))]);
+            }
+            const options = gtfsHandler.getResultOptions(newApiResults, value);
 
-            const filteredRes = filterApiReq(newApiResults, query);
-            const options = filteredRes.map((r) => {
-                return { value: r, label: r };
-            });
             if (!!options) {
                 setDefaultOptions(options);
                 resolve(options);

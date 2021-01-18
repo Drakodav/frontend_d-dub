@@ -7,7 +7,7 @@ export const GtfsApiRoute = 'https://api.thev-lad.com/api/gtfs/';
 
 export enum ApiInputType {
     route = 'route/?short_name=',
-    stop = 'stop/?name=%2C+stop+',
+    stop = 'stop/?name=',
 }
 
 export type ApiResult = {
@@ -15,5 +15,6 @@ export type ApiResult = {
     point?: GeoJSONGeometry;
     id?: number;
     short_name?: string;
+    long_name?: string;
     name?: string;
 };

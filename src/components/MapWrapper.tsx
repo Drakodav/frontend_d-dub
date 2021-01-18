@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import { ApiResult } from '../model/api.model';
 import { selectApiResults } from '../store/reducers/apiQuery';
 import { getDimensions } from '../store/reducers/window';
-import { getGeoObjFeature } from '../util/api.util';
+import { getGeoObjFeature } from '../util/geo.util';
 
 interface Props {}
 
