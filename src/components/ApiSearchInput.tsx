@@ -66,13 +66,26 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
         }
     };
 
+    const customStyles = {
+        option: (provided: any, state: { isSelected: any }) => ({
+            ...provided,
+            borderBottom: '1px dotted pink',
+            color: state.isSelected ? 'red' : 'blue',
+            padding: 20,
+        }),
+        singleValue: (provided: any, state: { isDisabled: any }) => {
+            const opacity = state.isDisabled ? 0.5 : 1;
+            const transition = 'opacity 300ms';
+            return { ...provided, opacity, transition };
+        },
+    };
+
     return (
         <div style={{ width: '200px', alignSelf: 'center', textAlign: 'center', margin: '20px' }}>
             <label>{heading}</label>
             <AsyncSelect
                 inputValue={inputValue}
-                isSearchable
-                isClearable
+                styles={customStyles}
                 cacheOptions={false}
                 defaultOptions={defaultOptions}
                 loadOptions={loadOptions}
@@ -80,6 +93,8 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
                 onChange={handleChange}
                 inputMode='numeric'
                 pattern='[0-9]*'
+                isSearchable
+                isClearable
             />
         </div>
     );
