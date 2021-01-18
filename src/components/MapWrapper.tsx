@@ -16,6 +16,10 @@ interface Props {}
 export const MapWrapper = (props: Props) => {
     const [map, setMap] = useState<Map>(new Map({}));
     const [featuresLayer, setFeaturesLayer] = useState<VectorLayer>(new VectorLayer());
+    const [dimensions, setDimensions] = useState<{ height: number; width: number }>({
+        height: window.innerHeight,
+        width: window.innerWidth,
+    });
 
     const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
     const mapRef = useRef({} as Map);
@@ -58,10 +62,29 @@ export const MapWrapper = (props: Props) => {
 
             map.getView().fit(featuresLayer.getSource().getExtent(), {
                 padding: [100, 100, 100, 100],
-                maxZoom: 12,
+                maxZoom: 11,
             });
         }
     }, [apiResult, featuresLayer, map]);
 
-    return <div ref={mapElement} className='map-container' style={{ width: '100%', height: '500px' }}></div>;
+    // resize map every time the window size changes
+    useEffect(() => {
+        const handleResize = () => {
+            setDimensions({
+                height: window.innerHeight,
+                width: window.innerWidth,
+            });
+        };
+        window.addEventListener('resize', handleResize);
+
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return (
+        <div
+            ref={mapElement}
+            className='map-container'
+            style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
+        ></div>
+    );
 };
