@@ -1,3 +1,4 @@
 import ApiReducer from './apiQuery';
+import WindowReducer from './window';
 
-export { ApiReducer };
+export { ApiReducer, WindowReducer };

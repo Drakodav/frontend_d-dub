@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import AsyncSelect from 'react-select/async';
 import { OptionsType, OptionTypeBase, ValueType } from 'react-select/src/types';

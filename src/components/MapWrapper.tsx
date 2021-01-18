@@ -9,6 +9,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ApiResult } from '../model/api.model';
 import { selectApiResults } from '../store/reducers/apiQuery';
+import { getDimensions } from '../store/reducers/window';
 import { getGeoObjFeature } from '../util/api.util';
 
 interface Props {}
@@ -16,10 +17,6 @@ interface Props {}
 export const MapWrapper = (props: Props) => {
     const [map, setMap] = useState<Map>(new Map({}));
     const [featuresLayer, setFeaturesLayer] = useState<VectorLayer>(new VectorLayer());
-    const [dimensions, setDimensions] = useState<{ height: number; width: number }>({
-        height: window.innerHeight,
-        width: window.innerWidth,
-    });
 
     const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
     const mapRef = useRef({} as Map);
@@ -68,23 +65,14 @@ export const MapWrapper = (props: Props) => {
     }, [apiResult, featuresLayer, map]);
 
     // resize map every time the window size changes
-    useEffect(() => {
-        const handleResize = () => {
-            setDimensions({
-                height: window.innerHeight,
-                width: window.innerWidth,
-            });
-        };
-        window.addEventListener('resize', handleResize);
-
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    let dim = useSelector(getDimensions);
+    useEffect(() => map.updateSize(), [dim, map]);
 
     return (
         <div
             ref={mapElement}
             className='map-container'
-            style={{ width: `${dimensions.width}px`, height: `${dimensions.height}px` }}
+            style={{ width: `${dim.width}px`, height: `${dim.height}px` }}
         ></div>
     );
 };
