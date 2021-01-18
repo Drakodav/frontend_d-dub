@@ -25,7 +25,7 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
 
     const loadOptions = (inputValue: string) =>
         new Promise(async (resolve) => {
-            const newApiResults = [...apiResults, ...(await getApiResults(inputValue, query))];
+            const newApiResults = await getApiResults(inputValue, query);
             setApiResults(newApiResults);
 
             const filteredRes = filterApiReq(newApiResults, query);
@@ -71,7 +71,7 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
                 inputValue={inputValue}
                 isSearchable
                 isClearable
-                cacheOptions
+                cacheOptions={false}
                 defaultOptions={defaultOptions}
                 loadOptions={loadOptions}
                 onInputChange={onInputChange}
