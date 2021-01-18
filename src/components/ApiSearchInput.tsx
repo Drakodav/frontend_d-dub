@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import AsyncSelect from 'react-select/async';
-import { OptionsType, OptionTypeBase, ValueType } from 'react-select/src/types';
+import { OptionTypeBase, ValueType } from 'react-select/src/types';
 import { ApiResult } from '../model/api.model';
 import { setApiQuery } from '../store/reducers/apiQuery';
 import { filterApiReq, getApiResults, getSingleApiResult } from '../util/api.util';
@@ -23,28 +23,44 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
         result && dipatch(setApiQuery(result));
     };
 
-    const loadOptions = async (input: string, callback: (options: OptionsType<OptionTypeBase>) => void) => {
-        const newApiResults = await getApiResults(input, query);
-        setApiResults(newApiResults);
-        const filteredRes = filterApiReq(newApiResults, query);
+    const loadOptions = (inputValue: string) =>
+        new Promise(async (resolve) => {
+            const newApiResults = [...apiResults, ...(await getApiResults(inputValue, query))];
+            setApiResults(newApiResults);
 
-        const options = filteredRes.map((r) => {
-            return { value: r, label: r };
+            const filteredRes = filterApiReq(newApiResults, query);
+            const options = filteredRes.map((r) => {
+                return { value: r, label: r };
+            });
+            if (!!options) {
+                setDefaultOptions(options);
+                resolve(options);
+            }
         });
-        if (!!options) {
-            setDefaultOptions(options);
-            callback(options);
+
+    const onInputChange = (value: string, { action }: any) => {
+        switch (action) {
+            case 'input-change':
+                setInputValue(value);
+                return;
+            default:
+                return;
         }
     };
 
-    const handleInputChange = (newValue: string) => {
-        !!newValue && setInputValue(newValue);
-    };
-
-    const handleChange = async (selectedOption: ValueType<OptionTypeBase, false>) => {
-        if (!!selectedOption?.value) {
-            setInputValue(selectedOption.value);
-            setResultToMap(selectedOption.value);
+    const handleChange = (selectedOption: ValueType<OptionTypeBase, false>, { action }: any) => {
+        switch (action) {
+            case 'select-option':
+                if (!!selectedOption?.value) {
+                    setInputValue(selectedOption.value);
+                    setResultToMap(selectedOption.value);
+                }
+                return;
+            case 'clear':
+                setInputValue('');
+                return;
+            default:
+                return;
         }
     };
 
@@ -52,10 +68,13 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
         <div style={{ width: '200px', alignSelf: 'center', textAlign: 'center', margin: '20px' }}>
             <label>{heading}</label>
             <AsyncSelect
-                cacheOptions={true}
+                inputValue={inputValue}
+                isSearchable
+                isClearable
+                cacheOptions
                 defaultOptions={defaultOptions}
                 loadOptions={loadOptions}
-                onInputChange={handleInputChange}
+                onInputChange={onInputChange}
                 onChange={handleChange}
                 inputMode='numeric'
                 pattern='[0-9]*'
