@@ -12,6 +12,12 @@ export class GtfsHandler {
         this.selector = this.getUrlSearchParam(this.query);
     }
 
+    private getUrlSearchParam = (url: string): keyof ApiResult => {
+        const token = url.split('/')[1];
+        const match = token.match(/([^?][^\s][^=]+)/g);
+        return (match?.length ? match[0] : '') as keyof ApiResult;
+    };
+
     private currLabel = (record: ApiResult): string => {
         switch (this.query) {
             case ApiInputType.route:
@@ -20,16 +26,9 @@ export class GtfsHandler {
                     : (record[this.selector] as string);
 
             case ApiInputType.stop:
-                return record[this.selector] as string;
             default:
                 return record[this.selector] as string;
         }
-    };
-
-    private getUrlSearchParam = (url: string): keyof ApiResult => {
-        const token = url.split('/')[1];
-        const match = token.match(/([^?][^\s][^=]+)/g);
-        return (match?.length ? match[0] : '') as keyof ApiResult;
     };
 
     private currentValue = (record: ApiResult): string => {
