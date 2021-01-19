@@ -1,8 +1,6 @@
-FROM node:15.4
+FROM node:15.4-slim
 
-RUN apt-get -y update && apt-get -y upgrade
-
-RUN npm install -g npm@7.1.2
+RUN npm install -g npm
 
 # Make a working directory in the image and set it as working dir
 RUN mkdir -p /user/src/app
@@ -12,8 +10,9 @@ WORKDIR /usr/src/app
 COPY ./build /usr/src/app/build
 
 RUN npm install -g serve
-# expose localhost 8002 on the image
-EXPOSE 5000
+
+# expose localhost 5000 on the image
+# EXPOSE 5000
 
 # # run uwsgi 
 CMD [ "serve", "-s", "build", "-n" ]
