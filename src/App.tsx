@@ -1,24 +1,50 @@
 import React from 'react';
 import './App.css';
-import { AppBar, Paper, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import { Container } from '@material-ui/core';
 import { MapWrapper } from './components/MapWrapper';
-import { ApiSearchInput } from './components/ApiSearchInput';
-import { ApiInputType } from './model/api.model';
-import { Toolbar } from '@material-ui/core';
+
+import { KeyboardArrowUp, GpsFixedRounded } from '@material-ui/icons';
+
+const useStyles = makeStyles(({ palette, breakpoints }) => ({
+    container: {
+        position: 'fixed',
+        backgroundColor: palette.common.white,
+        padding: '10px',
+        bottom: 0,
+        left: 0,
+        zIndex: 1,
+        borderRadius: '5px',
+        display: 'flex',
+        flex: 2,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        maxHeight: '50px',
+        [breakpoints.up('sm')]: {
+            top: 0,
+            left: 0,
+            margin: '15px',
+            width: '400px',
+        },
+    },
+}));
 
 function App() {
+    const classes = useStyles();
+
     return (
         <div>
-            <Paper>
-                <MapWrapper />
-            </Paper>
-            <AppBar position='fixed' color='primary'>
-                <Toolbar>
-                    <Typography variant='h6'>Dynamo Dublin</Typography>
-                    <ApiSearchInput heading={'Bus Route'} query={ApiInputType.route} />
-                    <ApiSearchInput heading={'Bus Stop'} query={ApiInputType.stop} />
-                </Toolbar>
-            </AppBar>
+            {/* <ApiSearchInput heading={'Bus Route'} query={ApiInputType.route} />
+            <ApiSearchInput heading={'Bus Stop'} query={ApiInputType.stop} /> */}
+
+            <Container maxWidth='sm' className={classes.container}>
+                <KeyboardArrowUp />
+                <p>hello</p>
+                <GpsFixedRounded />
+            </Container>
+
+            <MapWrapper />
         </div>
     );
 }

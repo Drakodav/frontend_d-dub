@@ -38,7 +38,7 @@ export const MapWrapper = (props: Props) => {
             ],
             view: new View({
                 center: fromLonLat([-6.249999, 53.416665]),
-                zoom: 10,
+                zoom: 11,
             }),
             controls: [],
         });

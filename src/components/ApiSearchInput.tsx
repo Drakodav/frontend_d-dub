@@ -70,7 +70,7 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
         option: (provided: any, state: { isSelected: any }) => ({
             ...provided,
             borderBottom: '1px dotted pink',
-            color: state.isSelected ? 'red' : 'blue',
+            color: 'blue',
             padding: 20,
         }),
         singleValue: (provided: any, state: { isDisabled: any }) => {
