@@ -28,7 +28,7 @@ const useStyles = makeStyles(({ palette, breakpoints }) => ({
 }));
 
 const heights = {
-    min: 50,
+    min: 60,
     mid: 350,
     max: 600,
 };
