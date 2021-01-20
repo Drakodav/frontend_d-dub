@@ -31,6 +31,7 @@ const heights = {
     min: 60,
     mid: 350,
     max: 600,
+    step: 30,
 };
 
 const initState = {
@@ -39,6 +40,9 @@ const initState = {
     prevState: heights.min,
     prevY: 0,
     direction: 0,
+    initY: 0,
+    diffHeight: 0,
+    tranistionSpeed: 300,
 };
 
 type State = typeof initState | { [key: string]: unknown };
@@ -50,48 +54,69 @@ export function UIWrapper() {
     const [state, tempState] = useState(initState);
     const setState = (val: State) => tempState({ ...state, ...val });
 
+    const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+        const initY = e.touches[0].clientY;
+        const diffHeight = window.innerHeight - initY - state.height;
+
+        setState({ initY, diffHeight });
+    };
+
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         if (!!e && e.touches[0]) {
-            const curr = e.touches[0].pageY;
+            const curr = e.touches[0].clientY;
             if (!state.prevY) {
-                setState({ prevY: curr });
+                // there needs to be a prev Y value in order to calculate direction
+                setState({ prevY: curr, tranistionSpeed: 0 });
                 return;
             }
 
             const direction = curr < state.prevY ? 1 : -1;
-            const newHieght = state.height + 2 * direction;
+            const newHeight = window.innerHeight - curr - state.diffHeight;
 
-            if (newHieght >= heights.min && newHieght <= heights.max)
-                setState({ height: newHieght, prevY: curr, direction });
+            if (newHeight >= heights.min && newHeight <= heights.max)
+                setState({ height: newHeight, prevY: curr, direction });
         }
     };
 
     const onTouchEnd = () => {
+        // if there is no previous Y touch then it was just a tap/click, dont switch
         if (!state.prevY) return;
 
-        const breakpoints = [heights.min, heights.mid, heights.max];
+        let height = state.prevState;
 
+        const breakpoints = [heights.min, heights.mid, heights.max];
         const currIdx = breakpoints.findIndex((value) => value === state.prevState);
-        let nextIdx = currIdx + state.direction;
-        let height = state.height;
-        if (nextIdx >= 0 && nextIdx < breakpoints.length) {
+        const nextIdx = currIdx + state.direction;
+
+        // used to calculate whether the movement was far enough to justify switching breakpoint
+        const barrier = state.prevState + heights.step * state.direction;
+        const min = Math.min(state.prevState, barrier);
+        const max = Math.max(state.prevState, barrier);
+        const withinBarrier = state.height > min && state.height < max;
+
+        if (nextIdx >= 0 && nextIdx < breakpoints.length && !withinBarrier) {
             height = breakpoints[nextIdx];
         }
 
         let open = true;
         if (height <= heights.min + 5) open = false;
 
-        setState({ prevY: 0, open, height, prevState: height });
+        setState({ prevY: 0, open, height, prevState: height, initY: 0, tranistionSpeed: initState.tranistionSpeed });
     };
 
     return (
         <Container
             ref={ref}
+            onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
             onTouchEnd={onTouchEnd}
             maxWidth='sm'
             className={classes.container}
-            style={{ height: state.height, flexDirection: !state.open ? 'row' : 'column' }}
+            style={{
+                height: state.height,
+                flexDirection: !state.open ? 'row' : 'column',
+                transition: `height ${state.tranistionSpeed}ms`,
+            }}
         >
             {!state.open ? (
                 <>

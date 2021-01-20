@@ -6,13 +6,25 @@ import { OptionTypeBase, ValueType } from 'react-select/src/types';
 import { ApiResult } from '../model/api.model';
 import { setApiQuery } from '../store/reducers/apiQuery';
 import { GtfsHandler } from '../handler/gtfsHandler';
+import { makeStyles } from '@material-ui/styles';
+import { Fade } from '@material-ui/core';
 
 type Props = {
     heading: string;
     query: string;
 };
 
+const useStyles = makeStyles({
+    search: {
+        width: '200px',
+        alignSelf: 'center',
+        textAlign: 'center',
+        margin: '20px',
+    },
+});
+
 export const ApiSearchInput = ({ heading, query }: Props) => {
+    const classes = useStyles();
     const [inputValue, setInputValue] = useState<string>('');
     const [apiResults, setApiResults] = useState<ApiResult[]>([]);
     const [defaultOptions, setDefaultOptions] = useState<{}[]>();
@@ -81,22 +93,24 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
     };
 
     return (
-        <div style={{ width: '200px', alignSelf: 'center', textAlign: 'center', margin: '20px' }}>
-            <label>{heading}</label>
-            <AsyncSelect
-                inputValue={inputValue}
-                styles={customStyles}
-                cacheOptions={false}
-                defaultOptions={defaultOptions}
-                loadOptions={loadOptions}
-                onInputChange={onInputChange}
-                onChange={handleChange}
-                inputMode='numeric'
-                pattern='[0-9]*'
-                isSearchable
-                isClearable
-            />
-        </div>
+        <Fade in={true} timeout={300}>
+            <div className={classes.search}>
+                <label>{heading}</label>
+                <AsyncSelect
+                    inputValue={inputValue}
+                    styles={customStyles}
+                    cacheOptions={false}
+                    defaultOptions={defaultOptions}
+                    loadOptions={loadOptions}
+                    onInputChange={onInputChange}
+                    onChange={handleChange}
+                    inputMode='numeric'
+                    pattern='[0-9]*'
+                    isSearchable
+                    isClearable
+                />
+            </div>
+        </Fade>
     );
 };
 
