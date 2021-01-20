@@ -8,27 +8,33 @@ import { setApiQuery } from '../store/reducers/apiQuery';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { makeStyles } from '@material-ui/styles';
 import { Fade } from '@material-ui/core';
+import { TRANSITION_DURATION } from '../model/constants';
 
 type Props = {
     heading: string;
     query: string;
+    disabled: boolean;
 };
 
-const useStyles = makeStyles({
-    search: {
-        width: '200px',
-        alignSelf: 'center',
-        textAlign: 'center',
-        margin: '20px',
-    },
-});
+const useStyles = (props: Props) =>
+    makeStyles({
+        search: {
+            width: '90%',
+            alignSelf: 'center',
+            textAlign: 'center',
+            margin: '20px',
+            display: props.disabled ? 'none' : 'inline',
+        },
+    });
 
-export const ApiSearchInput = ({ heading, query }: Props) => {
-    const classes = useStyles();
-    const [inputValue, setInputValue] = useState<string>('');
+export const ApiSearchInput = (props: Props) => {
+    const { heading, query, disabled } = props;
+    const classes = useStyles(props)();
+    const dipatch = useDispatch();
+
     const [apiResults, setApiResults] = useState<ApiResult[]>([]);
     const [defaultOptions, setDefaultOptions] = useState<{}[]>();
-    const dipatch = useDispatch();
+    const [search, setSearch] = useState<string[]>([]);
 
     const gtfsHandler = new GtfsHandler(query);
 
@@ -40,9 +46,19 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
     const loadOptions = (value: string) =>
         new Promise(async (resolve) => {
             let newApiResults = apiResults;
-            if (gtfsHandler.getSingleApiResult(apiResults, value) === undefined) {
-                newApiResults = await gtfsHandler.fetchApiResults(value);
-                setApiResults([...apiResults, ...(await gtfsHandler.fetchApiResults(value))]);
+            if (!(value in search)) {
+                const mergedArray = [...apiResults, ...(await gtfsHandler.fetchApiResults(value))];
+                // mergedArray have duplicates, lets remove the duplicates using Set
+                let set = new Set();
+                newApiResults = mergedArray.filter((item) => {
+                    if (!set.has(item.id)) {
+                        set.add(item.id);
+                        return true;
+                    }
+                    return false;
+                }, set);
+                setApiResults(newApiResults);
+                if (search.indexOf(value) === -1) setSearch([...search, value]);
             }
             const options = gtfsHandler.getResultOptions(newApiResults, value);
 
@@ -52,60 +68,42 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
             }
         });
 
-    const onInputChange = (value: string, { action }: any) => {
-        switch (action) {
-            case 'input-change':
-                setInputValue(value);
-                return;
-            default:
-                return;
-        }
-    };
-
     const handleChange = (selectedOption: ValueType<OptionTypeBase, false>, { action }: any) => {
         switch (action) {
             case 'select-option':
                 if (!!selectedOption?.value) {
-                    setInputValue(selectedOption.value);
                     setResultToMap(selectedOption.value);
                 }
-                return;
-            case 'clear':
-                setInputValue('');
-                return;
-            default:
                 return;
         }
     };
 
     const customStyles = {
-        option: (provided: any, state: { isSelected: any }) => ({
-            ...provided,
-            borderBottom: '1px dotted pink',
-            color: 'blue',
-            padding: 20,
-        }),
-        singleValue: (provided: any, state: { isDisabled: any }) => {
-            const opacity = state.isDisabled ? 0.5 : 1;
-            const transition = 'opacity 300ms';
-            return { ...provided, opacity, transition };
-        },
+        // option: (provided: any) => ({
+        //     ...provided,
+        //     borderBottom: '1px dotted pink',
+        //     color: 'blue',
+        //     padding: 20,
+        // }),
+        // singleValue: (provided: any, state: { isDisabled: any }) => {
+        //     const opacity = state.isDisabled ? 0.5 : 1;
+        //     const transition = `opacity ${TRANSITION_DURATION}ms`;
+        //     return { ...provided, opacity, transition };
+        // },
     };
 
     return (
-        <Fade in={true} timeout={300}>
+        <Fade in={!disabled} timeout={TRANSITION_DURATION}>
             <div className={classes.search}>
-                <label>{heading}</label>
                 <AsyncSelect
-                    inputValue={inputValue}
                     styles={customStyles}
                     cacheOptions={false}
                     defaultOptions={defaultOptions}
                     loadOptions={loadOptions}
-                    onInputChange={onInputChange}
                     onChange={handleChange}
                     inputMode='numeric'
                     pattern='[0-9]*'
+                    placeholder={heading}
                     isSearchable
                     isClearable
                 />
@@ -117,4 +115,5 @@ export const ApiSearchInput = ({ heading, query }: Props) => {
 ApiSearchInput.propTypes = {
     heading: PropTypes.string,
     query: PropTypes.string,
+    disabled: PropTypes.bool,
 };

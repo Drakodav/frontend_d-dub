@@ -76,6 +76,7 @@
         "eslint-plugin-react": "^7.20.3",
         "eslint-plugin-react-hooks": "^4.0.8",
         "react-scripts": "^4.0.1",
-        "styled-components": "^5.2.1"
+        "styled-components": "^5.2.1",
+        "tslib": "^2.1.0"
     }
 }
