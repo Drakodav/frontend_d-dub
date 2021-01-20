@@ -1,13 +1,17 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import { ApiReducer, MapReducer } from './reducers';
+import { configureStore, ThunkAction, Action, getDefaultMiddleware } from '@reduxjs/toolkit';
+import rootReducer, { RootState } from './reducers/rootReducer';
 
 export const store = configureStore({
-    reducer: {
-        // counter: counterReducer, // @TODO: Delete when finished with example
-        apiQuery: ApiReducer,
-        mapState: MapReducer,
-    },
+    reducer: rootReducer,
+    middleware: [...getDefaultMiddleware()],
+    devTools: process.env.NODE_ENV !== 'production',
 });
 
-export type RootState = ReturnType<typeof store.getState>;
+if (process.env.NODE_ENV === 'development' && (module as any).hot) {
+    (module as any).hot.accept('./reducers/rootReducer', () => {
+        const newRootReducer = require('./reducers/rootReducer').default;
+        store.replaceReducer(newRootReducer);
+    });
+}
+
 export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, Action<string>>;

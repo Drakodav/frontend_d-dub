@@ -1,16 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ApiResult } from '../../model/api.model';
-import { RootState } from '../store';
+import { RootState } from './rootReducer';
 
-interface ApiState {
-    apiResults: ApiResult;
-}
-
-const initialState: ApiState = {
+const initialState = {
     apiResults: {} as ApiResult,
 };
 
-export const apiSlice = createSlice({
+const apiSlice = createSlice({
     name: 'apiQuery',
     initialState,
     reducers: {
