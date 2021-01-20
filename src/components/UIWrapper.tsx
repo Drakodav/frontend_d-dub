@@ -31,7 +31,7 @@ const heights = {
     min: 60,
     mid: 350,
     max: 600,
-    step: 30,
+    step: 50,
 };
 
 const initState = {
@@ -69,12 +69,13 @@ export function UIWrapper() {
                 setState({ prevY: curr, tranistionSpeed: 0 });
                 return;
             }
+            let open = state.height > heights.min + heights.step;
 
             const direction = curr < state.prevY ? 1 : -1;
             const newHeight = window.innerHeight - curr - state.diffHeight;
 
-            if (newHeight >= heights.min && newHeight <= heights.max)
-                setState({ height: newHeight, prevY: curr, direction });
+            if (newHeight >= heights.min - heights.step && newHeight <= heights.max - heights.step)
+                setState({ height: newHeight, prevY: curr, direction, open });
         }
     };
 
