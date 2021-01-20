@@ -4,6 +4,8 @@ import { Container } from '@material-ui/core';
 import { KeyboardArrowUp } from '@material-ui/icons';
 import { ApiSearchInput } from './ApiSearchInput';
 import { ApiInputType } from '../model/api.model';
+import { moveMap, setMapDimensions } from '../store/reducers/map';
+import { useDispatch } from 'react-redux';
 
 const useStyles = makeStyles(({ palette, breakpoints }) => ({
     container: {
@@ -18,6 +20,7 @@ const useStyles = makeStyles(({ palette, breakpoints }) => ({
         flex: 2,
         alignItems: 'center',
         justifyContent: 'flex-start',
+        touchAction: 'none',
         [breakpoints.up('sm')]: {
             top: 0,
             left: 0,
@@ -48,6 +51,7 @@ const initState = {
 type State = typeof initState | { [key: string]: unknown };
 
 export function UIWrapper() {
+    const dispatch = useDispatch();
     const classes = useStyles();
     const ref = useRef<HTMLDivElement>(null);
 
@@ -74,7 +78,7 @@ export function UIWrapper() {
             const direction = curr < state.prevY ? 1 : -1;
             const newHeight = window.innerHeight - curr - state.diffHeight;
 
-            if (newHeight >= heights.min - heights.step && newHeight <= heights.max - heights.step)
+            if (newHeight >= heights.min - heights.step && newHeight <= heights.max + heights.step)
                 setState({ height: newHeight, prevY: curr, direction, open });
         }
     };
@@ -103,6 +107,8 @@ export function UIWrapper() {
         if (height <= heights.min + 5) open = false;
 
         setState({ prevY: 0, open, height, prevState: height, initY: 0, tranistionSpeed: initState.tranistionSpeed });
+
+        if (height === heights.mid || height === heights.min) dispatch(moveMap({ barHeight: height - heights.step }));
     };
 
     return (

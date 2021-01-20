@@ -1,11 +1,11 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import { ApiReducer, WindowReducer } from './reducers';
+import { ApiReducer, MapReducer } from './reducers';
 
 export const store = configureStore({
     reducer: {
         // counter: counterReducer, // @TODO: Delete when finished with example
         apiQuery: ApiReducer,
-        windowState: WindowReducer,
+        windowState: MapReducer,
     },
 });
 

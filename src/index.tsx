@@ -9,7 +9,6 @@ import { store } from './store/store';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 
 // adds window information to reducer
-import { WindowUtil } from './util/window.util';
 
 const theme = createMuiTheme({
     palette: {
@@ -41,7 +40,6 @@ ReactDOM.render(
     <React.StrictMode>
         <Provider store={store}>
             <ThemeProvider theme={theme}>
-                <WindowUtil />
                 <App />
             </ThemeProvider>
         </Provider>

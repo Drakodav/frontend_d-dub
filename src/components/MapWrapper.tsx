@@ -6,15 +6,16 @@ import OSM from 'ol/source/OSM';
 import VectorSource from 'ol/source/Vector';
 import View from 'ol/View';
 import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ApiResult } from '../model/api.model';
 import { selectApiResults } from '../store/reducers/apiQuery';
-import { getDimensions } from '../store/reducers/window';
+import { getMapDimensions, setMapDimensions } from '../store/reducers/map';
 import { getGeoObjFeature } from '../util/geo.util';
 
 interface Props {}
 
 export const MapWrapper = (props: Props) => {
+    const dispatch = useDispatch();
     const [map, setMap] = useState<Map>(new Map({}));
     const [featuresLayer, setFeaturesLayer] = useState<VectorLayer>(new VectorLayer());
 
@@ -64,10 +65,23 @@ export const MapWrapper = (props: Props) => {
         }
     }, [apiResult, featuresLayer, map]);
 
-    // resize map every time the window size changes
-    let dim = useSelector(getDimensions);
-    useEffect(() => map.updateSize(), [dim, map]);
+    useEffect(() => {
+        let timer: number | null;
+        const handleResize = () => {
+            timer && window.clearTimeout(timer);
+            timer = window.setTimeout(() => {
+                timer = null;
+                dispatch(setMapDimensions());
+            }, 100);
+        };
+        window.addEventListener('resize', handleResize);
 
+        return () => window.removeEventListener('resize', handleResize);
+    });
+
+    // resize map every time the window size changes
+    const dim = useSelector(getMapDimensions);
+    useEffect(() => map.updateSize(), [dim, map]);
     return (
         <div
             ref={mapElement}
