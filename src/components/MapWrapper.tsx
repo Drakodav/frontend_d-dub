@@ -23,6 +23,7 @@ export const MapWrapper = (props: Props) => {
     const mapRef = useRef({} as Map);
     mapRef.current = map;
 
+    // run once, init ol map
     useEffect(() => {
         // create and add vector source layer
         const initFeatLayers = new VectorLayer({
@@ -47,8 +48,8 @@ export const MapWrapper = (props: Props) => {
         setFeaturesLayer(initFeatLayers);
     }, []);
 
+    // update whats displayed on the map when a new apiResult comes in
     const apiResult: ApiResult = useSelector(selectApiResults);
-
     useEffect(() => {
         const newFeature = !!apiResult && getGeoObjFeature(apiResult);
         if (newFeature) {
@@ -65,6 +66,7 @@ export const MapWrapper = (props: Props) => {
         }
     }, [apiResult, featuresLayer, map]);
 
+    // used for dynamic map width and height resizing
     useEffect(() => {
         let timer: number | null;
         const handleResize = () => {

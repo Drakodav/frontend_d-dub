@@ -1,11 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Container } from '@material-ui/core';
-import { KeyboardArrowUp } from '@material-ui/icons';
+import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
 import { ApiSearchInput } from './ApiSearchInput';
 import { ApiInputType } from '../model/api.model';
 import { moveMap } from '../store/reducers/map';
 import { useDispatch } from 'react-redux';
+import { TRANSITION_DURATION } from '../model/constants';
 
 const useStyles = makeStyles(({ palette, breakpoints }) => ({
     container: {
@@ -28,6 +29,11 @@ const useStyles = makeStyles(({ palette, breakpoints }) => ({
             width: '400px',
         },
     },
+    pair: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
 }));
 
 const heights = {
@@ -45,12 +51,12 @@ const initState = {
     direction: 0,
     initY: 0,
     diffHeight: 0,
-    tranistionSpeed: 300,
+    tranistionSpeed: TRANSITION_DURATION,
 };
 
 type State = typeof initState | { [key: string]: unknown };
 
-export function UIWrapper() {
+export function MobileView() {
     const dispatch = useDispatch();
     const classes = useStyles();
     const ref = useRef<HTMLDivElement>(null);
@@ -111,6 +117,11 @@ export function UIWrapper() {
         if (height === heights.mid || height === heights.min) dispatch(moveMap({ barHeight: height - heights.step }));
     };
 
+    const openCloseMenu = () => {
+        const newHeight = !state.open ? heights.max : heights.min;
+        setState({ open: !state.open, height: newHeight, prevY: 0, prevState: newHeight });
+    };
+
     return (
         <Container
             ref={ref}
@@ -125,19 +136,16 @@ export function UIWrapper() {
                 transition: `height ${state.tranistionSpeed}ms`,
             }}
         >
-            {!state.open ? (
-                <>
-                    <KeyboardArrowUp
-                        onClick={() => setState({ open: true, height: heights.max, prevY: 0, prevState: heights.max })}
-                    />
-                    <p> click to expand </p>
-                </>
-            ) : (
-                <>
-                    <ApiSearchInput heading={'Bus Route'} query={ApiInputType.route} />
-                    <ApiSearchInput heading={'Bus Stop'} query={ApiInputType.stop} />
-                </>
-            )}
+            <div className={classes.pair}>
+                {!state.open ? (
+                    <KeyboardArrowUp onClick={openCloseMenu} />
+                ) : (
+                    <KeyboardArrowDown onClick={openCloseMenu} />
+                )}
+                <p> click to expand </p>
+            </div>
+            <ApiSearchInput disabled={!state.open} heading={'Bus Route'} query={ApiInputType.route} />
+            <ApiSearchInput disabled={!state.open} heading={'Bus Stop'} query={ApiInputType.stop} />
         </Container>
     );
 }

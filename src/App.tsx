@@ -1,15 +1,29 @@
-import React from 'react';
 import './App.css';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { MapWrapper } from './components/MapWrapper';
-import { UIWrapper } from './components/UIWrapper';
+import { MobileView } from './components/MobileView';
+import { getWindowWidth } from './store/reducers/map';
+import { useTheme } from '@material-ui/core/styles';
 
 function App() {
+    const [view, setView] = useState(0);
+
+    const theme = useTheme();
+    const width = useSelector(getWindowWidth);
+    useEffect(() => {
+        if (width <= theme.breakpoints.width('sm')) {
+            setView(-1);
+        } else {
+            setView(1);
+        }
+    }, [width, theme.breakpoints]);
+
+    const dynComponent: JSX.Element = view === -1 ? <MobileView /> : <>DeskTopView not yeat implemented</>;
+
     return (
         <div>
-            {/* <ApiSearchInput heading={'Bus Route'} query={ApiInputType.route} />
-            <ApiSearchInput heading={'Bus Stop'} query={ApiInputType.stop} /> */}
-
-            <UIWrapper />
+            {dynComponent}
             <MapWrapper />
         </div>
     );

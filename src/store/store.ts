@@ -5,7 +5,7 @@ export const store = configureStore({
     reducer: {
         // counter: counterReducer, // @TODO: Delete when finished with example
         apiQuery: ApiReducer,
-        windowState: MapReducer,
+        mapState: MapReducer,
     },
 });
 

@@ -21,12 +21,17 @@ export const windowSlice = createSlice({
             state.height = window.innerHeight;
             state.width = window.innerWidth;
         },
-        moveMap: (state: MapState, action: PayloadAction<{ barHeight: number; up?: boolean }>) => {},
+        moveMap: (state: MapState, action: PayloadAction<{ barHeight: number }>) => {},
     },
 });
 
 export const { setMapDimensions, moveMap } = windowSlice.actions;
 
-export const getMapDimensions = (state: RootState): MapState => state.windowState;
+export const getMapDimensions = (state: RootState): { width: number; height: number } => ({
+    width: state.mapState.width,
+    height: state.mapState.height,
+});
+
+export const getWindowWidth = (state: RootState): number => state.mapState.width;
 
 export default windowSlice.reducer;
