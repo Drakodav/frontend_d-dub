@@ -59,18 +59,18 @@ export class MapHandler {
 
     moveMap = (width: number, height: number): void => {
         if (width === 0 && height === 0) return;
-        const coord = this.view.getCenter();
-        if (coord) {
-            const [lon, lat] = coord as Coordinate;
-            const zoom = Number(this.view.getZoom());
-            const calcHeight = Number(height / (zoom * 100));
+        // const coord = this.view.getCenter();
+        // if (coord) {
+        //     const [lon, lat] = coord as Coordinate;
+        //     const zoom = Number(this.view.getZoom());
+        //     const calcHeight = Number(height / (zoom * 100));
 
-            const newLat = calcHeight - lat;
-            console.log(this.view.getCenter(), height, newLat, calcHeight);
+        //     const newLat = calcHeight - lat;
+        //     console.log(this.view.getCenter(), height, newLat, calcHeight);
 
-            // this.view.adjustCenter([0, calcHeight]);
-            this.view.animate({ center: [width, newLat], duration: TRANSITION_DURATION });
-        }
+        //     // this.view.adjustCenter([0, calcHeight]);
+        //     this.view.animate({ center: [width, newLat], duration: TRANSITION_DURATION });
+        // }
     };
 
     resetRotation = (): void => this.view.setRotation(0);
