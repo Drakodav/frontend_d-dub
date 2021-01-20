@@ -8,7 +8,7 @@ import { moveMap } from '../store/reducers/map';
 import { useDispatch } from 'react-redux';
 import { TRANSITION_DURATION } from '../model/constants';
 
-const useStyles = makeStyles(({ palette, breakpoints }) => ({
+const useStyles = makeStyles(({ palette }) => ({
     container: {
         position: 'fixed',
         backgroundColor: palette.common.white,
@@ -22,12 +22,6 @@ const useStyles = makeStyles(({ palette, breakpoints }) => ({
         alignItems: 'center',
         justifyContent: 'flex-start',
         touchAction: 'none',
-        [breakpoints.up('sm')]: {
-            top: 0,
-            left: 0,
-            margin: '15px',
-            width: '400px',
-        },
     },
     pair: {
         display: 'flex',
@@ -114,7 +108,8 @@ export function MobileView() {
 
         setState({ prevY: 0, open, height, prevState: height, initY: 0, tranistionSpeed: initState.tranistionSpeed });
 
-        if (height === heights.mid || height === heights.min) dispatch(moveMap({ barHeight: height - heights.step }));
+        if (height === heights.mid || height === heights.min)
+            dispatch(moveMap({ mapDisplacement: height - heights.step }));
     };
 
     const openCloseMenu = () => {

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { MapHandler } from '../handler/mapHandler';
 import { ApiResult } from '../model/api.model';
 import { selectApiResults } from '../store/reducers/apiQuery';
-import { getMapDimensions, setMapDimensions } from '../store/reducers/map';
+import { getMapDimensions, getMapDisplacement, setMapDimensions } from '../store/reducers/map';
 import { getGeoObjFeature } from '../util/geo.util';
 
 interface Props {}
@@ -44,6 +44,11 @@ export const MapWrapper = (props: Props) => {
     // resize map every time the window size changes
     const dim = useSelector(getMapDimensions);
     useEffect(() => mapHandler.updateSize(), [dim, mapHandler]);
+
+    const heightDis = useSelector(getMapDisplacement);
+    useEffect(() => {
+        mapHandler.moveMap(0, heightDis);
+    }, [heightDis, mapHandler]);
 
     return (
         <div

@@ -1,4 +1,5 @@
 import { Feature, View } from 'ol';
+import { Coordinate } from 'ol/coordinate';
 import Geometry from 'ol/geom/Geometry';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
@@ -6,7 +7,7 @@ import Map from 'ol/Map';
 import { fromLonLat } from 'ol/proj';
 import OSM from 'ol/source/OSM';
 import VectorSource from 'ol/source/Vector';
-import { CENTER_LOCATION } from '../model/constants';
+import { CENTER_LOCATION, TRANSITION_DURATION } from '../model/constants';
 
 export class MapHandler {
     private map: Map;
@@ -24,12 +25,12 @@ export class MapHandler {
         });
 
         this.view = new View({
-            center: fromLonLat(CENTER_LOCATION),
+            center: CENTER_LOCATION,
             zoom: 11,
         });
     }
 
-    init = () => {
+    init = (): void => {
         this.map = new Map({
             target: this.mapElement.current,
             layers: [
@@ -43,7 +44,7 @@ export class MapHandler {
         });
     };
 
-    setFeature = (newFeature: Feature<Geometry>) => {
+    setFeature = (newFeature: Feature<Geometry>): void => {
         this.featuresLayer.setSource(
             new VectorSource({
                 features: [newFeature],
@@ -51,10 +52,27 @@ export class MapHandler {
         );
 
         this.view.fit(this.featuresLayer.getSource().getExtent(), {
-            // padding: [100, 100, 100, 100],
+            padding: [5, 5, 5, 5],
             maxZoom: 13,
         });
     };
 
-    updateSize = () => this.map.updateSize();
+    moveMap = (width: number, height: number): void => {
+        const coord = this.view.getCenter();
+        if (coord) {
+            const [lon, lat] = coord as Coordinate;
+            const zoom = Number(this.view.getZoom());
+            const calcHeight = Number(height / (zoom * 100));
+
+            const newLat = calcHeight - lat;
+            console.log(this.view.getCenter(), height, newLat, calcHeight);
+
+            // this.view.adjustCenter([0, calcHeight]);
+            this.view.animate({ center: [width, newLat], duration: TRANSITION_DURATION });
+        }
+    };
+
+    resetRotation = (): void => this.view.setRotation(0);
+
+    updateSize = (): void => this.map.updateSize();
 }
