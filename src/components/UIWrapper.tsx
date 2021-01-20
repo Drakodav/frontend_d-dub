@@ -4,7 +4,7 @@ import { Container } from '@material-ui/core';
 import { KeyboardArrowUp } from '@material-ui/icons';
 import { ApiSearchInput } from './ApiSearchInput';
 import { ApiInputType } from '../model/api.model';
-import { moveMap, setMapDimensions } from '../store/reducers/map';
+import { moveMap } from '../store/reducers/map';
 import { useDispatch } from 'react-redux';
 
 const useStyles = makeStyles(({ palette, breakpoints }) => ({
