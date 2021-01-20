@@ -5,6 +5,7 @@ import { MapWrapper } from './components/MapWrapper';
 import { MobileView } from './components/MobileView';
 import { getWindowWidth } from './store/reducers/map';
 import { useTheme } from '@material-ui/core/styles';
+import { DesktopView } from './components/DesktopView';
 
 function App() {
     const [view, setView] = useState(0);
@@ -19,7 +20,7 @@ function App() {
         }
     }, [width, theme.breakpoints]);
 
-    const dynComponent: JSX.Element = view === -1 ? <MobileView /> : <>DeskTopView not yeat implemented</>;
+    const dynComponent: JSX.Element = view === -1 ? <MobileView /> : <DesktopView />;
 
     return (
         <div>
