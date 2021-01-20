@@ -16,8 +16,8 @@ export class MapHandler {
     private view: View;
 
     constructor(mapElement: React.MutableRefObject<HTMLDivElement>) {
-        this.map = new Map({});
         this.mapElement = mapElement;
+        this.map = new Map({});
 
         // create and add vector source layer
         this.featuresLayer = new VectorLayer({
@@ -25,7 +25,7 @@ export class MapHandler {
         });
 
         this.view = new View({
-            center: CENTER_LOCATION,
+            center: fromLonLat(CENTER_LOCATION),
             zoom: 11,
         });
     }
@@ -58,6 +58,7 @@ export class MapHandler {
     };
 
     moveMap = (width: number, height: number): void => {
+        if (width === 0 && height === 0) return;
         const coord = this.view.getCenter();
         if (coord) {
             const [lon, lat] = coord as Coordinate;
