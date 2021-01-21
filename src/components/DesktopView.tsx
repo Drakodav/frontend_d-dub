@@ -1,5 +1,5 @@
 import React from 'react';
 
 export const DesktopView = () => {
-    return <div>DeskTopView not yeat implemented</div>;
+    return <div>DeskTop view not yet implemented</div>;
 };
