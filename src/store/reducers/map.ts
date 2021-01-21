@@ -2,6 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from './rootReducer';
 
 const initialState = {
+    windowWidth: window.innerWidth,
+    windowHeight: window.innerHeight,
     width: window.innerWidth,
     height: window.innerHeight,
     hDisplacement: 0,
@@ -11,18 +13,19 @@ const mapSlice = createSlice({
     name: 'mapState',
     initialState,
     reducers: {
-        setMapDimensions: (state) => {
+        setWindowDimensions: (state) => {
+            state.windowHeight = window.innerHeight;
+            state.windowWidth = window.innerWidth;
             state.height = window.innerHeight - state.hDisplacement;
-            state.width = window.innerWidth;
         },
         updateMapHeight: (state, action: PayloadAction<{ hDisplacement: number }>) => {
-            state.height = window.innerHeight - action.payload.hDisplacement;
+            state.height = state.windowHeight - action.payload.hDisplacement;
             state.hDisplacement = action.payload.hDisplacement;
         },
     },
 });
 const { actions, reducer } = mapSlice;
-export const { setMapDimensions, updateMapHeight } = actions;
+export const { updateMapHeight, setWindowDimensions } = actions;
 export default reducer;
 
 export const getMapDimensions = (state: RootState): { width: number; height: number } => ({
@@ -30,4 +33,7 @@ export const getMapDimensions = (state: RootState): { width: number; height: num
     height: state.mapState.height,
 });
 
-export const getWindowWidth = (state: RootState): number => state.mapState.width;
+export const getWindowDimensions = (state: RootState): { windowWidth: number; windowHeight: number } => ({
+    windowWidth: state.mapState.windowWidth,
+    windowHeight: state.mapState.windowHeight,
+});

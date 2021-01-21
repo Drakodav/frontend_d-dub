@@ -4,26 +4,26 @@ import { useDispatch, useSelector } from 'react-redux';
 import { MapHandler } from '../handler/mapHandler';
 import { ApiResult } from '../model/api.model';
 import { selectApiResults } from '../store/reducers/apiQuery';
-import { getMapDimensions, setMapDimensions } from '../store/reducers/map';
+import { getMapDimensions, getWindowDimensions, setWindowDimensions } from '../store/reducers/map';
 import { getGeoObjFeature } from '../util/geo.util';
 
 interface StyleProps {
-    height: number;
-    width: number;
+    windowWidth: number;
+    windowHeight: number;
 }
 
 const useStyles = (props: StyleProps) =>
     makeStyles({
         map: {
-            width: `${props.width}px`,
-            height: `${props.height}px`,
+            width: `${props.windowWidth}px`,
+            height: `${props.windowHeight}px`,
         },
     });
 
 export const MapWrapper = () => {
     const dispatch = useDispatch();
-    const dim = useSelector(getMapDimensions);
-    const classes = useStyles({ ...dim })();
+    const windowDim = useSelector(getWindowDimensions);
+    const classes = useStyles({ ...windowDim })();
     const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
     const mapHandler = useMemo(() => new MapHandler(mapElement), []);
 
@@ -46,7 +46,7 @@ export const MapWrapper = () => {
             timer && window.clearTimeout(timer);
             timer = window.setTimeout(() => {
                 timer = null;
-                dispatch(setMapDimensions());
+                dispatch(setWindowDimensions());
             }, 100);
         };
         window.addEventListener('resize', handleResize);
@@ -55,9 +55,10 @@ export const MapWrapper = () => {
     });
 
     // resize map every time the window size changes
-    useMemo(() => {
-        mapHandler.setSize(dim.width, dim.height);
-    }, [dim, mapHandler]);
+    const mapDim = useSelector(getMapDimensions);
+    useEffect(() => {
+        mapHandler.setSize(mapDim.width, mapDim.height);
+    }, [mapDim, mapHandler]);
 
     return <div ref={mapElement} className={classes.map}></div>;
 };

@@ -4,8 +4,8 @@ import { Container } from '@material-ui/core';
 import { KeyboardArrowUp } from '@material-ui/icons';
 import { ApiSearchInput } from './ApiSearchInput';
 import { ApiInputType } from '../model/api.model';
-import { updateMapHeight } from '../store/reducers/map';
-import { useDispatch } from 'react-redux';
+import { getWindowDimensions, updateMapHeight } from '../store/reducers/map';
+import { useDispatch, useSelector } from 'react-redux';
 import { TRANSITION_DURATION } from '../model/constants';
 
 const useStyles = (state: typeof initState) =>
@@ -36,17 +36,17 @@ const useStyles = (state: typeof initState) =>
         },
     }));
 
-const heights = {
-    min: 60 as number,
+const initHeights = {
+    min: 50 as number,
     mid: 350 as number,
     max: 600 as number,
     step: 50 as number,
-} as const;
+};
 
 const initState = {
     open: false as boolean,
-    height: heights.min as number,
-    prevState: heights.min as number,
+    height: initHeights.min as number,
+    prevState: initHeights.min as number,
     prevY: 0 as number,
     direction: 0 as number,
     initY: 0 as number,
@@ -60,6 +60,7 @@ export function MobileView() {
     const dispatch = useDispatch();
     const ref = useRef<HTMLDivElement>(null);
 
+    const [heights, setHeights] = useState(initHeights);
     const [state, tempState] = useState(initState);
     const setState = (val: State) => tempState({ ...state, ...val });
 
@@ -161,6 +162,12 @@ export function MobileView() {
 
         updateHeightOfMap(newHeight);
     };
+
+    const { windowHeight } = useSelector(getWindowDimensions);
+    useEffect(() => {
+        const fraction = windowHeight / 10;
+        setHeights((h) => ({ ...h, mid: fraction * 4, max: fraction * 7 }));
+    }, [windowHeight]);
 
     return (
         <Container
