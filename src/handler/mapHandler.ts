@@ -8,17 +8,24 @@ import OSM from 'ol/source/OSM';
 import VectorSource from 'ol/source/Vector';
 import { CENTER_LOCATION, TRANSITION_DURATION } from '../model/constants';
 
+// const Projection: string = 'EPSG:3857'
 const MaxZoom: number = 14;
+const Padding: number[] = [10, 10, 10, 10];
 
 export class MapHandler {
     private map: Map;
     private mapElement: React.MutableRefObject<HTMLDivElement>;
     private featuresLayer: VectorLayer;
     private view: View;
+    private tileLayer: TileLayer;
 
     constructor(mapElement: React.MutableRefObject<HTMLDivElement>) {
         this.mapElement = mapElement;
         this.map = new Map({});
+
+        this.tileLayer = new TileLayer({
+            source: new OSM(),
+        });
 
         // create and add vector source layer
         this.featuresLayer = new VectorLayer({
@@ -34,12 +41,7 @@ export class MapHandler {
     init = (): void => {
         this.map = new Map({
             target: this.mapElement.current,
-            layers: [
-                new TileLayer({
-                    source: new OSM(),
-                }),
-                this.featuresLayer,
-            ],
+            layers: [this.tileLayer, this.featuresLayer],
             view: this.view,
             controls: [],
         });
@@ -53,21 +55,42 @@ export class MapHandler {
         );
 
         this.view.fit(this.featuresLayer.getSource().getExtent(), {
-            padding: [5, 5, 5, 5],
+            padding: Padding,
             maxZoom: MaxZoom,
+            duration: TRANSITION_DURATION,
         });
     };
 
     setSize = (width: number, height: number): void => {
+        if (width === 0 && height === 0) return;
         this.map.setSize([width, height]);
 
         if (this.featuresLayer.getSource().getFeatures().length)
             this.view.fit(this.featuresLayer.getSource().getExtent(), {
-                padding: [10, 10, 10, 10],
+                padding: Padding,
                 maxZoom: MaxZoom,
                 duration: TRANSITION_DURATION,
             });
     };
+
+    panMapByPixel(x: number, y: number) {
+        let newCenterInPx;
+        let center = this.view.getCenter();
+        if (!!center?.length) {
+            let centerInPx = this.map.getPixelFromCoordinate(center);
+
+            if (centerInPx) {
+                newCenterInPx = [centerInPx[0] + x, centerInPx[1] + y];
+
+                var newCenter = this.map.getCoordinateFromPixel(newCenterInPx);
+
+                this.view.animate({
+                    center: newCenter,
+                    duration: 400,
+                });
+            }
+        }
+    }
 
     resetRotation = (): void => this.view.setRotation(0);
 

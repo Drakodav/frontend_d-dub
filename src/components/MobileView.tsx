@@ -82,16 +82,17 @@ export function MobileView() {
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         if (!!e && e.touches[0] && ref?.current === e.target) {
             const curr = e.touches[0].clientY;
+            const { prevY, diffHeight, height } = state;
             if (!state.prevY) {
                 // there needs to be a prev Y value in order to calculate direction
                 setState({ prevY: curr, tranistionSpeed: 0 });
                 return;
             }
             let prevState = state.prevState;
-            let open = state.height > heights.min + heights.step;
+            let open = height > heights.min + heights.step;
 
-            const direction = curr < state.prevY ? 1 : -1;
-            const newHeight = window.innerHeight - curr - state.diffHeight;
+            const direction = curr < prevY ? 1 : -1;
+            const newHeight = window.innerHeight - curr - diffHeight;
 
             // if curr touch passes through middle then we can reach the further breakpoint
             if (newHeight > heights.mid - heights.step && newHeight < heights.mid + heights.step)
@@ -107,17 +108,19 @@ export function MobileView() {
         // if there is no previous Y touch then it was just a tap/click, dont switch
         if (!state.prevY) return;
 
-        let height = state.prevState;
+        const { prevState, direction } = state;
+
+        let height = prevState;
         let open = true;
 
         const breakpoints = [heights.min, heights.mid, heights.max];
-        const currIdx = breakpoints.findIndex((value) => value === state.prevState);
-        const nextIdx = currIdx + state.direction;
+        const currIdx = breakpoints.findIndex((value) => value === prevState);
+        const nextIdx = currIdx + direction;
 
         // used to calculate whether the movement was far enough to justify switching breakpoint
-        const barrier = state.prevState + heights.step * state.direction;
-        const min = Math.min(state.prevState, barrier);
-        const max = Math.max(state.prevState, barrier);
+        const barrier = prevState + heights.step * direction;
+        const min = Math.min(prevState, barrier);
+        const max = Math.max(prevState, barrier);
         const withinBarrier = state.height > min && state.height < max;
 
         // if a breakpoint is available and we dragged enough to not be a misclick
@@ -132,14 +135,27 @@ export function MobileView() {
         setState({ prevY: 0, open, height, prevState: height, initY: 0, tranistionSpeed: initState.tranistionSpeed });
 
         // update the map height along with the bar height
-        dispatch(updateMapHeight({ hDisplacement: height - heights.step }));
+        if (height <= heights.mid) dispatch(updateMapHeight({ hDisplacement: height - heights.step }));
     };
 
     // switcheroo on the menu tap icon
     const openCloseMenu = () => {
-        const newHeight = !state.open ? heights.max : heights.min;
-        setState({ open: !state.open, height: newHeight, prevY: 0, prevState: newHeight });
-        dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step }));
+        const { open } = state;
+        const newHeight = !open ? heights.max : heights.min;
+        setState({
+            open: !open,
+            height: newHeight,
+            prevY: 0,
+            prevState: newHeight,
+        });
+
+        // update map height based on if open or not, also use timeout to fix visual bug
+        if (!open)
+            setTimeout(
+                () => dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step })),
+                TRANSITION_DURATION
+            );
+        else dispatch(updateMapHeight({ hDisplacement: heights.min }));
     };
 
     return (

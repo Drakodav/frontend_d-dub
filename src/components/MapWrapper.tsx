@@ -14,7 +14,7 @@ interface StyleProps {
 
 const useStyles = (props: StyleProps) =>
     makeStyles({
-        'map-component': {
+        map: {
             width: `${props.width}px`,
             height: `${props.height}px`,
         },
@@ -59,5 +59,5 @@ export const MapWrapper = () => {
         mapHandler.setSize(dim.width, dim.height);
     }, [dim, mapHandler]);
 
-    return <div ref={mapElement} className={classes['map-component']}></div>;
+    return <div ref={mapElement} className={classes.map}></div>;
 };
