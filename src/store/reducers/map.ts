@@ -14,8 +14,10 @@ const mapSlice = createSlice({
     initialState,
     reducers: {
         setWindowDimensions: (state) => {
-            state.windowHeight = window.innerHeight;
             state.windowWidth = window.innerWidth;
+            state.width = window.innerWidth;
+
+            state.windowHeight = window.innerHeight;
             state.height = window.innerHeight - state.hDisplacement;
         },
         updateMapHeight: (state, action: PayloadAction<{ hDisplacement: number }>) => {
