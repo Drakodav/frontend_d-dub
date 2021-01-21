@@ -8,6 +8,8 @@ import OSM from 'ol/source/OSM';
 import VectorSource from 'ol/source/Vector';
 import { CENTER_LOCATION, TRANSITION_DURATION } from '../model/constants';
 
+const MaxZoom: number = 14;
+
 export class MapHandler {
     private map: Map;
     private mapElement: React.MutableRefObject<HTMLDivElement>;
@@ -52,7 +54,7 @@ export class MapHandler {
 
         this.view.fit(this.featuresLayer.getSource().getExtent(), {
             padding: [5, 5, 5, 5],
-            maxZoom: 11,
+            maxZoom: MaxZoom,
         });
     };
 
@@ -62,7 +64,7 @@ export class MapHandler {
         if (this.featuresLayer.getSource().getFeatures().length)
             this.view.fit(this.featuresLayer.getSource().getExtent(), {
                 padding: [10, 10, 10, 10],
-                maxZoom: 11,
+                maxZoom: MaxZoom,
                 duration: TRANSITION_DURATION,
             });
     };
