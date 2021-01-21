@@ -80,7 +80,7 @@ export function MobileView() {
     };
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (!!e && e.touches[0] && ref?.current === e.target) {
+        if (!!e && e.touches[0]) {
             const curr = e.touches[0].clientY;
             const { prevY, diffHeight, height } = state;
             if (!state.prevY) {
