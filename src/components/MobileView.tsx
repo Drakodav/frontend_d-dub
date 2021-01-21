@@ -144,7 +144,7 @@ export function MobileView() {
         setState({ prevY: 0, open, height, prevState: height, initY: 0, tranistionSpeed: initState.tranistionSpeed });
 
         // update the map height along with the bar height
-        if (height <= heights.mid) updateHeightOfMap(height);
+        updateHeightOfMap(height);
     };
 
     // switcheroo on the menu tap icon
