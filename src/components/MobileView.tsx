@@ -72,6 +72,15 @@ export function MobileView() {
         };
     }, [dispatch]);
 
+    // update map height based on if open or not, also use timeout to fix visual bug
+    const updateHeightOfMap = (newHeight: number) =>
+        state.open
+            ? dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step }))
+            : setTimeout(
+                  () => dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step })),
+                  TRANSITION_DURATION
+              );
+
     // track where the first touch was and the height difference to the bar
     const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
         const initY = e.touches[0].clientY;
@@ -135,13 +144,14 @@ export function MobileView() {
         setState({ prevY: 0, open, height, prevState: height, initY: 0, tranistionSpeed: initState.tranistionSpeed });
 
         // update the map height along with the bar height
-        if (height <= heights.mid) dispatch(updateMapHeight({ hDisplacement: height - heights.step }));
+        if (height <= heights.mid) updateHeightOfMap(height);
     };
 
     // switcheroo on the menu tap icon
     const openCloseMenu = () => {
         const { open } = state;
         const newHeight = !open ? heights.max : heights.min;
+
         setState({
             open: !open,
             height: newHeight,
@@ -149,13 +159,7 @@ export function MobileView() {
             prevState: newHeight,
         });
 
-        // update map height based on if open or not, also use timeout to fix visual bug
-        if (!open)
-            setTimeout(
-                () => dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step })),
-                TRANSITION_DURATION
-            );
-        else dispatch(updateMapHeight({ hDisplacement: heights.min }));
+        updateHeightOfMap(newHeight);
     };
 
     return (
