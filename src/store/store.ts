@@ -1,9 +1,8 @@
-import { configureStore, ThunkAction, Action, getDefaultMiddleware } from '@reduxjs/toolkit';
+import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import rootReducer, { RootState } from './reducers/rootReducer';
 
 export const store = configureStore({
     reducer: rootReducer,
-    middleware: [...getDefaultMiddleware()],
     devTools: process.env.NODE_ENV !== 'production',
 });
 
