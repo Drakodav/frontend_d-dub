@@ -1,16 +1,29 @@
+import { makeStyles } from '@material-ui/core';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MapHandler } from '../handler/mapHandler';
 import { ApiResult } from '../model/api.model';
 import { selectApiResults } from '../store/reducers/apiQuery';
-import { getMapDimensions, getMapDisplacement, setMapDimensions } from '../store/reducers/map';
+import { getMapDimensions, setMapDimensions } from '../store/reducers/map';
 import { getGeoObjFeature } from '../util/geo.util';
 
-interface Props {}
+interface StyleProps {
+    height: number;
+    width: number;
+}
 
-export const MapWrapper = (props: Props) => {
+const useStyles = (props: StyleProps) =>
+    makeStyles({
+        'map-component': {
+            width: `${props.width}px`,
+            height: `${props.height}px`,
+        },
+    });
+
+export const MapWrapper = () => {
     const dispatch = useDispatch();
-
+    const dim = useSelector(getMapDimensions);
+    const classes = useStyles({ ...dim })();
     const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
     const mapHandler = useMemo(() => new MapHandler(mapElement), []);
 
@@ -42,19 +55,9 @@ export const MapWrapper = (props: Props) => {
     });
 
     // resize map every time the window size changes
-    const dim = useSelector(getMapDimensions);
-    useEffect(() => mapHandler.updateSize(), [dim, mapHandler]);
+    useMemo(() => {
+        mapHandler.setSize(dim.width, dim.height);
+    }, [dim, mapHandler]);
 
-    const heightDis = useSelector(getMapDisplacement);
-    useEffect(() => {
-        mapHandler.moveMap(0, heightDis);
-    }, [heightDis, mapHandler]);
-
-    return (
-        <div
-            ref={mapElement}
-            className='map-container'
-            style={{ width: `${dim.width}px`, height: `${dim.height}px` }}
-        ></div>
-    );
+    return <div ref={mapElement} className={classes['map-component']}></div>;
 };

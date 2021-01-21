@@ -1,5 +1,4 @@
 import { Feature, View } from 'ol';
-import { Coordinate } from 'ol/coordinate';
 import Geometry from 'ol/geom/Geometry';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
@@ -53,24 +52,19 @@ export class MapHandler {
 
         this.view.fit(this.featuresLayer.getSource().getExtent(), {
             padding: [5, 5, 5, 5],
-            maxZoom: 13,
+            maxZoom: 11,
         });
     };
 
-    moveMap = (width: number, height: number): void => {
-        if (width === 0 && height === 0) return;
-        // const coord = this.view.getCenter();
-        // if (coord) {
-        //     const [lon, lat] = coord as Coordinate;
-        //     const zoom = Number(this.view.getZoom());
-        //     const calcHeight = Number(height / (zoom * 100));
+    setSize = (width: number, height: number): void => {
+        this.map.setSize([width, height]);
 
-        //     const newLat = calcHeight - lat;
-        //     console.log(this.view.getCenter(), height, newLat, calcHeight);
-
-        //     // this.view.adjustCenter([0, calcHeight]);
-        //     this.view.animate({ center: [width, newLat], duration: TRANSITION_DURATION });
-        // }
+        if (this.featuresLayer.getSource().getFeatures().length)
+            this.view.fit(this.featuresLayer.getSource().getExtent(), {
+                padding: [10, 10, 10, 10],
+                maxZoom: 11,
+                duration: TRANSITION_DURATION,
+            });
     };
 
     resetRotation = (): void => this.view.setRotation(0);

@@ -1,10 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Container } from '@material-ui/core';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
 import { ApiSearchInput } from './ApiSearchInput';
 import { ApiInputType } from '../model/api.model';
-import { moveMap } from '../store/reducers/map';
+import { updateMapHeight } from '../store/reducers/map';
 import { useDispatch } from 'react-redux';
 import { TRANSITION_DURATION } from '../model/constants';
 
@@ -58,10 +58,17 @@ export function MobileView() {
     const [state, tempState] = useState(initState);
     const setState = (val: State) => tempState({ ...state, ...val });
 
+    // componentWillUnmount
+    useEffect(() => {
+        return () => {
+            dispatch(updateMapHeight({ hDisplacement: 0 }));
+        };
+    }, [dispatch]);
+
+    // track where the first touch was and the height difference to the bar
     const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
         const initY = e.touches[0].clientY;
         const diffHeight = window.innerHeight - initY - state.height;
-
         setState({ initY, diffHeight });
     };
 
@@ -78,6 +85,7 @@ export function MobileView() {
             const direction = curr < state.prevY ? 1 : -1;
             const newHeight = window.innerHeight - curr - state.diffHeight;
 
+            // set the new height if it is within the boundary
             if (newHeight >= heights.min - heights.step && newHeight <= heights.max + heights.step)
                 setState({ height: newHeight, prevY: curr, direction, open });
         }
@@ -88,6 +96,7 @@ export function MobileView() {
         if (!state.prevY) return;
 
         let height = state.prevState;
+        let open = true;
 
         const breakpoints = [heights.min, heights.mid, heights.max];
         const currIdx = breakpoints.findIndex((value) => value === state.prevState);
@@ -99,22 +108,26 @@ export function MobileView() {
         const max = Math.max(state.prevState, barrier);
         const withinBarrier = state.height > min && state.height < max;
 
+        // if a breakpoint is available and we dragged enough to not be a misclick
         if (nextIdx >= 0 && nextIdx < breakpoints.length && !withinBarrier) {
             height = breakpoints[nextIdx];
         }
 
-        let open = true;
-        if (height <= heights.min + 5) open = false;
+        // if height is on min then bar is closed
+        if (height === heights.min) open = false;
 
+        // set the state of the bar, where it is, and transition speed
         setState({ prevY: 0, open, height, prevState: height, initY: 0, tranistionSpeed: initState.tranistionSpeed });
 
-        if (height === heights.mid || height === heights.min)
-            dispatch(moveMap({ mapDisplacement: height - heights.step }));
+        // update the map height along with the bar height
+        dispatch(updateMapHeight({ hDisplacement: height - heights.step }));
     };
 
+    // switcheroo on the menu tap icon
     const openCloseMenu = () => {
         const newHeight = !state.open ? heights.max : heights.min;
         setState({ open: !state.open, height: newHeight, prevY: 0, prevState: newHeight });
+        dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step }));
     };
 
     return (
@@ -137,7 +150,6 @@ export function MobileView() {
                 ) : (
                     <KeyboardArrowDown onClick={openCloseMenu} />
                 )}
-                <p> click to expand </p>
             </div>
             <ApiSearchInput disabled={!state.open} heading={'Bus Route'} query={ApiInputType.route} />
             <ApiSearchInput disabled={!state.open} heading={'Bus Stop'} query={ApiInputType.stop} />

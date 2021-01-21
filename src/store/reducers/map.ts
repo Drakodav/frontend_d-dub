@@ -4,7 +4,7 @@ import { RootState } from './rootReducer';
 const initialState = {
     width: window.innerWidth,
     height: window.innerHeight,
-    mapDisplacement: 0,
+    hDisplacement: 0,
 };
 
 const mapSlice = createSlice({
@@ -12,19 +12,18 @@ const mapSlice = createSlice({
     initialState,
     reducers: {
         setMapDimensions: (state) => {
-            state.height = window.innerHeight;
+            state.height = window.innerHeight - state.hDisplacement;
             state.width = window.innerWidth;
         },
-        moveMap: (state, action: PayloadAction<{ mapDisplacement: number }>) => {
-            state.mapDisplacement = action.payload.mapDisplacement;
+        updateMapHeight: (state, action: PayloadAction<{ hDisplacement: number }>) => {
+            state.height = window.innerHeight - action.payload.hDisplacement;
+            state.hDisplacement = action.payload.hDisplacement;
         },
     },
 });
 const { actions, reducer } = mapSlice;
-export const { setMapDimensions, moveMap } = actions;
+export const { setMapDimensions, updateMapHeight } = actions;
 export default reducer;
-
-export const getMapDisplacement = (state: RootState): number => state.mapState.mapDisplacement;
 
 export const getMapDimensions = (state: RootState): { width: number; height: number } => ({
     width: state.mapState.width,
