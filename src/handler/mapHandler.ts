@@ -95,7 +95,7 @@ export class MapHandler {
     setApiFeature = (newFeature: Geometry): void => {
         this.apiFeature.setGeometry(newFeature);
 
-        this.view.fit(this.featuresLayer.getSource().getExtent(), {
+        this.view.fit(newFeature.getExtent(), {
             padding: Padding,
             maxZoom: MaxZoom,
             duration: TRANSITION_DURATION,
