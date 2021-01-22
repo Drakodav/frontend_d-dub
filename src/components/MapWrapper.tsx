@@ -21,8 +21,8 @@ const useStyles = (props: StyleProps) =>
             height: `${props.windowHeight}px`,
         },
         iconButton: {
-            width: '45px',
-            height: '45px',
+            width: '60px',
+            height: '60px',
             zIndex: 1,
             position: 'fixed',
             right: 15,
@@ -36,6 +36,10 @@ const useStyles = (props: StyleProps) =>
             transition: `auto ${TRANSITION_DURATION}ms`,
             '&:hover': {
                 backgroundColor: palette.common.white,
+            },
+            '& svg': {
+                width: '100%',
+                height: '100%',
             },
         },
     }));
