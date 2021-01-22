@@ -7,6 +7,7 @@ const initialState = {
     width: window.innerWidth,
     height: window.innerHeight,
     hDisplacement: 0,
+    controlsVisible: true,
 };
 
 const mapSlice = createSlice({
@@ -24,10 +25,13 @@ const mapSlice = createSlice({
             state.height = state.windowHeight - action.payload.hDisplacement;
             state.hDisplacement = action.payload.hDisplacement;
         },
+        updateControlsVisible: (state, action: PayloadAction<boolean>) => {
+            state.controlsVisible = action.payload;
+        },
     },
 });
 const { actions, reducer } = mapSlice;
-export const { updateMapHeight, setWindowDimensions } = actions;
+export const { updateMapHeight, setWindowDimensions, updateControlsVisible } = actions;
 export default reducer;
 
 export const getMapDimensions = (state: RootState): { width: number; height: number } => ({
@@ -39,3 +43,5 @@ export const getWindowDimensions = (state: RootState): { windowWidth: number; wi
     windowWidth: state.mapState.windowWidth,
     windowHeight: state.mapState.windowHeight,
 });
+
+export const getControlsVisible = (state: RootState): boolean => state.mapState.controlsVisible;

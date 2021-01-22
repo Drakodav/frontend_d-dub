@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { MapHandler } from '../handler/mapHandler';
 import { ApiResult } from '../model/api.model';
 import { selectApiResults } from '../store/reducers/apiQuery';
-import { getMapDimensions, getWindowDimensions, setWindowDimensions } from '../store/reducers/map';
+import { getControlsVisible, getMapDimensions, getWindowDimensions, setWindowDimensions } from '../store/reducers/map';
 import { getGeoObjFeature } from '../util/geo.util';
 import { TRANSITION_DURATION } from '../model/constants';
 import GpsNotFixedRoundedIcon from '@material-ui/icons/GpsNotFixedRounded';
@@ -13,6 +13,7 @@ import ExploreRoundedIcon from '@material-ui/icons/ExploreRounded';
 interface StyleProps {
     windowWidth: number;
     windowHeight: number;
+    visible: boolean;
 }
 
 const useStyles = (props: StyleProps) =>
@@ -29,12 +30,13 @@ const useStyles = (props: StyleProps) =>
             borderRadius: '50%',
             color: palette.primary.dark,
             backgroundColor: palette.common.white,
+            opacity: props.visible ? '1' : '0',
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'center',
             padding: '8px',
             alignItems: 'center',
-            transition: `auto ${TRANSITION_DURATION}ms`,
+            transition: `opacity ${TRANSITION_DURATION}ms`,
             '&:hover': {
                 backgroundColor: palette.common.white,
             },
@@ -48,9 +50,12 @@ const useStyles = (props: StyleProps) =>
 export const MapWrapper = () => {
     const dispatch = useDispatch();
     const windowDim = useSelector(getWindowDimensions);
-    const classes = useStyles({ ...windowDim })();
+    const visible = useSelector(getControlsVisible);
+
     const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
     const mapHandler = useMemo(() => new MapHandler(mapElement), []);
+
+    const classes = useStyles({ ...windowDim, visible })();
 
     // run once, init ol map
     useEffect(() => {

@@ -4,7 +4,7 @@ import { Container } from '@material-ui/core';
 import { KeyboardArrowUp } from '@material-ui/icons';
 import { ApiSearchInput } from './ApiSearchInput';
 import { ApiInputType } from '../model/api.model';
-import { getWindowDimensions, updateMapHeight } from '../store/reducers/map';
+import { getWindowDimensions, updateControlsVisible, updateMapHeight } from '../store/reducers/map';
 import { useDispatch, useSelector } from 'react-redux';
 import { TRANSITION_DURATION } from '../model/constants';
 
@@ -63,7 +63,6 @@ export function MobileView() {
     const [heights, setHeights] = useState(initHeights);
     const [state, tempState] = useState(initState);
     const setState = (val: State) => tempState({ ...state, ...val });
-
     const classes = useStyles(state)();
 
     // componentWillUnmount
@@ -74,13 +73,15 @@ export function MobileView() {
     }, [dispatch]);
 
     // update map height based on if open or not, also use timeout to fix visual bug
-    const updateHeightOfMap = (newHeight: number) =>
-        state.open
-            ? dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step }))
-            : setTimeout(
+    const updateHeightOfMap = (open: boolean, newHeight: number) => {
+        open
+            ? setTimeout(
                   () => dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step })),
                   TRANSITION_DURATION
-              );
+              )
+            : dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step }));
+        dispatch(updateControlsVisible(!open));
+    };
 
     // track where the first touch was and the height difference to the bar
     const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -145,7 +146,7 @@ export function MobileView() {
         setState({ prevY: 0, open, height, prevState: height, initY: 0, tranistionSpeed: initState.tranistionSpeed });
 
         // update the map height along with the bar height
-        updateHeightOfMap(height);
+        updateHeightOfMap(open, height);
     };
 
     // switcheroo on the menu tap icon
@@ -160,7 +161,7 @@ export function MobileView() {
             prevState: newHeight,
         });
 
-        updateHeightOfMap(newHeight);
+        updateHeightOfMap(!open, newHeight);
     };
 
     const { windowHeight } = useSelector(getWindowDimensions);
