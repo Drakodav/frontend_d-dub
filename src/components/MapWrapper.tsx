@@ -60,5 +60,5 @@ export const MapWrapper = () => {
         mapHandler.setSize(mapDim.width, mapDim.height);
     }, [mapDim, mapHandler]);
 
-    return <div ref={mapElement} className={classes.map}></div>;
+    return <div ref={mapElement} className={classes.map} />;
 };
