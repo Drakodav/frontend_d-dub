@@ -22,8 +22,8 @@ const useStyles = (props: StyleProps) =>
             height: `${props.windowHeight}px`,
         },
         iconButton: {
-            width: '55px',
-            height: '55px',
+            width: '50px',
+            height: '50px',
             zIndex: 1,
             position: 'fixed',
             borderRadius: '50%',
@@ -32,12 +32,13 @@ const useStyles = (props: StyleProps) =>
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'center',
+            padding: '8px',
             alignItems: 'center',
             transition: `auto ${TRANSITION_DURATION}ms`,
             '&:hover': {
                 backgroundColor: palette.common.white,
             },
-            '& svg': {
+            '& span svg': {
                 width: '100%',
                 height: '100%',
             },
