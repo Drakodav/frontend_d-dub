@@ -131,7 +131,7 @@ export class MapHandler {
         this.geoLocation.getPosition() &&
             this.view.animate({
                 center: this.geoLocation.getPosition(),
-                duration: MAP_TRANSITION,
+                duration: TRANSITION_DURATION,
                 zoom: MaxZoom,
             });
     };
