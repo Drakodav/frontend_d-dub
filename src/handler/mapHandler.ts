@@ -126,6 +126,15 @@ export class MapHandler {
         }
     }
 
+    gpsClick = () => {
+        this.geoLocation.getPosition() &&
+            this.view.animate({
+                center: this.geoLocation.getPosition(),
+                duration: TRANSITION_DURATION * 2,
+                zoom: MaxZoom,
+            });
+    };
+
     resetRotation = (): void => this.view.setRotation(0);
 
     updateSize = (): void => this.map.updateSize();

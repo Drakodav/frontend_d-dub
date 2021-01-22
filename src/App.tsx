@@ -13,17 +13,13 @@ function App() {
     const theme = useTheme();
     const { windowWidth } = useSelector(getWindowDimensions);
     useEffect(() => {
-        if (windowWidth <= theme.breakpoints.width('sm')) {
-            setView(-1);
-        } else {
-            setView(1);
-        }
+        setView(windowWidth <= theme.breakpoints.width('sm') ? -1 : 1);
     }, [windowWidth, theme.breakpoints]);
 
-    const dynComponent: JSX.Element = view === -1 ? <MobileView /> : <DesktopView />;
+    const dynamicComponent: JSX.Element = view === -1 ? <MobileView /> : <DesktopView />;
     return (
         <>
-            {dynComponent}
+            {dynamicComponent}
             <MapWrapper />
         </>
     );

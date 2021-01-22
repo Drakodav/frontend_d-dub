@@ -16,7 +16,7 @@ const useStyles = (state: typeof initState) =>
             padding: '10px',
             bottom: 0,
             left: 0,
-            zIndex: 1,
+            zIndex: 10,
             borderRadius: '10px',
             display: 'flex',
             flex: 2,

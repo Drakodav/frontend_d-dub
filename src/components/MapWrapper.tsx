@@ -1,4 +1,4 @@
-import { makeStyles } from '@material-ui/core';
+import { IconButton, makeStyles } from '@material-ui/core';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MapHandler } from '../handler/mapHandler';
@@ -6,6 +6,8 @@ import { ApiResult } from '../model/api.model';
 import { selectApiResults } from '../store/reducers/apiQuery';
 import { getMapDimensions, getWindowDimensions, setWindowDimensions } from '../store/reducers/map';
 import { getGeoObjFeature } from '../util/geo.util';
+import { TRANSITION_DURATION } from '../model/constants';
+import GpsNotFixedRoundedIcon from '@material-ui/icons/GpsNotFixedRounded';
 
 interface StyleProps {
     windowWidth: number;
@@ -13,12 +15,30 @@ interface StyleProps {
 }
 
 const useStyles = (props: StyleProps) =>
-    makeStyles({
+    makeStyles(({ palette }) => ({
         map: {
             width: `${props.windowWidth}px`,
             height: `${props.windowHeight}px`,
         },
-    });
+        iconButton: {
+            width: '45px',
+            height: '45px',
+            zIndex: 1,
+            position: 'fixed',
+            right: 15,
+            bottom: 75,
+            borderRadius: '50%',
+            backgroundColor: palette.common.white,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            transition: `auto ${TRANSITION_DURATION}ms`,
+            '&:hover': {
+                backgroundColor: palette.common.white,
+            },
+        },
+    }));
 
 export const MapWrapper = () => {
     const dispatch = useDispatch();
@@ -60,5 +80,16 @@ export const MapWrapper = () => {
         mapHandler.setSize(mapDim.width, mapDim.height);
     }, [mapDim, mapHandler]);
 
-    return <div ref={mapElement} className={classes.map} />;
+    const gpsClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        mapHandler.gpsClick();
+    };
+
+    return (
+        <>
+            <IconButton className={classes.iconButton} onClick={gpsClick}>
+                <GpsNotFixedRoundedIcon />
+            </IconButton>
+            <div ref={mapElement} className={classes.map} />
+        </>
+    );
 };
