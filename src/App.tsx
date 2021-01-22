@@ -21,12 +21,11 @@ function App() {
     }, [windowWidth, theme.breakpoints]);
 
     const dynComponent: JSX.Element = view === -1 ? <MobileView /> : <DesktopView />;
-
     return (
-        <div>
+        <>
             {dynComponent}
             <MapWrapper />
-        </div>
+        </>
     );
 }
 
