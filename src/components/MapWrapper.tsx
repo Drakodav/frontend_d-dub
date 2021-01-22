@@ -8,6 +8,7 @@ import { getMapDimensions, getWindowDimensions, setWindowDimensions } from '../s
 import { getGeoObjFeature } from '../util/geo.util';
 import { TRANSITION_DURATION } from '../model/constants';
 import GpsNotFixedRoundedIcon from '@material-ui/icons/GpsNotFixedRounded';
+import ExploreRoundedIcon from '@material-ui/icons/ExploreRounded';
 
 interface StyleProps {
     windowWidth: number;
@@ -21,13 +22,12 @@ const useStyles = (props: StyleProps) =>
             height: `${props.windowHeight}px`,
         },
         iconButton: {
-            width: '60px',
-            height: '60px',
+            width: '55px',
+            height: '55px',
             zIndex: 1,
             position: 'fixed',
-            right: 15,
-            bottom: 75,
             borderRadius: '50%',
+            color: palette.primary.dark,
             backgroundColor: palette.common.white,
             display: 'flex',
             flexDirection: 'row',
@@ -88,11 +88,20 @@ export const MapWrapper = () => {
         mapHandler.gpsClick();
     };
 
+    const rotationClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        mapHandler.resetRotation();
+    };
+
     return (
         <>
-            <IconButton className={classes.iconButton} onClick={gpsClick}>
+            <IconButton className={classes.iconButton} onClick={rotationClick} style={{ right: 15, bottom: 145 }}>
+                <ExploreRoundedIcon />
+            </IconButton>
+
+            <IconButton className={classes.iconButton} onClick={gpsClick} style={{ right: 15, bottom: 75 }}>
                 <GpsNotFixedRoundedIcon />
             </IconButton>
+
             <div ref={mapElement} className={classes.map} />
         </>
     );

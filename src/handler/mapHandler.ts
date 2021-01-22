@@ -11,6 +11,7 @@ import { CENTER_LOCATION, TRANSITION_DURATION } from '../model/constants';
 import { apiFeatureStyle, positionFeatureStyle } from '../util/geo.util';
 
 // const Projection: string = 'EPSG:3857'
+const MAP_TRANSITION = TRANSITION_DURATION * 2;
 const MaxZoom: number = 18;
 const MinZoom: number = 11;
 const Padding: number[] = [10, 10, 10, 10];
@@ -98,7 +99,7 @@ export class MapHandler {
         this.view.fit(newFeature.getExtent(), {
             padding: Padding,
             maxZoom: MaxZoom,
-            duration: TRANSITION_DURATION,
+            duration: MAP_TRANSITION,
         });
     };
 
@@ -120,7 +121,7 @@ export class MapHandler {
 
                 this.view.animate({
                     center: newCenter,
-                    duration: TRANSITION_DURATION,
+                    duration: MAP_TRANSITION,
                 });
             }
         }
@@ -130,12 +131,12 @@ export class MapHandler {
         this.geoLocation.getPosition() &&
             this.view.animate({
                 center: this.geoLocation.getPosition(),
-                duration: TRANSITION_DURATION * 2,
+                duration: MAP_TRANSITION,
                 zoom: MaxZoom,
             });
     };
 
-    resetRotation = (): void => this.view.setRotation(0);
+    resetRotation = (): void => this.view.animate({ rotation: 0, duration: MAP_TRANSITION });
 
     updateSize = (): void => this.map.updateSize();
 }
