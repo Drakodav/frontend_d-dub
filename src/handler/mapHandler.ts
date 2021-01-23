@@ -155,6 +155,7 @@ export class MapHandler {
                 duration: TRANSITION_DURATION,
                 zoom: MaxZoom,
             });
+    };
 
     resetRotation = (): void => this.view.animate({ rotation: 0, duration: MAP_TRANSITION });
 
