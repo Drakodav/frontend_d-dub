@@ -1,6 +1,7 @@
-import { Feature, Geolocation, View } from 'ol';
+import { Feature, View } from 'ol';
 import Geometry from 'ol/geom/Geometry';
 import Point from 'ol/geom/Point';
+import { circular } from 'ol/geom/Polygon';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import Map from 'ol/Map';
@@ -19,12 +20,15 @@ const Padding: number[] = [10, 10, 10, 10];
 export class MapHandler {
     private map: Map;
     private mapElement: React.MutableRefObject<HTMLDivElement>;
-    private featuresLayer: VectorLayer;
     private view: View;
     private tileLayer: TileLayer;
-    private geoLocation: Geolocation;
+
+    private featuresLayer: VectorLayer;
+    private LocationLayer: VectorLayer;
 
     private apiFeature: Feature;
+    private accuracyFeature: Feature;
+    private positionFeature: Feature;
 
     constructor(mapElement: React.MutableRefObject<HTMLDivElement>) {
         this.mapElement = mapElement;
@@ -36,11 +40,21 @@ export class MapHandler {
 
         // create and add vector source layer
         this.apiFeature = new Feature();
+        this.accuracyFeature = new Feature();
+        this.positionFeature = new Feature();
+
         this.apiFeature.setStyle(apiFeatureStyle());
+        this.positionFeature.setStyle(positionFeatureStyle());
 
         this.featuresLayer = new VectorLayer({
             source: new VectorSource({
                 features: [this.apiFeature],
+            }),
+        });
+
+        this.LocationLayer = new VectorLayer({
+            source: new VectorSource({
+                features: [this.accuracyFeature, this.positionFeature],
             }),
         });
 
@@ -50,43 +64,36 @@ export class MapHandler {
             maxZoom: MaxZoom,
             minZoom: MinZoom,
         });
-
-        this.geoLocation = new Geolocation({
-            trackingOptions: {
-                enableHighAccuracy: true,
-                // timeout: 500,
-                // maximumAge: 1500,
-            },
-            projection: this.view.getProjection(),
-            tracking: true,
-        });
     }
 
     init = (): void => {
         this.map = new Map({
             target: this.mapElement.current,
-            layers: [this.tileLayer, this.featuresLayer],
+            layers: [this.tileLayer, this.featuresLayer, this.LocationLayer],
             view: this.view,
             controls: [],
         });
-        this.enableGeo();
+
+        window.navigator.geolocation.watchPosition(this.updateGeoSuccess, this.updateGeoError, {
+            enableHighAccuracy: true,
+            timeout: 2000,
+            maximumAge: 1000,
+        });
     };
 
-    private enableGeo = () => {
-        const accuracyFeature = new Feature();
-        this.geoLocation.on('change:accuracyGeometry', () => {
-            accuracyFeature.setGeometry(this.geoLocation.getAccuracyGeometry());
-        });
+    private updateGeoSuccess = (pos: GeolocationPosition) => {
+        console.log(pos);
+        const coords = [pos.coords.longitude, pos.coords.latitude];
+        const accuracy = circular(coords, pos.coords.accuracy);
 
-        const positionFeature = new Feature();
-        positionFeature.setStyle(positionFeatureStyle());
+        this.positionFeature.setGeometry(new Point(fromLonLat(coords)));
+        this.accuracyFeature.setGeometry(accuracy.transform('EPSG:4326', this.view.getProjection()));
+    };
 
-        this.geoLocation.on('change:position', () => {
-            const coordinates = this.geoLocation.getPosition();
-            positionFeature.setGeometry(coordinates ? new Point(coordinates) : undefined);
-        });
-
-        this.addFeatures([accuracyFeature, positionFeature]);
+    private updateGeoError = (e: GeolocationPositionError) => {
+        console.log(e);
+        this.accuracyFeature.setGeometry(undefined);
+        this.positionFeature.setGeometry(undefined);
     };
 
     addFeatures = (features: Feature<Geometry>[]) => {
@@ -128,12 +135,18 @@ export class MapHandler {
     }
 
     gpsClick = () => {
-        this.geoLocation.getPosition() &&
-            this.view.animate({
-                center: this.geoLocation.getPosition(),
-                duration: TRANSITION_DURATION,
-                zoom: MaxZoom,
-            });
+        window.navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                this.updateGeoSuccess(pos);
+                this.view.animate({
+                    center: fromLonLat([pos.coords.longitude, pos.coords.latitude]),
+                    duration: TRANSITION_DURATION,
+                    zoom: MaxZoom,
+                });
+            },
+            this.updateGeoError,
+            { enableHighAccuracy: true, maximumAge: 1000, timeout: 2000 }
+        );
     };
 
     resetRotation = (): void => this.view.animate({ rotation: 0, duration: MAP_TRANSITION });
