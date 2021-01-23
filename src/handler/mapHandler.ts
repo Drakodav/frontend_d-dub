@@ -94,7 +94,6 @@ export class MapHandler {
     };
 
     private updateGeoSuccess = (pos: GeolocationPosition) => {
-        console.log(pos);
         const coords = [pos.coords.longitude, pos.coords.latitude];
         const accuracy = circular(coords, pos.coords.accuracy);
 
@@ -103,7 +102,6 @@ export class MapHandler {
     };
 
     private updateGeoError = (e: GeolocationPositionError) => {
-        console.log(e);
         this.accuracyFeature.setGeometry(undefined);
         this.positionFeature.setGeometry(undefined);
     };
