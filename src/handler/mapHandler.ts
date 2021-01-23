@@ -149,12 +149,12 @@ export class MapHandler {
     }
 
     gpsClick = () => {
-        this.view.animate({
-            center: this.currLocation,
-            duration: TRANSITION_DURATION,
-            zoom: MaxZoom,
-        });
-    };
+        this.currLocation.length &&
+            this.view.animate({
+                center: this.currLocation,
+                duration: TRANSITION_DURATION,
+                zoom: MaxZoom,
+            });
 
     resetRotation = (): void => this.view.animate({ rotation: 0, duration: MAP_TRANSITION });
 
