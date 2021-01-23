@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { TRANSITION_DURATION } from '../model/constants';
 
 const useStyles = (state: typeof initState) =>
-    makeStyles(({ palette }) => ({
+    makeStyles(({ palette, shadows }) => ({
         container: {
             position: 'fixed',
             backgroundColor: palette.common.white,
@@ -23,6 +23,7 @@ const useStyles = (state: typeof initState) =>
             alignItems: 'center',
             justifyContent: 'flex-start',
             touchAction: 'none',
+            boxShadow: shadows[4],
             height: state.height,
             flexDirection: !state.open ? 'column' : 'column',
             transition: `height ${state.tranistionSpeed}ms`,
@@ -146,7 +147,7 @@ export function MobileView() {
         setState({ prevY: 0, open, height, prevState: height, initY: 0, tranistionSpeed: initState.tranistionSpeed });
 
         // update the map height along with the bar height
-        updateHeightOfMap(open, height);
+        updateHeightOfMap(direction > 0 ?? false, height);
     };
 
     // switcheroo on the menu tap icon
