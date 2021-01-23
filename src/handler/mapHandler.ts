@@ -5,6 +5,7 @@ import { circular } from 'ol/geom/Polygon';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import Map from 'ol/Map';
+import { ObjectEvent } from 'ol/Object';
 import { fromLonLat } from 'ol/proj';
 import OSM from 'ol/source/OSM';
 import VectorSource from 'ol/source/Vector';
@@ -16,6 +17,10 @@ const MAP_TRANSITION = TRANSITION_DURATION * 2;
 const MaxZoom: number = 18;
 const MinZoom: number = 11;
 const Padding: number[] = [10, 10, 10, 10];
+
+type MapCallbacks = {
+    rotation: (e: ObjectEvent) => void;
+};
 
 export class MapHandler {
     private map: Map;
@@ -81,6 +86,10 @@ export class MapHandler {
         });
     };
 
+    setMapCallbacks = ({ rotation }: MapCallbacks) => {
+        this.view.on('change:rotation', rotation);
+    };
+
     private updateGeoSuccess = (pos: GeolocationPosition) => {
         console.log(pos);
         const coords = [pos.coords.longitude, pos.coords.latitude];
@@ -137,7 +146,7 @@ export class MapHandler {
     gpsClick = () => {
         window.navigator.geolocation.getCurrentPosition(
             (pos) => {
-                this.updateGeoSuccess(pos);
+                // this.updateGeoSuccess(pos);
                 this.view.animate({
                     center: fromLonLat([pos.coords.longitude, pos.coords.latitude]),
                     duration: TRANSITION_DURATION,

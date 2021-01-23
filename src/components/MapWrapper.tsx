@@ -1,5 +1,5 @@
 import { IconButton, makeStyles } from '@material-ui/core';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MapHandler } from '../handler/mapHandler';
 import { ApiResult } from '../model/api.model';
@@ -9,11 +9,14 @@ import { getGeoObjFeature } from '../util/geo.util';
 import { TRANSITION_DURATION } from '../model/constants';
 import GpsNotFixedRoundedIcon from '@material-ui/icons/GpsNotFixedRounded';
 import ExploreRoundedIcon from '@material-ui/icons/ExploreRounded';
+import { ObjectEvent } from 'ol/Object';
+import View from 'ol/View';
 
 interface StyleProps {
     windowWidth: number;
     windowHeight: number;
     visible: boolean;
+    rotated: boolean;
 }
 
 const useStyles = (props: StyleProps) =>
@@ -21,6 +24,16 @@ const useStyles = (props: StyleProps) =>
         map: {
             width: `${props.windowWidth}px`,
             height: `${props.windowHeight}px`,
+        },
+        gps: {
+            right: 15,
+            bottom: 75,
+            opacity: props.visible ? '1' : '0',
+        },
+        rotation: {
+            right: 15,
+            bottom: 145,
+            opacity: props.visible && props.rotated ? '1' : '0',
         },
         iconButton: {
             width: '50px',
@@ -30,7 +43,6 @@ const useStyles = (props: StyleProps) =>
             borderRadius: '50%',
             color: palette.primary.dark,
             backgroundColor: palette.common.white,
-            opacity: props.visible ? '1' : '0',
             display: 'flex',
             flexDirection: 'row',
             justifyContent: 'center',
@@ -51,16 +63,28 @@ export const MapWrapper = () => {
     const dispatch = useDispatch();
     const windowDim = useSelector(getWindowDimensions);
     const visible = useSelector(getControlsVisible);
+    const [rotated, setRotation] = useState(false);
 
     const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
     const mapHandler = useMemo(() => new MapHandler(mapElement), []);
 
-    const classes = useStyles({ ...windowDim, visible })();
+    const classes = useStyles({ ...windowDim, visible, rotated })();
 
     // run once, init ol map
     useEffect(() => {
         mapHandler.init();
     }, [mapHandler]);
+
+    // define callbacks that require react state to take action upon
+    useEffect(() => {
+        const mapCallbacks = {
+            rotation: (e: ObjectEvent) => {
+                const mapRotated = (e.target as View).getRotation() === 0 ? false : true;
+                if (rotated !== mapRotated) setRotation(() => mapRotated);
+            },
+        };
+        mapHandler.setMapCallbacks(mapCallbacks);
+    }, [mapHandler, rotated]);
 
     // update whats displayed on the map when a new apiResult comes in
     const apiResult: ApiResult = useSelector(selectApiResults);
@@ -100,11 +124,11 @@ export const MapWrapper = () => {
 
     return (
         <>
-            <IconButton className={classes.iconButton} onClick={rotationClick} style={{ right: 15, bottom: 145 }}>
+            <IconButton className={`${classes.iconButton} ${classes.rotation}`} onClick={rotationClick}>
                 <ExploreRoundedIcon />
             </IconButton>
 
-            <IconButton className={classes.iconButton} onClick={gpsClick} style={{ right: 15, bottom: 75 }}>
+            <IconButton className={`${classes.iconButton} ${classes.gps}`} onClick={gpsClick}>
                 <GpsNotFixedRoundedIcon />
             </IconButton>
 
