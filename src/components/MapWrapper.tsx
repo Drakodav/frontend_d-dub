@@ -8,7 +8,6 @@ import { getControlsVisible, getMapDimensions, getWindowDimensions, setWindowDim
 import { getGeoObjFeature } from '../util/geo.util';
 import { TRANSITION_DURATION } from '../model/constants';
 import { GpsFixedRounded, GpsOffRounded, GpsNotFixedRounded, ExploreRounded } from '@material-ui/icons';
-import ExploreRoundedIcon from '@material-ui/icons/ExploreRounded';
 import { ObjectEvent } from 'ol/Object';
 import View from 'ol/View';
 
@@ -23,13 +22,13 @@ interface StyleProps {
 const makeGpsIcon = (truthy: boolean) => ({
     opacity: truthy ? '1' : '0',
     transform: truthy ? 'rotate(180deg)' : 'rotate(0deg)',
-    width: truthy ? '100%' : '0',
-    height: truthy ? '100%' : '0',
+    width: truthy ? '80%' : '0',
+    height: truthy ? '80%' : '0',
     transition: `all ${TRANSITION_DURATION}ms`,
 });
 
 const useStyles = (props: StyleProps) =>
-    makeStyles(({ palette }) => ({
+    makeStyles(({ palette, shadows }) => ({
         map: {
             width: `${props.windowWidth}px`,
             height: `${props.windowHeight}px`,
@@ -44,8 +43,8 @@ const useStyles = (props: StyleProps) =>
             bottom: 145,
             opacity: props.visible && props.rotated ? '1' : '0',
             '& span svg': {
-                width: '100%',
-                height: '100%',
+                width: '80%',
+                height: '80%',
                 transition: `opacity ${TRANSITION_DURATION}ms`,
             },
         },
@@ -61,6 +60,7 @@ const useStyles = (props: StyleProps) =>
             flexDirection: 'row',
             justifyContent: 'center',
             padding: '8px',
+            boxShadow: shadows[4],
             alignItems: 'center',
             transition: `opacity ${TRANSITION_DURATION}ms`,
             '&:hover': {
@@ -102,7 +102,7 @@ export const MapWrapper = () => {
             },
         };
         mapHandler.setMapCallbacks(mapCallbacks);
-    }, [mapHandler, rotated]);
+    }, [mapHandler, rotated, locationPermission]);
 
     // update whats displayed on the map when a new apiResult comes in
     const apiResult: ApiResult = useSelector(selectApiResults);
