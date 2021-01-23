@@ -20,6 +20,7 @@ const Padding: number[] = [10, 10, 10, 10];
 
 type MapCallbacks = {
     rotation: (e: ObjectEvent) => void;
+    location: (result: PermissionStatus) => void;
 };
 
 export class MapHandler {
@@ -78,16 +79,18 @@ export class MapHandler {
             view: this.view,
             controls: [],
         });
+    };
+
+    setMapCallbacks = ({ rotation, location }: MapCallbacks) => {
+        this.view.on('change:rotation', rotation);
+
+        navigator.permissions.query({ name: 'geolocation' }).then(location);
 
         window.navigator.geolocation.watchPosition(this.updateGeoSuccess, this.updateGeoError, {
             enableHighAccuracy: true,
             timeout: 2000,
             maximumAge: 1000,
         });
-    };
-
-    setMapCallbacks = ({ rotation }: MapCallbacks) => {
-        this.view.on('change:rotation', rotation);
     };
 
     private updateGeoSuccess = (pos: GeolocationPosition) => {

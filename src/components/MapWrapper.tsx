@@ -7,7 +7,7 @@ import { selectApiResults } from '../store/reducers/apiQuery';
 import { getControlsVisible, getMapDimensions, getWindowDimensions, setWindowDimensions } from '../store/reducers/map';
 import { getGeoObjFeature } from '../util/geo.util';
 import { TRANSITION_DURATION } from '../model/constants';
-import GpsNotFixedRoundedIcon from '@material-ui/icons/GpsNotFixedRounded';
+import { GpsFixedRounded, GpsOffRounded, GpsNotFixedRounded, ExploreRounded } from '@material-ui/icons';
 import ExploreRoundedIcon from '@material-ui/icons/ExploreRounded';
 import { ObjectEvent } from 'ol/Object';
 import View from 'ol/View';
@@ -17,7 +17,16 @@ interface StyleProps {
     windowHeight: number;
     visible: boolean;
     rotated: boolean;
+    location: string;
 }
+
+const makeGpsIcon = (truthy: boolean) => ({
+    opacity: truthy ? '1' : '0',
+    transform: truthy ? 'rotate(180deg)' : 'rotate(0deg)',
+    width: truthy ? '100%' : '0',
+    height: truthy ? '100%' : '0',
+    transition: `all ${TRANSITION_DURATION}ms`,
+});
 
 const useStyles = (props: StyleProps) =>
     makeStyles(({ palette }) => ({
@@ -34,6 +43,11 @@ const useStyles = (props: StyleProps) =>
             right: 15,
             bottom: 145,
             opacity: props.visible && props.rotated ? '1' : '0',
+            '& span svg': {
+                width: '100%',
+                height: '100%',
+                transition: `opacity ${TRANSITION_DURATION}ms`,
+            },
         },
         iconButton: {
             width: '50px',
@@ -52,11 +66,10 @@ const useStyles = (props: StyleProps) =>
             '&:hover': {
                 backgroundColor: palette.common.white,
             },
-            '& span svg': {
-                width: '100%',
-                height: '100%',
-            },
         },
+        gpsGranted: makeGpsIcon(props.location === 'granted'),
+        gpsPrompted: makeGpsIcon(props.location === 'prompt'),
+        gpsDenied: makeGpsIcon(props.location === 'denied'),
     }));
 
 export const MapWrapper = () => {
@@ -64,11 +77,12 @@ export const MapWrapper = () => {
     const windowDim = useSelector(getWindowDimensions);
     const visible = useSelector(getControlsVisible);
     const [rotated, setRotation] = useState(false);
+    const [locationPermission, setLocationPermission] = useState('');
 
     const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
     const mapHandler = useMemo(() => new MapHandler(mapElement), []);
 
-    const classes = useStyles({ ...windowDim, visible, rotated })();
+    const classes = useStyles({ ...windowDim, visible, rotated, location: locationPermission })();
 
     // run once, init ol map
     useEffect(() => {
@@ -81,6 +95,10 @@ export const MapWrapper = () => {
             rotation: (e: ObjectEvent) => {
                 const mapRotated = (e.target as View).getRotation() === 0 ? false : true;
                 if (rotated !== mapRotated) setRotation(() => mapRotated);
+            },
+            location: (result: PermissionStatus) => {
+                setLocationPermission(() => result.state);
+                result.onchange = () => setLocationPermission(() => result.state);
             },
         };
         mapHandler.setMapCallbacks(mapCallbacks);
@@ -114,22 +132,29 @@ export const MapWrapper = () => {
         mapHandler.setSize(mapDim.width, mapDim.height);
     }, [mapDim, mapHandler]);
 
-    const gpsClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        mapHandler.gpsClick();
-    };
+    const gpsClick = () => {
+        switch (locationPermission) {
+            case 'granted':
+                mapHandler.gpsClick();
+                break;
 
-    const rotationClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        mapHandler.resetRotation();
+            case 'prompt':
+                break;
+            case 'denied':
+                break;
+        }
     };
 
     return (
         <>
-            <IconButton className={`${classes.iconButton} ${classes.rotation}`} onClick={rotationClick}>
-                <ExploreRoundedIcon />
+            <IconButton className={`${classes.iconButton} ${classes.rotation}`} onClick={mapHandler.resetRotation}>
+                <ExploreRounded />
             </IconButton>
 
             <IconButton className={`${classes.iconButton} ${classes.gps}`} onClick={gpsClick}>
-                <GpsNotFixedRoundedIcon />
+                <GpsFixedRounded className={classes.gpsGranted} />
+                <GpsNotFixedRounded className={classes.gpsPrompted} />
+                <GpsOffRounded className={classes.gpsDenied} />
             </IconButton>
 
             <div ref={mapElement} className={classes.map} />
