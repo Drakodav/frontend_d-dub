@@ -36,6 +36,8 @@ export class MapHandler {
     private accuracyFeature: Feature;
     private positionFeature: Feature;
 
+    private currLocation: number[] = [];
+
     constructor(mapElement: React.MutableRefObject<HTMLDivElement>) {
         this.mapElement = mapElement;
         this.map = new Map({});
@@ -79,12 +81,6 @@ export class MapHandler {
             view: this.view,
             controls: [],
         });
-    };
-
-    setMapCallbacks = ({ rotation, location }: MapCallbacks) => {
-        this.view.on('change:rotation', rotation);
-
-        navigator.permissions.query({ name: 'geolocation' }).then(location);
 
         window.navigator.geolocation.watchPosition(this.updateGeoSuccess, this.updateGeoError, {
             enableHighAccuracy: true,
@@ -93,9 +89,17 @@ export class MapHandler {
         });
     };
 
+    setMapCallbacks = ({ rotation, location }: MapCallbacks) => {
+        this.view.on('change:rotation', rotation);
+
+        navigator.permissions.query({ name: 'geolocation' }).then(location);
+    };
+
     private updateGeoSuccess = (pos: GeolocationPosition) => {
         const coords = [pos.coords.longitude, pos.coords.latitude];
         const accuracy = circular(coords, pos.coords.accuracy);
+
+        this.currLocation = fromLonLat(coords);
 
         this.positionFeature.setGeometry(new Point(fromLonLat(coords)));
         this.accuracyFeature.setGeometry(accuracy.transform('EPSG:4326', this.view.getProjection()));
@@ -145,18 +149,11 @@ export class MapHandler {
     }
 
     gpsClick = () => {
-        window.navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                // this.updateGeoSuccess(pos);
-                this.view.animate({
-                    center: fromLonLat([pos.coords.longitude, pos.coords.latitude]),
-                    duration: TRANSITION_DURATION,
-                    zoom: MaxZoom,
-                });
-            },
-            this.updateGeoError,
-            { enableHighAccuracy: true, maximumAge: 1000, timeout: 2000 }
-        );
+        this.view.animate({
+            center: this.currLocation,
+            duration: TRANSITION_DURATION,
+            zoom: MaxZoom,
+        });
     };
 
     resetRotation = (): void => this.view.animate({ rotation: 0, duration: MAP_TRANSITION });
