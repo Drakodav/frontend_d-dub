@@ -42,6 +42,8 @@ export class MapHandler {
 
     private mapCallbacks: MapCallbacks;
 
+    private id: number = 0;
+
     constructor(mapElement: React.MutableRefObject<HTMLDivElement>, mapCallbacks: MapCallbacks) {
         this.mapElement = mapElement;
         this.mapCallbacks = mapCallbacks;
@@ -79,7 +81,7 @@ export class MapHandler {
         });
     }
 
-    init = async (): Promise<void> => {
+    init = (): void => {
         this.map = new Map({
             target: this.mapElement.current,
             layers: [this.tileLayer, this.featuresLayer, this.LocationLayer],
@@ -87,17 +89,25 @@ export class MapHandler {
             controls: [],
         });
 
-        window.navigator.geolocation.watchPosition(this.updateGeoSuccess, this.updateGeoError, GeoOptions);
-
         this.view.on('change:rotation', (e: ObjectEvent) => {
             this.mapCallbacks.setRotation((e.target as View).getRotation() !== 0 ? true : false);
         });
 
-        await navigator.permissions.query({ name: 'geolocation' }).then(async (result: PermissionStatus) => {
+        navigator.permissions.query({ name: 'geolocation' }).then(async (result: PermissionStatus) => {
             const { setLocation } = this.mapCallbacks;
             setLocation(() => result.state);
             result.onchange = () => setLocation(() => result.state);
         });
+    };
+
+    enableLocation = () => {
+        this.id = window.navigator.geolocation.watchPosition(this.updateGeoSuccess, this.updateGeoError, GeoOptions);
+    };
+
+    disableLocation = () => {
+        window.navigator.geolocation.clearWatch(this.id);
+        this.accuracyFeature.setGeometry(undefined);
+        this.positionFeature.setGeometry(undefined);
     };
 
     private updateGeoSuccess = (pos: GeolocationPosition) => {
@@ -115,12 +125,14 @@ export class MapHandler {
             case error.PERMISSION_DENIED:
                 this.mapCallbacks.setLocation(() => 'denied');
                 break;
-            case error.POSITION_UNAVAILABLE:
+            case error.TIMEOUT:
                 this.mapCallbacks.setLocation(() => 'prompt');
                 break;
-            case error.TIMEOUT:
+            case error.POSITION_UNAVAILABLE:
+                this.mapCallbacks.setLocation(() => 'prompt');
                 this.accuracyFeature.setGeometry(undefined);
                 this.positionFeature.setGeometry(undefined);
+                this.currLocation = [];
                 break;
         }
     };
@@ -155,37 +167,34 @@ export class MapHandler {
 
                 var newCenter = this.map.getCoordinateFromPixel(newCenterInPx);
 
-                this.view.animate({
-                    center: newCenter,
-                    duration: MAP_TRANSITION,
-                });
+                this.gotoCenter(newCenter);
             }
         }
     }
 
-    gpsClick = () => {
+    getCurrentPosition = (): void => {
         window.navigator.geolocation.getCurrentPosition(
             (pos: GeolocationPosition) => {
                 this.updateGeoSuccess(pos);
-                this.view.animate({
-                    center: fromLonLat([pos.coords.longitude, pos.coords.latitude]),
-                    duration: TRANSITION_DURATION,
-                    zoom: MaxZoom,
-                });
+                this.gotoCenter(fromLonLat([pos.coords.longitude, pos.coords.latitude]));
             },
             this.updateGeoError,
             GeoOptions
         );
+    };
 
-        this.currLocation.length &&
-            this.view.animate({
-                center: this.currLocation,
-                duration: TRANSITION_DURATION,
-                zoom: MaxZoom,
-            });
+    gotoCurrentPosition = (): void => {
+        this.currLocation.length && this.gotoCenter(this.currLocation);
     };
 
     resetRotation = (): void => this.view.animate({ rotation: 0, duration: MAP_TRANSITION });
 
     updateSize = (): void => this.map.updateSize();
+
+    gotoCenter = (coords: number[]) =>
+        this.view.animate({
+            center: coords,
+            duration: TRANSITION_DURATION,
+            zoom: MaxZoom,
+        });
 }

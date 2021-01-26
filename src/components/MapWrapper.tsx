@@ -93,12 +93,16 @@ export const MapWrapper = () => {
 
     // run once, init ol map
     useEffect(() => {
-        async function init() {
-            await mapHandler.init();
-        }
-
-        init();
+        mapHandler.init();
     }, [mapHandler]);
+
+    useEffect(() => {
+        if (locationPermission === 'granted') {
+            mapHandler.enableLocation();
+        } else {
+            return mapHandler.disableLocation;
+        }
+    }, [mapHandler, locationPermission]);
 
     // update whats displayed on the map when a new apiResult comes in
     const apiResult: ApiResult = useSelector(selectApiResults);
@@ -134,15 +138,9 @@ export const MapWrapper = () => {
             .then((result: PermissionStatus) => result.state);
         setLocationPermission(permission);
 
-        switch (permission) {
-            case 'granted':
-                mapHandler.gpsClick();
-                break;
-            case 'prompt':
-            case 'denied':
-                setAlertOpen(true);
-                break;
-        }
+        if (permission !== 'granted') return setAlertOpen(true);
+
+        mapHandler.gotoCurrentPosition();
     };
 
     return (
@@ -161,7 +159,7 @@ export const MapWrapper = () => {
                 open={alertOpen}
                 handleClose={() => {
                     setAlertOpen(false);
-                    mapHandler.gpsClick();
+                    mapHandler.getCurrentPosition();
                 }}
             />
 
