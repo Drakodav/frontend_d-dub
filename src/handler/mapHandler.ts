@@ -107,6 +107,7 @@ export class MapHandler {
         const coords = [pos.coords.longitude, pos.coords.latitude];
         const accuracy = circular(coords, pos.coords.accuracy);
 
+        this.mapCallbacks.setLocation('granted');
         this.currLocation = fromLonLat(coords);
         this.positionFeature.setGeometry(new Point(fromLonLat(coords)));
         this.accuracyFeature.setGeometry(accuracy.transform('EPSG:4326', this.view.getProjection()));
@@ -169,7 +170,6 @@ export class MapHandler {
         window.navigator.geolocation.getCurrentPosition(
             (pos: GeolocationPosition) => {
                 this.updateGeoSuccess(pos);
-                this.mapCallbacks.setLocation('granted');
                 this.view.animate({
                     center: fromLonLat([pos.coords.longitude, pos.coords.latitude]),
                     duration: TRANSITION_DURATION,
