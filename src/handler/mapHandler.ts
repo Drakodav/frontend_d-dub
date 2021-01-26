@@ -17,10 +17,15 @@ const MAP_TRANSITION = TRANSITION_DURATION * 2;
 const MaxZoom: number = 18;
 const MinZoom: number = 11;
 const Padding: number[] = [10, 10, 10, 10];
+const GeoOptions = {
+    enableHighAccuracy: true,
+    timeout: 2000,
+    maximumAge: 1000,
+};
 
 type MapCallbacks = {
-    rotation: (e: ObjectEvent) => void;
-    location: (result: PermissionStatus) => void;
+    setRotation: (value: React.SetStateAction<boolean>) => void;
+    setLocation: (value: React.SetStateAction<string>) => void;
 };
 
 export class MapHandler {
@@ -38,8 +43,11 @@ export class MapHandler {
 
     private currLocation: number[] = [];
 
-    constructor(mapElement: React.MutableRefObject<HTMLDivElement>) {
+    private mapCallbacks: MapCallbacks;
+
+    constructor(mapElement: React.MutableRefObject<HTMLDivElement>, mapCallbacks: MapCallbacks) {
         this.mapElement = mapElement;
+        this.mapCallbacks = mapCallbacks;
         this.map = new Map({});
 
         this.tileLayer = new TileLayer({
@@ -74,7 +82,7 @@ export class MapHandler {
         });
     }
 
-    init = (): void => {
+    init = async (): Promise<void> => {
         this.map = new Map({
             target: this.mapElement.current,
             layers: [this.tileLayer, this.featuresLayer, this.LocationLayer],
@@ -82,17 +90,17 @@ export class MapHandler {
             controls: [],
         });
 
-        window.navigator.geolocation.watchPosition(this.updateGeoSuccess, this.updateGeoError, {
-            enableHighAccuracy: true,
-            timeout: 2000,
-            maximumAge: 1000,
+        window.navigator.geolocation.watchPosition(this.updateGeoSuccess, this.updateGeoError, GeoOptions);
+
+        this.view.on('change:rotation', (e: ObjectEvent) => {
+            if ((e.target as View).getRotation() !== 0) this.mapCallbacks.setRotation(() => true);
         });
-    };
 
-    setMapCallbacks = ({ rotation, location }: MapCallbacks) => {
-        this.view.on('change:rotation', rotation);
-
-        navigator.permissions.query({ name: 'geolocation' }).then(location);
+        await navigator.permissions.query({ name: 'geolocation' }).then(async (result: PermissionStatus) => {
+            const { setLocation } = this.mapCallbacks;
+            setLocation(() => result.state);
+            result.onchange = () => setLocation(() => result.state);
+        });
     };
 
     private updateGeoSuccess = (pos: GeolocationPosition) => {
@@ -100,14 +108,23 @@ export class MapHandler {
         const accuracy = circular(coords, pos.coords.accuracy);
 
         this.currLocation = fromLonLat(coords);
-
         this.positionFeature.setGeometry(new Point(fromLonLat(coords)));
         this.accuracyFeature.setGeometry(accuracy.transform('EPSG:4326', this.view.getProjection()));
     };
 
-    private updateGeoError = (e: GeolocationPositionError) => {
-        this.accuracyFeature.setGeometry(undefined);
-        this.positionFeature.setGeometry(undefined);
+    private updateGeoError = (error: GeolocationPositionError) => {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                this.mapCallbacks.setLocation(() => 'denied');
+                break;
+            case error.POSITION_UNAVAILABLE:
+                this.mapCallbacks.setLocation(() => 'prompt');
+                break;
+            case error.TIMEOUT:
+                this.accuracyFeature.setGeometry(undefined);
+                this.positionFeature.setGeometry(undefined);
+                break;
+        }
     };
 
     addFeatures = (features: Feature<Geometry>[]) => {
@@ -149,6 +166,19 @@ export class MapHandler {
     }
 
     gpsClick = () => {
+        window.navigator.geolocation.getCurrentPosition(
+            (pos: GeolocationPosition) => {
+                this.updateGeoSuccess(pos);
+                this.view.animate({
+                    center: fromLonLat([pos.coords.longitude, pos.coords.latitude]),
+                    duration: TRANSITION_DURATION,
+                    zoom: MaxZoom,
+                });
+            },
+            this.updateGeoError,
+            GeoOptions
+        );
+
         this.currLocation.length &&
             this.view.animate({
                 center: this.currLocation,

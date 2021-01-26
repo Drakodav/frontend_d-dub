@@ -8,8 +8,7 @@ import { getControlsVisible, getMapDimensions, getWindowDimensions, setWindowDim
 import { getGeoObjFeature } from '../util/geo.util';
 import { TRANSITION_DURATION } from '../model/constants';
 import { GpsFixedRounded, GpsOffRounded, GpsNotFixedRounded, ExploreRounded } from '@material-ui/icons';
-import { ObjectEvent } from 'ol/Object';
-import View from 'ol/View';
+import AlertDialog from './AlertDialog';
 
 interface StyleProps {
     windowWidth: number;
@@ -76,33 +75,30 @@ export const MapWrapper = () => {
     const dispatch = useDispatch();
     const windowDim = useSelector(getWindowDimensions);
     const visible = useSelector(getControlsVisible);
+
     const [rotated, setRotation] = useState(false);
     const [locationPermission, setLocationPermission] = useState('');
-
-    const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
-    const mapHandler = useMemo(() => new MapHandler(mapElement), []);
+    const [alertOpen, setAlertOpen] = useState(false);
 
     const classes = useStyles({ ...windowDim, visible, rotated, location: locationPermission })();
 
+    const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
+    const mapHandler = useMemo(() => {
+        const mapCallbacks = {
+            setRotation: setRotation,
+            setLocation: setLocationPermission,
+        };
+        return new MapHandler(mapElement, mapCallbacks);
+    }, []);
+
     // run once, init ol map
     useEffect(() => {
-        mapHandler.init();
-    }, [mapHandler]);
+        async function init() {
+            await mapHandler.init();
+        }
 
-    // define callbacks that require react state to take action upon
-    useEffect(() => {
-        const mapCallbacks = {
-            rotation: (e: ObjectEvent) => {
-                const mapRotated = (e.target as View).getRotation() === 0 ? false : true;
-                if (rotated !== mapRotated) setRotation(() => mapRotated);
-            },
-            location: (result: PermissionStatus) => {
-                setLocationPermission(() => result.state);
-                result.onchange = () => setLocationPermission(() => result.state);
-            },
-        };
-        mapHandler.setMapCallbacks(mapCallbacks);
-    }, [mapHandler, rotated, locationPermission]);
+        init();
+    }, [mapHandler]);
 
     // update whats displayed on the map when a new apiResult comes in
     const apiResult: ApiResult = useSelector(selectApiResults);
@@ -132,15 +128,19 @@ export const MapWrapper = () => {
         mapHandler.setSize(mapDim.width, mapDim.height);
     }, [mapDim, mapHandler]);
 
-    const gpsClick = () => {
-        switch (locationPermission) {
+    const gpsClick = async () => {
+        const permission = await navigator.permissions
+            .query({ name: 'geolocation' })
+            .then((result: PermissionStatus) => result.state);
+        setLocationPermission(permission);
+
+        switch (permission) {
             case 'granted':
                 mapHandler.gpsClick();
                 break;
-
             case 'prompt':
-                break;
             case 'denied':
+                setAlertOpen(true);
                 break;
         }
     };
@@ -156,6 +156,14 @@ export const MapWrapper = () => {
                 <GpsNotFixedRounded className={classes.gpsPrompted} />
                 <GpsOffRounded className={classes.gpsDenied} />
             </IconButton>
+
+            <AlertDialog
+                open={alertOpen}
+                handleClose={() => {
+                    setAlertOpen(false);
+                    mapHandler.gpsClick();
+                }}
+            />
 
             <div ref={mapElement} className={classes.map} />
         </>
