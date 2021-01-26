@@ -3,10 +3,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Container } from '@material-ui/core';
 import { KeyboardArrowUp } from '@material-ui/icons';
 import { ApiSearchInput } from './ApiSearchInput';
-import { ApiInputType } from '../model/api.model';
 import { getWindowDimensions, updateControlsVisible, updateMapHeight } from '../store/reducers/map';
 import { useDispatch, useSelector } from 'react-redux';
 import { TRANSITION_DURATION } from '../model/constants';
+import { Chips } from './Chips';
 
 const useStyles = (state: typeof initState) =>
     makeStyles(({ palette, shadows }) => ({
@@ -32,8 +32,12 @@ const useStyles = (state: typeof initState) =>
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            transform: state.open ? 'rotateX(540deg)' : 'none',
+            transform: state.open ? 'rotate(540deg)' : 'none',
             transition: `transform ${TRANSITION_DURATION}ms`,
+        },
+        hide: {
+            opacity: state.open ? '1' : '0',
+            transition: `opacity ${TRANSITION_DURATION}ms`,
         },
     }));
 
@@ -81,7 +85,7 @@ export function MobileView() {
                   TRANSITION_DURATION
               )
             : dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step }));
-        dispatch(updateControlsVisible(!open));
+        dispatch(updateControlsVisible(newHeight <= heights.mid ? true : false));
     };
 
     // track where the first touch was and the height difference to the bar
@@ -181,8 +185,8 @@ export function MobileView() {
             className={classes.container}
         >
             <KeyboardArrowUp onClick={openCloseMenu} className={classes.arrow} />
-            <ApiSearchInput disabled={!state.open} heading={'Bus Route'} query={ApiInputType.route} />
-            <ApiSearchInput disabled={!state.open} heading={'Bus Stop'} query={ApiInputType.stop} />
+            <ApiSearchInput className={classes.hide} />
+            <Chips className={classes.hide} />
         </Container>
     );
 }

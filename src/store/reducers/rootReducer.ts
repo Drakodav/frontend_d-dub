@@ -1,8 +1,8 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import { ApiReducer, MapReducer } from '.';
+import { SearchReducer, MapReducer } from '.';
 
 const rootReducer = combineReducers({
-    apiQuery: ApiReducer,
+    searchInput: SearchReducer,
     mapState: MapReducer,
 });
 

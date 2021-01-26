@@ -1,4 +1,4 @@
-import ApiReducer from './apiQuery';
+import SearchReducer from './searchInput';
 import MapReducer from './map';
 
-export { ApiReducer, MapReducer };
+export { SearchReducer, MapReducer };

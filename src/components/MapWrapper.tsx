@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MapHandler } from '../handler/mapHandler';
 import { ApiResult } from '../model/api.model';
-import { selectApiResults } from '../store/reducers/apiQuery';
+import { selectSearchResults } from '../store/reducers/searchInput';
 import { getControlsVisible, getMapDimensions, getWindowDimensions, setWindowDimensions } from '../store/reducers/map';
 import { getGeoObjFeature } from '../util/geo.util';
 import { TRANSITION_DURATION } from '../model/constants';
@@ -16,6 +16,7 @@ interface StyleProps {
     visible: boolean;
     rotated: boolean;
     location: string;
+    offset: number;
 }
 
 const makeGpsIcon = (truthy: boolean) => ({
@@ -34,17 +35,20 @@ const useStyles = (props: StyleProps) =>
         },
         gps: {
             right: 15,
-            bottom: 75,
+            bottom: props.offset + 75,
             opacity: props.visible ? '1' : '0',
+            visibility: props.visible ? 'visible' : 'hidden',
         },
         rotation: {
             right: 15,
-            bottom: 145,
+            bottom: props.offset + 145,
             opacity: props.visible && props.rotated ? '1' : '0',
+            visibility: props.visible && props.rotated ? 'visible' : 'hidden',
+
             '& span svg': {
                 width: '80%',
                 height: '80%',
-                transition: `opacity ${TRANSITION_DURATION}ms`,
+                transition: `all ${TRANSITION_DURATION}ms`,
             },
         },
         iconButton: {
@@ -61,7 +65,7 @@ const useStyles = (props: StyleProps) =>
             padding: '8px',
             boxShadow: shadows[4],
             alignItems: 'center',
-            transition: `opacity ${TRANSITION_DURATION}ms`,
+            transition: `all ${TRANSITION_DURATION}ms`,
             '&:hover': {
                 backgroundColor: palette.common.white,
             },
@@ -75,12 +79,14 @@ export const MapWrapper = () => {
     const dispatch = useDispatch();
     const windowDim = useSelector(getWindowDimensions);
     const visible = useSelector(getControlsVisible);
+    const mapDim = useSelector(getMapDimensions);
 
     const [rotated, setRotation] = useState(false);
     const [locationPermission, setLocationPermission] = useState('');
     const [alertOpen, setAlertOpen] = useState(false);
 
-    const classes = useStyles({ ...windowDim, visible, rotated, location: locationPermission })();
+    const offset = windowDim.windowHeight - mapDim.height;
+    const classes = useStyles({ ...windowDim, visible, rotated, location: locationPermission, offset })();
 
     const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
     const mapHandler = useMemo(() => {
@@ -96,6 +102,11 @@ export const MapWrapper = () => {
         mapHandler.init();
     }, [mapHandler]);
 
+    // resize map every time the window size changes
+    useEffect(() => {
+        mapHandler.setSize(mapDim.width, mapDim.height);
+    }, [mapDim, mapHandler]);
+
     useEffect(() => {
         if (locationPermission === 'granted') {
             mapHandler.enableLocation();
@@ -105,7 +116,7 @@ export const MapWrapper = () => {
     }, [mapHandler, locationPermission]);
 
     // update whats displayed on the map when a new apiResult comes in
-    const apiResult: ApiResult = useSelector(selectApiResults);
+    const apiResult: ApiResult = useSelector(selectSearchResults);
     useEffect(() => {
         const newFeature = !!apiResult && getGeoObjFeature(apiResult);
         if (newFeature) mapHandler.setApiFeature(newFeature);
@@ -125,12 +136,6 @@ export const MapWrapper = () => {
 
         return () => window.removeEventListener('resize', handleResize);
     });
-
-    // resize map every time the window size changes
-    const mapDim = useSelector(getMapDimensions);
-    useEffect(() => {
-        mapHandler.setSize(mapDim.width, mapDim.height);
-    }, [mapDim, mapHandler]);
 
     const gpsClick = async () => {
         const permission = await navigator.permissions

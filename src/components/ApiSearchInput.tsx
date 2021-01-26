@@ -1,19 +1,15 @@
 import PropTypes from 'prop-types';
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import AsyncSelect from 'react-select/async';
 import { OptionTypeBase, ValueType } from 'react-select/src/types';
-import { ApiResult } from '../model/api.model';
-import { setApiQuery } from '../store/reducers/apiQuery';
+import { ApiInputType, ApiResult } from '../model/api.model';
+import { getSearchType, setSearchResults } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { makeStyles } from '@material-ui/styles';
-import { Fade } from '@material-ui/core';
-import { TRANSITION_DURATION } from '../model/constants';
 
 type Props = {
-    heading: string;
-    query: string;
-    disabled: boolean;
+    className: string;
 };
 
 const useStyles = (props: Props) =>
@@ -22,25 +18,38 @@ const useStyles = (props: Props) =>
             width: '90%',
             alignSelf: 'center',
             textAlign: 'center',
-            margin: '20px',
-            display: props.disabled ? 'none' : 'inline',
+            margin: '20px 20px 5px 20px',
         },
     });
 
 export const ApiSearchInput = (props: Props) => {
-    const { heading, query, disabled } = props;
+    const { className } = props;
     const classes = useStyles(props)();
     const dipatch = useDispatch();
 
     const [apiResults, setApiResults] = useState<ApiResult[]>([]);
     const [defaultOptions, setDefaultOptions] = useState<{}[]>();
     const [search, setSearch] = useState<string[]>([]);
+    const [inputValue, setInputValue] = useState({ value: null, label: null });
+
+    const query = useSelector(getSearchType);
+    useEffect(() => {
+        setApiResults(() => []);
+        setDefaultOptions(() => []);
+        setSearch(() => []);
+        setInputValue(null as any);
+    }, [query]);
 
     const gtfsHandler = new GtfsHandler(query);
 
+    // find the heading value fromn the query apiInputType
+    const headingIdx = Object.values(ApiInputType).findIndex((item: string) => item === query);
+    let heading = Object.keys(ApiInputType)[headingIdx];
+    heading = heading.charAt(0).toUpperCase() + heading.slice(1);
+
     const setResultToMap = (value: string) => {
         const result = gtfsHandler.getSingleApiResult(apiResults, value);
-        result && dipatch(setApiQuery(result));
+        result && dipatch(setSearchResults(result));
     };
 
     const loadOptions = (value: string) =>
@@ -72,48 +81,33 @@ export const ApiSearchInput = (props: Props) => {
         switch (action) {
             case 'select-option':
                 if (!!selectedOption?.value) {
+                    setInputValue({ ...(selectedOption as any) });
                     setResultToMap(selectedOption.value);
                 }
                 return;
         }
     };
 
-    const customStyles = {
-        // option: (provided: any) => ({
-        //     ...provided,
-        //     borderBottom: '1px dotted pink',
-        //     color: 'blue',
-        //     padding: 20,
-        // }),
-        // singleValue: (provided: any, state: { isDisabled: any }) => {
-        //     const opacity = state.isDisabled ? 0.5 : 1;
-        //     const transition = `opacity ${TRANSITION_DURATION}ms`;
-        //     return { ...provided, opacity, transition };
-        // },
-    };
-
     return (
-        <Fade in={!disabled} timeout={TRANSITION_DURATION}>
-            <div className={classes.search}>
-                <AsyncSelect
-                    styles={customStyles}
-                    cacheOptions={false}
-                    defaultOptions={defaultOptions}
-                    loadOptions={loadOptions}
-                    onChange={handleChange}
-                    inputMode='numeric'
-                    pattern='[0-9]*'
-                    placeholder={heading}
-                    isSearchable
-                    isClearable
-                />
-            </div>
-        </Fade>
+        <div className={`${classes.search} ${className}`}>
+            <AsyncSelect
+                value={inputValue}
+                cacheOptions={false}
+                defaultOptions={defaultOptions}
+                loadOptions={loadOptions}
+                onChange={handleChange}
+                inputMode='numeric'
+                pattern='[0-9]*'
+                placeholder={`Bus ${heading}`}
+                isSearchable
+                isClearable
+                blurInputOnSelect
+                captureMenuScroll
+            />
+        </div>
     );
 };
 
 ApiSearchInput.propTypes = {
-    heading: PropTypes.string,
-    query: PropTypes.string,
-    disabled: PropTypes.bool,
+    className: PropTypes.string,
 };
