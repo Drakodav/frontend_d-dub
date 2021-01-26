@@ -93,7 +93,7 @@ export class MapHandler {
         window.navigator.geolocation.watchPosition(this.updateGeoSuccess, this.updateGeoError, GeoOptions);
 
         this.view.on('change:rotation', (e: ObjectEvent) => {
-            if ((e.target as View).getRotation() !== 0) this.mapCallbacks.setRotation(() => true);
+            this.mapCallbacks.setRotation((e.target as View).getRotation() !== 0 ? true : false);
         });
 
         await navigator.permissions.query({ name: 'geolocation' }).then(async (result: PermissionStatus) => {
@@ -169,6 +169,7 @@ export class MapHandler {
         window.navigator.geolocation.getCurrentPosition(
             (pos: GeolocationPosition) => {
                 this.updateGeoSuccess(pos);
+                this.mapCallbacks.setLocation('granted');
                 this.view.animate({
                     center: fromLonLat([pos.coords.longitude, pos.coords.latitude]),
                     duration: TRANSITION_DURATION,
