@@ -9,19 +9,16 @@ import { ObjectEvent } from 'ol/Object';
 import { fromLonLat } from 'ol/proj';
 import OSM from 'ol/source/OSM';
 import VectorSource from 'ol/source/Vector';
-import { CENTER_LOCATION, TRANSITION_DURATION } from '../model/constants';
 import { apiFeatureStyle, positionFeatureStyle } from '../util/geo.util';
-
-// const Projection: string = 'EPSG:3857'
-const MAP_TRANSITION = TRANSITION_DURATION * 2;
-const MaxZoom: number = 18;
-const MinZoom: number = 11;
-const Padding: number[] = [10, 10, 10, 10];
-const GeoOptions = {
-    enableHighAccuracy: true,
-    timeout: 2000,
-    maximumAge: 1000,
-};
+import {
+    CENTER_LOCATION,
+    TRANSITION_DURATION,
+    MAP_TRANSITION,
+    GeoOptions,
+    MaxZoom,
+    MinZoom,
+    Padding,
+} from '../model/constants';
 
 type MapCallbacks = {
     setRotation: (value: React.SetStateAction<boolean>) => void;
