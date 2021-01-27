@@ -82,7 +82,7 @@ export const MapWrapper = () => {
     const mapDim = useSelector(getMapDimensions);
 
     const [rotated, setRotation] = useState(false);
-    const [locationPermission, setLocationPermission] = useState('');
+    const [locationPermission, setLocationPermission] = useState('denied');
     const [alertOpen, setAlertOpen] = useState(false);
 
     const offset = windowDim.windowHeight - mapDim.height;
@@ -111,8 +111,10 @@ export const MapWrapper = () => {
         if (locationPermission === 'granted') {
             mapHandler.enableLocation();
         } else {
-            return mapHandler.disableLocation;
+            mapHandler.disableLocation();
         }
+
+        return mapHandler.disableLocation;
     }, [mapHandler, locationPermission]);
 
     // update whats displayed on the map when a new apiResult comes in
@@ -141,9 +143,14 @@ export const MapWrapper = () => {
         const permission = await navigator?.permissions
             ?.query({ name: 'geolocation' })
             .then((result: PermissionStatus) => result.state);
-        setLocationPermission(permission);
-        if (permission !== 'granted') return setAlertOpen(true);
-        mapHandler.gotoCurrentPosition();
+
+        if (!!permission) {
+            setLocationPermission(permission);
+            mapHandler.gotoCurrentPosition();
+            if (permission !== 'granted') setAlertOpen(true);
+        } else {
+            mapHandler.getCurrentPosition(undefined, () => locationPermission !== 'granted' && setAlertOpen(true));
+        }
     };
 
     return (
@@ -162,7 +169,10 @@ export const MapWrapper = () => {
                 open={alertOpen}
                 handleClose={() => {
                     setAlertOpen(false);
-                    mapHandler.getCurrentPosition();
+                    setTimeout(() => {
+                        mapHandler.enableLocation();
+                        mapHandler.getCurrentPosition();
+                    }, 500);
                 }}
             />
 

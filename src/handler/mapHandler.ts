@@ -39,10 +39,9 @@ export class MapHandler {
     private positionFeature: Feature;
 
     private currLocation: number[] = [];
+    private id: number | undefined;
 
     private mapCallbacks: MapCallbacks;
-
-    private id: number = 0;
 
     constructor(mapElement: React.MutableRefObject<HTMLDivElement>, mapCallbacks: MapCallbacks) {
         this.mapElement = mapElement;
@@ -101,13 +100,22 @@ export class MapHandler {
     };
 
     enableLocation = () => {
-        this.id = window.navigator.geolocation.watchPosition(this.updateGeoSuccess, this.updateGeoError, GeoOptions);
+        if (!this.id)
+            this.id = window.navigator.geolocation.watchPosition(
+                this.updateGeoSuccess,
+                this.updateGeoError,
+                GeoOptions
+            );
     };
 
     disableLocation = () => {
-        window.navigator.geolocation.clearWatch(this.id);
-        this.accuracyFeature.setGeometry(undefined);
-        this.positionFeature.setGeometry(undefined);
+        if (!!this.id) {
+            window.navigator.geolocation.clearWatch(this.id);
+            this.accuracyFeature.setGeometry(undefined);
+            this.positionFeature.setGeometry(undefined);
+            this.id = undefined;
+            this.currLocation = [];
+        }
     };
 
     private updateGeoSuccess = (pos: GeolocationPosition) => {
@@ -172,13 +180,20 @@ export class MapHandler {
         }
     }
 
-    getCurrentPosition = (): void => {
+    getCurrentPosition = (
+        successCallback?: PositionCallback,
+        errorCallback?: PositionErrorCallback | undefined
+    ): void => {
         window.navigator.geolocation.getCurrentPosition(
             (pos: GeolocationPosition) => {
                 this.updateGeoSuccess(pos);
                 this.gotoCenter(fromLonLat([pos.coords.longitude, pos.coords.latitude]));
+                successCallback && successCallback(pos);
             },
-            this.updateGeoError,
+            (error: GeolocationPositionError) => {
+                this.updateGeoError(error);
+                errorCallback && errorCallback(error);
+            },
             GeoOptions
         );
     };

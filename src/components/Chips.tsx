@@ -36,6 +36,7 @@ export const Chips = ({ className }: Props) => {
         for (let i = 0; i < Object.values(ApiInputType).length; i++) {
             chips.push(
                 <Chip
+                    key={i}
                     label={Object.keys(ApiInputType)[i]}
                     clickable
                     color={Object.values(ApiInputType)[i] === query ? 'primary' : 'default'}
