@@ -1,16 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Container } from '@material-ui/core';
+import { Container, IconButton, Typography } from '@material-ui/core';
 import { KeyboardArrowUp } from '@material-ui/icons';
 import { ApiSearchInput } from './ApiSearchInput';
 import { getWindowDimensions, updateControlsVisible, updateMapHeight } from '../store/reducers/map';
 import { useDispatch, useSelector } from 'react-redux';
 import { TRANSITION_DURATION } from '../model/constants';
 import { Chips } from './Chips';
+import { InfoListView } from './InfoListView';
 
 const useStyles = (state: typeof initState) =>
     makeStyles(({ palette, shadows }) => ({
         container: {
+            overflowY: state.height >= state.breakpoints.mid ? 'auto' : 'unset',
             position: 'fixed',
             backgroundColor: palette.common.white,
             padding: '10px',
@@ -25,7 +27,7 @@ const useStyles = (state: typeof initState) =>
             touchAction: 'none',
             boxShadow: shadows[4],
             height: state.height,
-            flexDirection: !state.open ? 'column' : 'column',
+            flexDirection: 'column',
             transition: `height ${state.tranistionSpeed}ms`,
         },
         arrow: {
@@ -35,28 +37,36 @@ const useStyles = (state: typeof initState) =>
             transform: state.open ? 'rotate(540deg)' : 'none',
             transition: `transform ${TRANSITION_DURATION}ms`,
         },
-        hide: {
+        hideClose: {
             opacity: state.open ? '1' : '0',
             transition: `opacity ${TRANSITION_DURATION}ms`,
         },
+        bottomText: {
+            opacity: !state.open ? '1' : '0',
+            visibility: !state.open ? 'visible' : 'hidden',
+            height: !state.open ? '100%' : '0px',
+            width: !state.open ? '100%' : '0px',
+            transition: `opacity ${TRANSITION_DURATION}ms ${TRANSITION_DURATION}ms`,
+        },
     }));
 
-const initHeights = {
-    min: 50 as number,
+const initBreakpoints = {
+    min: 65 as number,
     mid: 350 as number,
     max: 600 as number,
     step: 50 as number,
-};
+} as const;
 
 const initState = {
-    open: false as boolean,
-    height: initHeights.min as number,
-    prevState: initHeights.min as number,
+    open: true as boolean,
+    height: initBreakpoints.mid as number,
+    prevState: initBreakpoints.mid as number,
     prevY: 0 as number,
     direction: 0 as number,
     initY: 0 as number,
     diffHeight: 0 as number,
     tranistionSpeed: TRANSITION_DURATION as number,
+    breakpoints: initBreakpoints as typeof initBreakpoints,
 } as const;
 
 type State = typeof initState | { [key: string]: unknown };
@@ -65,9 +75,8 @@ export function MobileView() {
     const dispatch = useDispatch();
     const ref = useRef<HTMLDivElement>(null);
 
-    const [heights, setHeights] = useState(initHeights);
-    const [state, tempState] = useState(initState);
-    const setState = (val: State) => tempState({ ...state, ...val });
+    const [state, setDummyState] = useState(initState);
+    const setState = (val: State) => setDummyState({ ...state, ...val });
     const classes = useStyles(state)();
 
     // componentWillUnmount
@@ -79,13 +88,11 @@ export function MobileView() {
 
     // update map height based on if open or not, also use timeout to fix visual bug
     const updateHeightOfMap = (open: boolean, newHeight: number) => {
+        const { step, mid } = state.breakpoints;
         open
-            ? setTimeout(
-                  () => dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step })),
-                  TRANSITION_DURATION
-              )
-            : dispatch(updateMapHeight({ hDisplacement: newHeight - heights.step }));
-        dispatch(updateControlsVisible(newHeight <= heights.mid ? true : false));
+            ? setTimeout(() => dispatch(updateMapHeight({ hDisplacement: newHeight - step })), TRANSITION_DURATION)
+            : dispatch(updateMapHeight({ hDisplacement: newHeight - step }));
+        dispatch(updateControlsVisible(newHeight <= mid ? true : false));
     };
 
     // track where the first touch was and the height difference to the bar
@@ -98,24 +105,24 @@ export function MobileView() {
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         if (!!e && e.touches[0]) {
             const curr = e.touches[0].clientY;
-            const { prevY, diffHeight, height } = state;
+            const { prevY, diffHeight, height, breakpoints } = state;
             if (!state.prevY) {
                 // there needs to be a prev Y value in order to calculate direction
                 setState({ prevY: curr, tranistionSpeed: 0 });
                 return;
             }
             let prevState = state.prevState;
-            let open = height > heights.min + heights.step;
+            let open = height > breakpoints.min + breakpoints.step;
 
             const direction = curr < prevY ? 1 : -1;
             const newHeight = window.innerHeight - curr - diffHeight;
 
             // if curr touch passes through middle then we can reach the further breakpoint
-            if (newHeight > heights.mid - heights.step && newHeight < heights.mid + heights.step)
-                prevState = heights.mid;
+            if (newHeight > breakpoints.mid - breakpoints.step && newHeight < breakpoints.mid + breakpoints.step)
+                prevState = breakpoints.mid;
 
             // set the new height if it is within the boundary
-            if (newHeight >= heights.min - heights.step && newHeight <= heights.max + heights.step)
+            if (newHeight >= breakpoints.min - breakpoints.step && newHeight <= breakpoints.max + breakpoints.step)
                 setState({ height: newHeight, prevY: curr, direction, open, prevState });
         }
     };
@@ -124,31 +131,31 @@ export function MobileView() {
         // if there is no previous Y touch then it was just a tap/click, dont switch
         if (!state.prevY) return;
 
-        const { prevState, direction } = state;
+        const { prevState, direction, breakpoints } = state;
 
         let height = prevState;
         let open = true;
 
-        const breakpoints = [heights.min, heights.mid, heights.max];
-        const currIdx = breakpoints.findIndex((value) => value === prevState);
+        const breakpointsArr = [breakpoints.min, breakpoints.mid, breakpoints.max];
+        const currIdx = breakpointsArr.findIndex((value) => value === prevState);
         const nextIdx = currIdx + direction;
 
         // used to calculate whether the movement was far enough to justify switching breakpoint
-        const barrier = prevState + heights.step * direction;
+        const barrier = prevState + breakpoints.step * direction;
         const min = Math.min(prevState, barrier);
         const max = Math.max(prevState, barrier);
         const withinBarrier = state.height > min && state.height < max;
 
         // if a breakpoint is available and we dragged enough to not be a misclick
-        if (nextIdx >= 0 && nextIdx < breakpoints.length && !withinBarrier) {
-            height = breakpoints[nextIdx];
+        if (nextIdx >= 0 && nextIdx < breakpointsArr.length && !withinBarrier) {
+            height = breakpointsArr[nextIdx];
         }
 
         // if height is on min then bar is closed
-        if (height === heights.min) open = false;
+        if (height === breakpoints.min) open = false;
 
         // set the state of the bar, where it is, and transition speed
-        setState({ prevY: 0, open, height, prevState: height, initY: 0, tranistionSpeed: initState.tranistionSpeed });
+        setState({ prevY: 0, open, height, prevState: height, initY: 0, tranistionSpeed: TRANSITION_DURATION });
 
         // update the map height along with the bar height
         updateHeightOfMap(direction > 0 ?? false, height);
@@ -156,8 +163,8 @@ export function MobileView() {
 
     // switcheroo on the menu tap icon
     const openCloseMenu = () => {
-        const { open } = state;
-        const newHeight = !open ? heights.max : heights.min;
+        const { open, breakpoints } = state;
+        const newHeight = !open ? breakpoints.max : breakpoints.min;
 
         setState({
             open: !open,
@@ -172,7 +179,11 @@ export function MobileView() {
     const { windowHeight } = useSelector(getWindowDimensions);
     useEffect(() => {
         const fraction = windowHeight / 10;
-        setHeights((h) => ({ ...h, mid: fraction * 4, max: fraction * 7 }));
+        const breakpoints = { mid: fraction * 3, max: fraction * 7 };
+        setDummyState((s) => ({
+            ...s,
+            breakpoints: { ...s.breakpoints, ...breakpoints },
+        }));
     }, [windowHeight]);
 
     return (
@@ -184,9 +195,17 @@ export function MobileView() {
             maxWidth='sm'
             className={classes.container}
         >
-            <KeyboardArrowUp onClick={openCloseMenu} className={classes.arrow} />
-            <ApiSearchInput className={classes.hide} />
-            <Chips className={classes.hide} />
+            <IconButton color='default' onClick={openCloseMenu}>
+                <KeyboardArrowUp className={classes.arrow} />
+                <Typography className={classes.bottomText} variant='subtitle2'>
+                    Tap to Expand
+                </Typography>
+            </IconButton>
+
+            <ApiSearchInput className={classes.hideClose} />
+            <Chips className={classes.hideClose} />
+
+            <InfoListView />
         </Container>
     );
 }

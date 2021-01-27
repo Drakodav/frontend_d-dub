@@ -13,10 +13,13 @@ const useStyles = makeStyles((theme: Theme) =>
             justifyContent: 'center',
             flexWrap: 'wrap',
             alignSelf: 'flex-start',
-            margin: '0px 20px 20px 20px',
+            margin: '5px 20px ',
             '& > *': {
                 margin: theme.spacing(0.5),
             },
+        },
+        chip: {
+            boxShadow: theme.shadows[4],
         },
     })
 );
@@ -39,13 +42,14 @@ export const Chips = ({ className }: Props) => {
                     key={i}
                     label={Object.keys(ApiInputType)[i]}
                     clickable
+                    className={classes.chip}
                     color={Object.values(ApiInputType)[i] === query ? 'primary' : 'default'}
                     onClick={() => dispatch(setSearchType(Object.values(ApiInputType)[i]))}
                 />
             );
         }
         return chips;
-    }, [dispatch, query]);
+    }, [dispatch, query, classes.chip]);
 
     return <div className={`${classes.root} ${className}`}>{chipsArray}</div>;
 };

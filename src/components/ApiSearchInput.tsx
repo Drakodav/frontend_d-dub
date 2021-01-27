@@ -18,7 +18,6 @@ const useStyles = (props: Props) =>
             width: '90%',
             alignSelf: 'center',
             textAlign: 'center',
-            margin: '20px 20px 5px 20px',
         },
     });
 
@@ -84,7 +83,10 @@ export const ApiSearchInput = (props: Props) => {
                     setInputValue({ ...(selectedOption as any) });
                     setResultToMap(selectedOption.value);
                 }
-                return;
+                break;
+            case 'clear':
+                setInputValue(null as any);
+                break;
         }
     };
 
