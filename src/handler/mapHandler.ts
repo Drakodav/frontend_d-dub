@@ -93,7 +93,7 @@ export class MapHandler {
             this.mapCallbacks.setRotation((e.target as View).getRotation() !== 0 ? true : false);
         });
 
-        navigator.permissions.query({ name: 'geolocation' }).then(async (result: PermissionStatus) => {
+        navigator?.permissions?.query({ name: 'geolocation' }).then(async (result: PermissionStatus) => {
             const { setLocation } = this.mapCallbacks;
             setLocation(() => result.state);
             result.onchange = () => setLocation(() => result.state);

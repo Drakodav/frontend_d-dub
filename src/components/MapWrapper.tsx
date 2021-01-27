@@ -138,13 +138,11 @@ export const MapWrapper = () => {
     });
 
     const gpsClick = async () => {
-        const permission = await navigator.permissions
-            .query({ name: 'geolocation' })
+        const permission = await navigator?.permissions
+            ?.query({ name: 'geolocation' })
             .then((result: PermissionStatus) => result.state);
         setLocationPermission(permission);
-
         if (permission !== 'granted') return setAlertOpen(true);
-
         mapHandler.gotoCurrentPosition();
     };
 
