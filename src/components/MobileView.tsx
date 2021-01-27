@@ -8,18 +8,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import { TRANSITION_DURATION } from '../model/constants';
 import { Chips } from './Chips';
 import { InfoListView } from './InfoListView';
+import { ApiResult } from '../model/api.model';
+import { selectSearchResults } from '../store/reducers/searchInput';
 
 const useStyles = (state: typeof initState) =>
     makeStyles(({ palette, shadows }) => ({
         container: {
-            overflowY: state.height >= state.breakpoints.mid ? 'auto' : 'unset',
+            overflowY: state.height > state.breakpoints.mid ? 'auto' : 'unset',
             position: 'fixed',
             backgroundColor: palette.common.white,
-            padding: '10px',
+            padding: '0px 10px',
             bottom: 0,
             left: 0,
             zIndex: 10,
-            borderRadius: '10px',
+            borderRadius: '10px 10px 0px 0px',
             display: 'flex',
             flex: 2,
             alignItems: 'center',
@@ -179,12 +181,14 @@ export function MobileView() {
     const { windowHeight } = useSelector(getWindowDimensions);
     useEffect(() => {
         const fraction = windowHeight / 10;
-        const breakpoints = { mid: fraction * 3, max: fraction * 7 };
+        const breakpoints = { mid: fraction * 4, max: fraction * 7 };
         setDummyState((s) => ({
             ...s,
             breakpoints: { ...s.breakpoints, ...breakpoints },
         }));
     }, [windowHeight]);
+
+    const apiResult: ApiResult = useSelector(selectSearchResults);
 
     return (
         <Container
@@ -205,7 +209,7 @@ export function MobileView() {
             <ApiSearchInput className={classes.hideClose} />
             <Chips className={classes.hideClose} />
 
-            <InfoListView />
+            {!!Object.keys(apiResult).length && <InfoListView />}
         </Container>
     );
 }
