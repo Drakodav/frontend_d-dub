@@ -24,7 +24,7 @@ const useStyles = (props: Props) =>
 export const ApiSearchInput = (props: Props) => {
     const { className } = props;
     const classes = useStyles(props)();
-    const dipatch = useDispatch();
+    const dispatch = useDispatch();
 
     const [apiResults, setApiResults] = useState<ApiResult[]>([]);
     const [defaultOptions, setDefaultOptions] = useState<{}[]>();
@@ -37,7 +37,8 @@ export const ApiSearchInput = (props: Props) => {
         setDefaultOptions(() => []);
         setSearch(() => []);
         setInputValue(null as any);
-    }, [query]);
+        dispatch(setSearchResults({}));
+    }, [query, dispatch]);
 
     const gtfsHandler = new GtfsHandler(query);
 
@@ -48,7 +49,7 @@ export const ApiSearchInput = (props: Props) => {
 
     const setResultToMap = (value: string) => {
         const result = gtfsHandler.getSingleApiResult(apiResults, value);
-        result && dipatch(setSearchResults(result));
+        result && dispatch(setSearchResults(result));
     };
 
     const loadOptions = (value: string) =>
@@ -86,7 +87,7 @@ export const ApiSearchInput = (props: Props) => {
                 break;
             case 'clear':
                 setInputValue(null as any);
-                dipatch(setSearchResults({}));
+                dispatch(setSearchResults({}));
                 break;
         }
     };
