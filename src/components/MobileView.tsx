@@ -60,9 +60,9 @@ const initBreakpoints = {
 } as const;
 
 const initState = {
-    open: true as boolean,
-    height: initBreakpoints.mid as number,
-    prevState: initBreakpoints.mid as number,
+    open: false as boolean,
+    height: initBreakpoints.min as number,
+    prevState: initBreakpoints.min as number,
     prevY: 0 as number,
     direction: 0 as number,
     initY: 0 as number,
@@ -80,6 +80,11 @@ export function MobileView() {
     const [state, setDummyState] = useState(initState);
     const setState = (val: State) => setDummyState({ ...state, ...val });
     const classes = useStyles(state)();
+
+    //component will mount
+    useEffect(() => {
+        setDummyState((s) => ({ ...s, open: true, height: s.breakpoints.mid, prevState: s.breakpoints.mid }));
+    }, []);
 
     // componentWillUnmount
     useEffect(() => {
