@@ -86,6 +86,7 @@ export const ApiSearchInput = (props: Props) => {
                 break;
             case 'clear':
                 setInputValue(null as any);
+                dipatch(setSearchResults({}));
                 break;
         }
     };

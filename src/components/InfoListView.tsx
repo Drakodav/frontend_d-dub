@@ -6,16 +6,17 @@ import { Card } from '@material-ui/core';
 const useStyles = (state: {}) =>
     makeStyles(({ palette, shadows }) => ({
         card: {
-            overflowY: 'auto',
+            overflow: 'auto',
             WebkitOverflowScrolling: 'touch',
+            msTouchAction: 'auto',
+            touchAction: 'auto',
             backgroundColor: palette.common.white,
             margin: '0px 20px',
             padding: '5px 5px',
-            borderRadius: '10px 10px 0px 0px',
+            borderRadius: '2px 2px 0px 0px',
             alignItems: 'center',
-            touchAction: 'none',
             boxShadow: shadows[4],
-            height: '1600px',
+            height: '100%',
             width: '100%',
             flexDirection: 'column',
         },
@@ -36,20 +37,13 @@ export const InfoListView = (props: Props) => {
         list.push('item');
     }
 
-    const onTouchMove = (e: any) => {
-        console.log(e);
-        if (ref?.current) {
-            ref.current.scrollBy({ top: 5 });
-        }
-    };
-
-    const onScroll = (e: any) => {
-        console.log(e);
+    const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+        e.stopPropagation();
     };
 
     return (
         //
-        <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove} onScroll={onScroll}>
+        <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
             {list.map((item, i) => (
                 <div style={{ width: '100%', height: '60px' }} key={i}>
                     {item} {i}

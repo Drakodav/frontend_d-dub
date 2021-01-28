@@ -171,7 +171,7 @@ export function MobileView() {
     // switcheroo on the menu tap icon
     const openCloseMenu = () => {
         const { open, breakpoints } = state;
-        const newHeight = !open ? breakpoints.max : breakpoints.min;
+        const newHeight = !open ? breakpoints.mid : breakpoints.min;
 
         setState({
             open: !open,
@@ -213,6 +213,8 @@ export function MobileView() {
 
             <ApiSearchInput className={classes.hideClose} />
             <Chips className={classes.hideClose} />
+
+            <br />
 
             {!!Object.keys(apiResult).length && <InfoListView />}
         </Container>
