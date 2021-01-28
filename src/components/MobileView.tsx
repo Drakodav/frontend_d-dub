@@ -15,7 +15,8 @@ const useStyles = (state: typeof initState) =>
     makeStyles(({ palette, shadows }) => ({
         container: {
             overflowY: state.height > state.breakpoints.mid ? 'auto' : 'unset',
-            position: 'fixed',
+            position: 'absolute',
+            maxHeight: `${window.innerHeight}px`,
             backgroundColor: palette.common.white,
             padding: '0px 10px',
             bottom: 0,
