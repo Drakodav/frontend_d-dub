@@ -97,7 +97,7 @@ export const ApiSearchInput = (props: Props) => {
     };
 
     return (
-        <div className={`${classes.search} ${className}`}>
+        <div className={`${className} ${classes.search}`}>
             <AsyncSelect
                 value={inputValue}
                 className={classes.input}
