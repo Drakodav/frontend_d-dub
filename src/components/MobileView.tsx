@@ -55,8 +55,8 @@ const useStyles = (state: typeof initState) =>
 
 const initBreakpoints = {
     min: 65 as number,
-    mid: 350 as number,
-    max: 600 as number,
+    mid: ((window.innerHeight / 10) * 4) as number,
+    max: ((window.innerHeight / 10) * 7) as number,
     step: 50 as number,
 } as const;
 
@@ -82,17 +82,16 @@ export function MobileView() {
     const setState = (val: State) => setDummyState({ ...state, ...val });
     const classes = useStyles(state)();
 
-    //component will mount
     useEffect(() => {
-        setDummyState((s) => ({ ...s, open: true, height: s.breakpoints.mid, prevState: s.breakpoints.mid }));
-    }, []);
+        //component will mount
+        openCloseMenu();
 
-    // componentWillUnmount
-    useEffect(() => {
+        // componentWillUnmount
         return () => {
             dispatch(updateMapHeight({ hDisplacement: 0 }));
         };
-    }, [dispatch]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // update map height based on if open or not, also use timeout to fix visual bug
     const updateHeightOfMap = (open: boolean, newHeight: number) => {
@@ -113,13 +112,13 @@ export function MobileView() {
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         if (!!e && e.touches[0]) {
             const curr = e.touches[0].clientY;
-            const { prevY, diffHeight, height, breakpoints } = state;
+            const { prevY, diffHeight, height, breakpoints, prevState } = state;
             if (!state.prevY) {
                 // there needs to be a prev Y value in order to calculate direction
                 setState({ prevY: curr, tranistionSpeed: 0 });
                 return;
             }
-            let prevState = state.prevState;
+            let newPrevState = prevState;
             let open = height > breakpoints.min + breakpoints.step;
 
             const direction = curr < prevY ? 1 : -1;
@@ -127,11 +126,11 @@ export function MobileView() {
 
             // if curr touch passes through middle then we can reach the further breakpoint
             if (newHeight > breakpoints.mid - breakpoints.step && newHeight < breakpoints.mid + breakpoints.step)
-                prevState = breakpoints.mid;
+                newPrevState = breakpoints.mid;
 
             // set the new height if it is within the boundary
             if (newHeight >= breakpoints.min - breakpoints.step && newHeight <= breakpoints.max + breakpoints.step)
-                setState({ height: newHeight, prevY: curr, direction, open, prevState });
+                setState({ height: newHeight, prevY: curr, direction, open, prevState: newPrevState });
         }
     };
 
