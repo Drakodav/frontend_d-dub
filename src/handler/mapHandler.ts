@@ -149,14 +149,15 @@ export class MapHandler {
         this.featuresLayer.getSource().addFeatures(features);
     };
 
-    setApiFeature = (newFeature: Geometry): void => {
+    setApiFeature = (newFeature: Geometry | undefined): void => {
         this.apiFeature.setGeometry(newFeature);
 
-        this.view.fit(newFeature.getExtent(), {
-            padding: Padding,
-            maxZoom: MaxZoom,
-            duration: MAP_TRANSITION,
-        });
+        !!newFeature &&
+            this.view.fit(newFeature.getExtent(), {
+                padding: Padding,
+                maxZoom: MaxZoom,
+                duration: MAP_TRANSITION,
+            });
     };
 
     setSize = (width: number, height: number): void => {

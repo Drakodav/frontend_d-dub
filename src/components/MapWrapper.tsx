@@ -121,7 +121,7 @@ export const MapWrapper = () => {
     const apiResult: ApiResult = useSelector(selectSearchResults);
     useEffect(() => {
         const newFeature = !!apiResult && getGeoObjFeature(apiResult);
-        if (newFeature) mapHandler.setApiFeature(newFeature);
+        newFeature ? mapHandler.setApiFeature(newFeature) : mapHandler.setApiFeature(undefined);
     }, [apiResult, mapHandler]);
 
     // used for dynamic map width and height resizing

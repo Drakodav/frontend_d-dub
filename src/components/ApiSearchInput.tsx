@@ -19,6 +19,10 @@ const useStyles = (props: Props) =>
             alignSelf: 'center',
             textAlign: 'center',
         },
+        input: {
+            WebkitUserSelect: 'auto',
+            userSelect: 'auto',
+        },
     });
 
 export const ApiSearchInput = (props: Props) => {
@@ -96,6 +100,7 @@ export const ApiSearchInput = (props: Props) => {
         <div className={`${classes.search} ${className}`}>
             <AsyncSelect
                 value={inputValue}
+                className={classes.input}
                 cacheOptions={false}
                 defaultOptions={defaultOptions}
                 loadOptions={loadOptions}
@@ -103,10 +108,7 @@ export const ApiSearchInput = (props: Props) => {
                 inputMode='numeric'
                 pattern='[0-9]*'
                 placeholder={`Bus ${heading}`}
-                isSearchable
                 isClearable
-                blurInputOnSelect
-                captureMenuScroll
             />
         </div>
     );

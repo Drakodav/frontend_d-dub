@@ -42,7 +42,6 @@ export const InfoListView = (props: Props) => {
     };
 
     return (
-        //
         <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
             {list.map((item, i) => (
                 <div style={{ width: '100%', height: '60px' }} key={i}>
