@@ -18,6 +18,7 @@ import {
     MaxZoom,
     MinZoom,
     Padding,
+    DublinBoundary,
 } from '../model/constants';
 
 type MapCallbacks = {
@@ -74,6 +75,7 @@ export class MapHandler {
 
         this.view = new View({
             center: fromLonLat(CENTER_LOCATION),
+            extent: DublinBoundary,
             zoom: MinZoom,
             maxZoom: MaxZoom,
             minZoom: MinZoom,
