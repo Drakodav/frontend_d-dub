@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AsyncSelect from 'react-select/async';
 import { OptionTypeBase, ValueType } from 'react-select/src/types';
-import { ApiInputType, ApiResult } from '../model/api.model';
+import { ApiResult } from '../model/api.model';
 import { getSearchType, setSearchResults } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { makeStyles } from '@material-ui/styles';
@@ -35,21 +35,19 @@ export const ApiSearchInput = (props: Props) => {
     const [search, setSearch] = useState<string[]>([]);
     const [inputValue, setInputValue] = useState({ value: null, label: null });
 
-    const query = useSelector(getSearchType);
+    const searchType = useSelector(getSearchType);
     useEffect(() => {
         setApiResults(() => []);
         setDefaultOptions(() => []);
         setSearch(() => []);
         setInputValue(null as any);
         dispatch(setSearchResults({}));
-    }, [query, dispatch]);
+    }, [searchType, dispatch]);
 
-    const gtfsHandler = new GtfsHandler(query);
+    const gtfsHandler = new GtfsHandler(searchType);
 
-    // find the heading value fromn the query apiInputType
-    const headingIdx = Object.values(ApiInputType).findIndex((item: string) => item === query);
-    let heading = Object.keys(ApiInputType)[headingIdx];
-    heading = heading.charAt(0).toUpperCase() + heading.slice(1);
+    // uppercase heading
+    const heading = searchType.charAt(0).toUpperCase() + searchType.slice(1);
 
     const setResultToMap = (value: string) => {
         const result = gtfsHandler.getSingleApiResult(apiResults, value);

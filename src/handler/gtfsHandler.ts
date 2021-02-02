@@ -1,48 +1,44 @@
-import { ApiInputType, ApiResult, GtfsApiRoute } from '../model/api.model';
+import { ApiDef, ApiNaming, ApiResult, ApiType, GtfsApiRoute } from '../model/api.model';
 import { levenshtein } from '../util/util';
 
 export type SelectOptions = { value: string; label: string };
 
 export class GtfsHandler {
-    query: string;
-    selector: keyof ApiResult;
+    obj: ApiType;
 
-    constructor(query: string) {
-        this.query = query;
-        this.selector = this.getUrlSearchParam(this.query);
+    constructor(name: string) {
+        const obj = ApiDef.find((item) => item.name === name);
+        if (!obj) throw Error('Wrong gtfsHandler name obj type');
+
+        this.obj = obj;
     }
 
-    private getUrlSearchParam = (url: string): keyof ApiResult => {
-        const token = url.split('/')[1];
-        const match = token.match(/([^?][^\s][^=]+)/g);
-        return (match?.length ? match[0] : '') as keyof ApiResult;
-    };
-
     private currLabel = (record: ApiResult): string => {
-        switch (this.query) {
-            case ApiInputType.route:
+        const { name, selector } = this.obj;
+        switch (name) {
+            case ApiNaming.route:
                 return record.long_name
-                    ? (`${record[this.selector]} ${record['long_name']}` as string)
-                    : (record[this.selector] as string);
+                    ? (`${record[selector]} ${record['long_name']}` as string)
+                    : (record[selector] as string);
 
-            case ApiInputType.stop:
+            case ApiNaming.stop:
             default:
-                return record[this.selector] as string;
+                return record[selector] as string;
         }
     };
 
     private currentValue = (record: ApiResult): string => {
-        let currValue = record[this.selector] as string;
-        if (this.query === ApiInputType.stop && !!currValue) {
+        let currValue = record[this.obj.selector] as string;
+        if (this.obj.name === ApiNaming.stop && !!currValue) {
             currValue = currValue.split(',')[1]?.replace('stop ', '');
         }
         return currValue;
     };
 
-    fetchApiResults = async (value: string): Promise<ApiResult[]> => {
-        const response = (await fetch(`${GtfsApiRoute}${this.query}${value}`)).json();
-        const results: ApiResult[] = ((await response) as any).results as [];
-        if (results.length > 0) {
+    fetchApiResults = async (value: string, query: string = this.obj.query): Promise<ApiResult[]> => {
+        const response = (await fetch(`${GtfsApiRoute}${query}${value}`)).json();
+        const results: ApiResult[] = (((await response) as any).results as []) ?? ((await response) as []);
+        if (results?.length > 0) {
             return results;
         }
         return [];
@@ -74,4 +70,6 @@ export class GtfsHandler {
                     levenshtein(a.value.toLowerCase(), inputValue) - levenshtein(b.value.toLowerCase(), inputValue)
             );
     };
+
+    getObj = (): ApiType => this.obj;
 }

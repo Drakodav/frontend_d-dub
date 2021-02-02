@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ApiInputType, ApiResult } from '../../model/api.model';
+import { ApiNaming, ApiResult } from '../../model/api.model';
 import { RootState } from './rootReducer';
 
 const initialState = {
-    searchType: Object.values(ApiInputType)[0] as string,
+    searchType: ApiNaming.route as string,
     apiResults: {} as ApiResult,
 };
 
