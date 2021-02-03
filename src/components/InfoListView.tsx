@@ -1,11 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import { Card } from '@material-ui/core';
-// import { useSelector } from 'react-redux';
-// import { getSearchType, selectSearchResults } from '../store/reducers/searchInput';
-// import { GtfsHandler } from '../handler/gtfsHandler';
-// import { ApiResult } from '../model/api.model';
+import { Card, Tab, Tabs } from '@material-ui/core';
+import { useSelector } from 'react-redux';
+import { getSearchType, selectSearchResults } from '../store/reducers/searchInput';
+import { GtfsHandler } from '../handler/gtfsHandler';
+import { ApiResult } from '../model/api.model';
+import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 
 const useStyles = (state: {}) =>
     makeStyles(({ palette, shadows }) => ({
@@ -15,14 +16,22 @@ const useStyles = (state: {}) =>
             msTouchAction: 'auto',
             touchAction: 'auto',
             backgroundColor: palette.common.white,
-            margin: '0px 20px',
             padding: '5px 5px',
             borderRadius: '2px 2px 0px 0px',
             alignItems: 'center',
-            boxShadow: shadows[4],
+            borderTopStyle: 'solid',
+            borderTopColor: palette.secondary.dark,
             height: '100%',
             width: '100%',
-            flexDirection: 'column',
+            display: 'grid',
+        },
+        row: {
+            margin: '2px auto',
+            borderRadius: '2px',
+            width: '95%',
+            height: '60px',
+            padding: '10px 0px 0px 5px',
+            boxShadow: shadows[1],
         },
     }));
 
@@ -34,28 +43,38 @@ export const InfoListView = (props: Props) => {
     const { className } = props;
     const classes = useStyles({})();
 
+    const [infoList, setInfoList] = useState<ApiResult[]>([]);
+    const [tabValue, setTabValue] = useState(0);
+
     const ref = useRef<HTMLDivElement>(null);
-    // const searchType = useSelector(getSearchType);
-    // const gtfsHandler = useMemo(() => new GtfsHandler(searchType), [searchType]);
+    const searchType = useSelector(getSearchType);
+    const gtfsHandler = useMemo(() => new GtfsHandler(searchType), [searchType]);
 
-    // const { infoView } = gtfsHandler.getObj();
+    const { infoView } = gtfsHandler.getObj();
 
-    // const apiResult: ApiResult = useSelector(selectSearchResults);
+    const apiResult: ApiResult = useSelector(selectSearchResults);
 
-    // useEffect(() => {
-    //     const fetchRes = async (val: string, query: string) => await gtfsHandler.fetchApiResults(val, query);
+    useEffect(() => {
+        async function fetchRes() {
+            if (infoView) {
+                const value = apiResult[infoView.selector] as string;
+                const infoResults = await gtfsHandler.fetchApiResults(value, infoView.query);
+                setInfoList(() => infoResults);
+            }
+        }
 
-    //     if (infoView) {
-    //         const value = apiResult[infoView.selector] as string;
-    //         const infoResults = fetchRes(value, infoView.query);
-    //         console.log(infoResults);
-    //     }
-    // }, [apiResult, gtfsHandler, infoView]);
+        fetchRes();
+    }, [apiResult, gtfsHandler, infoView]);
 
-    let list = [];
-    for (let index = 0; index < 20; index++) {
-        list.push('item');
-    }
+    const infoListElements = useMemo(
+        () =>
+            infoList.map((item, i) => (
+                <Card className={classes.row} key={i}>
+                    {item?.stop_sequence} {item?.name}
+                </Card>
+            )),
+        [infoList]
+    );
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -63,11 +82,18 @@ export const InfoListView = (props: Props) => {
 
     return (
         <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
-            {list.map((item, i) => (
-                <div style={{ width: '100%', height: '60px' }} key={i}>
-                    {item} {i}
-                </div>
-            ))}
+            {/* <Tabs
+                value={tabValue}
+                onChange={(event, value: any) => setTabValue(value)}
+                indicatorColor='secondary'
+                centered
+            >
+                <Tab icon={<FiberManualRecordIcon />} />
+                <Tab icon={<FiberManualRecordIcon />} />
+                <Tab icon={<FiberManualRecordIcon />} />
+            </Tabs> */}
+
+            {infoListElements}
         </Card>
     );
 };

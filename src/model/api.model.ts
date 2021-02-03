@@ -46,4 +46,5 @@ export type ApiResult = {
     short_name?: string;
     long_name?: string;
     name?: string;
+    stop_sequence?: string;
 };

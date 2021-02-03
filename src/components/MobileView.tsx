@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Container, IconButton, Typography } from '@material-ui/core';
 import { KeyboardArrowUp } from '@material-ui/icons';
@@ -42,14 +42,13 @@ const useStyles = (state: typeof initState) =>
         },
         hideClose: {
             opacity: state.open ? '1' : '0',
+            visibility: state.open ? 'visible' : 'hidden',
             transition: `opacity ${TRANSITION_DURATION}ms`,
         },
         bottomText: {
             opacity: !state.open ? '1' : '0',
-            visibility: !state.open ? 'visible' : 'hidden',
-            height: !state.open ? '100%' : '0px',
-            width: !state.open ? '100%' : '0px',
-            transition: `opacity ${TRANSITION_DURATION}ms ${TRANSITION_DURATION}ms`,
+            display: !state.open ? 'block' : 'none',
+            transition: !state.open ? `opacity ${TRANSITION_DURATION}ms ${TRANSITION_DURATION}ms` : 'none',
         },
     }));
 
@@ -195,6 +194,8 @@ export function MobileView() {
 
     const apiResult: ApiResult = useSelector(selectSearchResults);
 
+    const memoizedInfoListView = useMemo(() => !!Object.keys(apiResult).length && <InfoListView />, [apiResult]);
+
     return (
         <Container
             ref={ref}
@@ -214,9 +215,7 @@ export function MobileView() {
             <ApiSearchInput className={classes.hideClose} />
             <Chips className={classes.hideClose} />
 
-            <br />
-
-            {!!Object.keys(apiResult).length && <InfoListView />}
+            {memoizedInfoListView}
         </Container>
     );
 }
