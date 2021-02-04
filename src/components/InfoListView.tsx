@@ -25,6 +25,7 @@ const useStyles = (state: {}) =>
             height: '100%',
             width: '100%',
             display: 'grid',
+            alignContent: ' flex-start',
         },
         row: {
             borderRadius: '2px',
