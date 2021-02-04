@@ -22,10 +22,14 @@ const searchSlice = createSlice({
         setSelectedStop: (state, action: PayloadAction<ApiStop>) => {
             state.selectedStop = action.payload;
         },
+        resetSearchInput: (state) => {
+            state.apiResults = {} as any;
+            state.selectedStop = {} as any;
+        },
     },
 });
 
-export const { setSearchResults, setSearchType, setSelectedStop } = searchSlice.actions;
+export const { setSearchResults, setSearchType, setSelectedStop, resetSearchInput } = searchSlice.actions;
 
 export const getSearchResults = (state: RootState) => state.searchInput.apiResults;
 

@@ -49,7 +49,9 @@ export class MapHandler {
 
     private constructor() {
         this.tileLayer = new TileLayer({
-            source: new OSM(),
+            source: new OSM({
+                url: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
+            }),
         });
 
         // create and add vector source layer
@@ -225,4 +227,8 @@ export class MapHandler {
             duration: TRANSITION_DURATION,
             zoom: MaxZoom,
         });
+
+    resetFeaturesLayer = (): void => {
+        this.featuresLayer.getSource().forEachFeature((feature: Feature<Geometry>) => feature.setGeometry(undefined));
+    };
 }

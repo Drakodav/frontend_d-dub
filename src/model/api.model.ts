@@ -57,3 +57,5 @@ export type ApiStop = {
     point: Point;
     stop_sequence: number;
 };
+
+export type ApiDepartures = {};

@@ -5,7 +5,6 @@ import { MapHandler } from '../handler/mapHandler';
 import { ApiResult } from '../model/api.model';
 import { getSearchResults } from '../store/reducers/searchInput';
 import { getControlsVisible, getMapDimensions, getWindowDimensions, setWindowDimensions } from '../store/reducers/map';
-import { getGeoObjFeature } from '../util/geo.util';
 import { TRANSITION_DURATION } from '../model/constants';
 import { GpsFixedRounded, GpsOffRounded, GpsNotFixedRounded, ExploreRounded } from '@material-ui/icons';
 import AlertDialog from './AlertDialog';
@@ -117,11 +116,13 @@ export const MapWrapper = () => {
         return mapHandler.disableLocation;
     }, [mapHandler, locationPermission]);
 
-    // update whats displayed on the map when a new apiResult comes in
+    // If there is no apiResult then there should also be no features displayed on the map
     const apiResult: ApiResult = useSelector(getSearchResults);
     useEffect(() => {
-        const newFeature = !!apiResult && getGeoObjFeature(apiResult);
-        newFeature ? mapHandler.setApiFeature(newFeature) : mapHandler.setApiFeature(undefined);
+        if (!Object.keys(apiResult)) {
+            mapHandler.resetFeaturesLayer();
+            return;
+        }
     }, [apiResult, mapHandler]);
 
     // used for dynamic map width and height resizing

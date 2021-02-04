@@ -4,9 +4,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import AsyncSelect from 'react-select/async';
 import { OptionTypeBase, ValueType } from 'react-select/src/types';
 import { ApiResult } from '../model/api.model';
-import { getSearchType, setSearchResults } from '../store/reducers/searchInput';
+import { getSearchType, resetSearchInput, setSearchResults } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { makeStyles } from '@material-ui/styles';
+import { MapHandler } from '../handler/mapHandler';
+import { getGeoObjFeature } from '../util/geo.util';
 
 type Props = {
     className: string;
@@ -41,17 +43,22 @@ export const ApiSearchInput = (props: Props) => {
         setDefaultOptions(() => []);
         setSearch(() => []);
         setInputValue(null as any);
-        dispatch(setSearchResults({}));
+        dispatch(resetSearchInput());
     }, [searchType, dispatch]);
 
     const gtfsHandler = new GtfsHandler(searchType);
+    const mapHandler = MapHandler.getInstance();
 
     // uppercase heading
     const heading = searchType.charAt(0).toUpperCase() + searchType.slice(1);
 
     const setResultToMap = (value: string) => {
         const result = gtfsHandler.getSingleApiResult(apiResults, value);
-        result && dispatch(setSearchResults(result));
+        if (result) {
+            dispatch(setSearchResults(result));
+            const newFeature = getGeoObjFeature(result);
+            mapHandler.setApiFeature(newFeature);
+        }
     };
 
     const loadOptions = (value: string) =>

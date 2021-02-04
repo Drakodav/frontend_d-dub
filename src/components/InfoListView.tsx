@@ -94,8 +94,15 @@ export const InfoListView = (props: Props) => {
 
     return !!Object.keys(selectedStop).length ? (
         <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
-            <Button onClick={() => dispatch(setSelectedStop(undefined as any))}>back</Button>
             {selectedStop.name}
+            <Button
+                variant='contained'
+                color='primary'
+                style={{ alignSelf: 'flex-end' }}
+                onClick={() => dispatch(setSelectedStop({} as any))}
+            >
+                Back
+            </Button>
         </Card>
     ) : (
         <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
