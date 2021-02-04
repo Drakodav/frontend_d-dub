@@ -89,17 +89,17 @@ export const MapWrapper = () => {
     const classes = useStyles({ ...windowDim, visible, rotated, location: locationPermission, offset })();
 
     const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
-    const mapHandler = useMemo(() => {
-        const mapCallbacks = {
-            setRotation: setRotation,
-            setLocation: setLocationPermission,
-        };
-        return new MapHandler(mapElement, mapCallbacks);
+    const mapHandler: MapHandler = useMemo(() => {
+        return MapHandler.getInstance();
     }, []);
 
     // run once, init ol map
     useEffect(() => {
-        mapHandler.init();
+        const mapCallbacks = {
+            setRotation: setRotation,
+            setLocation: setLocationPermission,
+        };
+        mapHandler.init(mapElement, mapCallbacks);
     }, [mapHandler]);
 
     // resize map every time the window size changes

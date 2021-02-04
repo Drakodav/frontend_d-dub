@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import { Card, Tab, Tabs } from '@material-ui/core';
+import { Card } from '@material-ui/core';
 import { useSelector } from 'react-redux';
 import { getSearchType, selectSearchResults } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { ApiResult } from '../model/api.model';
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
 
 const useStyles = (state: {}) =>
     makeStyles(({ palette, shadows }) => ({
@@ -44,7 +43,6 @@ export const InfoListView = (props: Props) => {
     const classes = useStyles({})();
 
     const [infoList, setInfoList] = useState<ApiResult[]>([]);
-    const [tabValue, setTabValue] = useState(0);
 
     const ref = useRef<HTMLDivElement>(null);
     const searchType = useSelector(getSearchType);
@@ -73,7 +71,7 @@ export const InfoListView = (props: Props) => {
                     {item?.stop_sequence} {item?.name}
                 </Card>
             )),
-        [infoList]
+        [infoList, classes.row]
     );
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -82,17 +80,6 @@ export const InfoListView = (props: Props) => {
 
     return (
         <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
-            {/* <Tabs
-                value={tabValue}
-                onChange={(event, value: any) => setTabValue(value)}
-                indicatorColor='secondary'
-                centered
-            >
-                <Tab icon={<FiberManualRecordIcon />} />
-                <Tab icon={<FiberManualRecordIcon />} />
-                <Tab icon={<FiberManualRecordIcon />} />
-            </Tabs> */}
-
             {infoListElements}
         </Card>
     );

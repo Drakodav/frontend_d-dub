@@ -42,7 +42,7 @@ export const Chips = ({ className }: Props) => {
                 clickable
                 className={classes.chip}
                 color={item.name === searchType ? 'primary' : 'default'}
-                onClick={() => dispatch(setSearchType(item.name))}
+                onClick={() => item.name !== searchType && dispatch(setSearchType(item.name))}
             />
         ));
     }, [dispatch, searchType, classes.chip]);

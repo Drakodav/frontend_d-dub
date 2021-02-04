@@ -27,8 +27,8 @@ type MapCallbacks = {
 };
 
 export class MapHandler {
+    private static instance: MapHandler;
     private map: Map;
-    private mapElement: React.MutableRefObject<HTMLDivElement>;
     private view: View;
     private tileLayer: TileLayer;
 
@@ -42,11 +42,10 @@ export class MapHandler {
     private currLocation: number[] = [];
     private id: number | undefined;
 
-    private mapCallbacks: MapCallbacks;
+    private mapCallbacks!: MapCallbacks;
+    private mapElement!: React.MutableRefObject<HTMLDivElement>;
 
-    constructor(mapElement: React.MutableRefObject<HTMLDivElement>, mapCallbacks: MapCallbacks) {
-        this.mapElement = mapElement;
-        this.mapCallbacks = mapCallbacks;
+    private constructor() {
         this.map = new Map({});
 
         this.tileLayer = new TileLayer({
@@ -82,7 +81,18 @@ export class MapHandler {
         });
     }
 
-    init = (): void => {
+    static getInstance(): MapHandler {
+        if (!MapHandler.instance) {
+            // if (!(mapElement && mapCallbacks)) throw Error('Map must be initialized with a mapElement argument');
+            MapHandler.instance = new MapHandler();
+        }
+        return MapHandler.instance;
+    }
+
+    init = (mapElement: React.MutableRefObject<HTMLDivElement>, mapCallbacks: MapCallbacks): void => {
+        this.mapElement = mapElement;
+        this.mapCallbacks = mapCallbacks;
+
         this.map = new Map({
             target: this.mapElement.current,
             layers: [this.tileLayer, this.featuresLayer, this.LocationLayer],

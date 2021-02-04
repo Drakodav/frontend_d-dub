@@ -195,7 +195,15 @@ export function MobileView() {
     const apiResult: ApiResult = useSelector(selectSearchResults);
 
     const memoizedInfoListView = useMemo(() => !!Object.keys(apiResult).length && <InfoListView />, [apiResult]);
-
+    const memoizedApiSearchInput = useMemo(
+        () => (
+            <>
+                <ApiSearchInput className={classes.hideClose} />
+                <Chips className={classes.hideClose} />
+            </>
+        ),
+        [classes.hideClose]
+    );
     return (
         <Container
             ref={ref}
@@ -212,9 +220,7 @@ export function MobileView() {
                 </Typography>
             </IconButton>
 
-            <ApiSearchInput className={classes.hideClose} />
-            <Chips className={classes.hideClose} />
-
+            {memoizedApiSearchInput}
             {memoizedInfoListView}
         </Container>
     );
