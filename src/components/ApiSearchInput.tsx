@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AsyncSelect from 'react-select/async';
 import { OptionTypeBase, ValueType } from 'react-select/src/types';
@@ -9,6 +9,7 @@ import { GtfsHandler } from '../handler/gtfsHandler';
 import { makeStyles } from '@material-ui/styles';
 import { MapHandler } from '../handler/mapHandler';
 import { getGeoObjFeature } from '../util/geo.util';
+import { MapFeatureTypes } from '../model/constants';
 
 type Props = {
     className: string;
@@ -38,13 +39,18 @@ export const ApiSearchInput = (props: Props) => {
     const [inputValue, setInputValue] = useState({ value: null, label: null });
 
     const searchType = useSelector(getSearchType);
-    useEffect(() => {
+
+    const resetState = useCallback(() => {
         setApiResults(() => []);
         setDefaultOptions(() => []);
         setSearch(() => []);
-        setInputValue(null as any);
+        setInputValue(() => null as any);
         dispatch(resetSearchInput());
-    }, [searchType, dispatch]);
+    }, [dispatch]);
+
+    useEffect(() => {
+        resetState();
+    }, [searchType, resetState]);
 
     const gtfsHandler = new GtfsHandler(searchType);
     const mapHandler = MapHandler.getInstance();
@@ -57,7 +63,7 @@ export const ApiSearchInput = (props: Props) => {
         if (result) {
             dispatch(setSearchResults(result));
             const newFeature = getGeoObjFeature(result);
-            mapHandler.setApiFeature(newFeature);
+            mapHandler.setFeature(newFeature, MapFeatureTypes.ApiFeature);
         }
     };
 
@@ -95,8 +101,7 @@ export const ApiSearchInput = (props: Props) => {
                 }
                 break;
             case 'clear':
-                setInputValue(null as any);
-                dispatch(setSearchResults({}));
+                resetState();
                 break;
         }
     };

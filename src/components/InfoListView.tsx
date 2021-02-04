@@ -8,6 +8,7 @@ import { GtfsHandler } from '../handler/gtfsHandler';
 import { ApiDepartures, ApiResult, ApiStop } from '../model/api.model';
 import { MapHandler } from '../handler/mapHandler';
 import { getGeoObjFeature, getStopPointsFeature } from '../util/geo.util';
+import { MapFeatureTypes } from '../model/constants';
 
 const useStyles = (state: {}) =>
     makeStyles(({ palette, shadows }) => ({
@@ -61,12 +62,12 @@ export const InfoListView = (props: Props) => {
 
     useEffect(() => {
         async function fetchRes() {
-            if (infoView) {
+            if (infoView && Object.keys(apiResult).length) {
                 const value = apiResult[infoView[0].selector] as string;
                 const infoResults = await gtfsHandler.fetchApiResults(value, infoView[0].query);
                 setInfoList(() => infoResults);
                 const newFeature = getStopPointsFeature(infoResults);
-                mapHandler.setStopsFeature(newFeature);
+                mapHandler.setFeature(newFeature, MapFeatureTypes.StopsFeature);
             }
         }
 
@@ -75,11 +76,10 @@ export const InfoListView = (props: Props) => {
 
     useEffect(() => {
         async function fetchRes() {
-            if (infoView && !!selectedStop) {
+            if (infoView && Object.keys(selectedStop).length) {
                 const value = (selectedStop as any)[(infoView[1].selector as unknown) as any] as string;
                 const departureResults = await gtfsHandler.fetchApiResults(value, infoView[1].query);
                 setDepartureList(() => departureResults);
-                console.log(departureResults);
             }
         }
 
@@ -115,7 +115,7 @@ export const InfoListView = (props: Props) => {
                     key={i}
                     onClick={() => {
                         const newFeature = getGeoObjFeature((item as unknown) as any);
-                        mapHandler.setStopsFeature(newFeature);
+                        mapHandler.setFeature(newFeature, MapFeatureTypes.ExtraFeature);
                     }}
                 >
                     <Card className={classes.row}>
@@ -131,6 +131,11 @@ export const InfoListView = (props: Props) => {
     return !!Object.keys(selectedStop).length ? (
         <>
             <Card className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
+                <Button key={-1}>
+                    <Card className={classes.row} style={{ placeContent: 'center' }}>
+                        <p>{selectedStop.name}</p>
+                    </Card>
+                </Button>
                 {departureListElements}
             </Card>
             <Button

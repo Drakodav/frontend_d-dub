@@ -119,7 +119,7 @@ export const MapWrapper = () => {
     // If there is no apiResult then there should also be no features displayed on the map
     const apiResult: ApiResult = useSelector(getSearchResults);
     useEffect(() => {
-        if (!Object.keys(apiResult)) {
+        if (!Object.keys(apiResult).length) {
             mapHandler.resetFeaturesLayer();
             return;
         }

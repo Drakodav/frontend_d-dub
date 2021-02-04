@@ -16,3 +16,11 @@ export const GeoOptions = {
     timeout: 2000,
     maximumAge: 1000,
 };
+
+export enum MapFeatureTypes {
+    ApiFeature,
+    StopsFeature,
+    ExtraFeature,
+    AccuracyFeature,
+    PositionFeature,
+}

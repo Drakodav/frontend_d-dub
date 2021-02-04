@@ -9,7 +9,7 @@ import { ObjectEvent } from 'ol/Object';
 import { fromLonLat } from 'ol/proj';
 import OSM from 'ol/source/OSM';
 import VectorSource from 'ol/source/Vector';
-import { apiFeatureStyle, positionFeatureStyle } from '../util/geo.util';
+import { apiFeatureStyle, extraFeatureStyle, positionFeatureStyle } from '../util/geo.util';
 import {
     CENTER_LOCATION,
     TRANSITION_DURATION,
@@ -20,6 +20,7 @@ import {
     Padding,
     DublinBoundary,
     Projection,
+    MapFeatureTypes,
 } from '../model/constants';
 
 type MapCallbacks = {
@@ -36,6 +37,7 @@ export class MapHandler {
     private featuresLayer: VectorLayer;
     private apiFeature: Feature = new Feature();
     private stopsFeature: Feature = new Feature();
+    private extraFeature: Feature = new Feature();
 
     private LocationLayer: VectorLayer;
     private accuracyFeature: Feature = new Feature();
@@ -56,9 +58,11 @@ export class MapHandler {
         this.apiFeature.setStyle(apiFeatureStyle());
         this.positionFeature.setStyle(positionFeatureStyle());
 
+        this.extraFeature.setStyle(extraFeatureStyle());
+
         this.featuresLayer = new VectorLayer({
             source: new VectorSource({
-                features: [this.apiFeature, this.stopsFeature],
+                features: [this.apiFeature, this.stopsFeature, this.extraFeature],
             }),
         });
 
@@ -153,13 +157,28 @@ export class MapHandler {
         }
     };
 
-    setApiFeature = (newFeature: Geometry | undefined): void => {
-        this.apiFeature.setGeometry(newFeature);
-        this.fitFeature(newFeature);
-    };
+    setFeature = (newFeature: Geometry | undefined, featureType: MapFeatureTypes): void => {
+        let feat: Feature;
 
-    setStopsFeature = (newFeature: Geometry | undefined): void => {
-        this.stopsFeature.setGeometry(newFeature);
+        switch (featureType) {
+            case MapFeatureTypes.ApiFeature:
+                feat = this.apiFeature;
+                break;
+            case MapFeatureTypes.StopsFeature:
+                feat = this.stopsFeature;
+                break;
+            case MapFeatureTypes.AccuracyFeature:
+                feat = this.accuracyFeature;
+                break;
+            case MapFeatureTypes.ExtraFeature:
+                feat = this.extraFeature;
+                break;
+            case MapFeatureTypes.PositionFeature:
+                feat = this.positionFeature;
+                break;
+        }
+
+        feat.setGeometry(newFeature);
         this.fitFeature(newFeature);
     };
 

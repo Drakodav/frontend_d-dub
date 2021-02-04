@@ -6,6 +6,7 @@ import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import { Options as FillOptions } from 'ol/style/Fill';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
 import GeometryLayout from 'ol/geom/GeometryLayout';
+import { ThemeConfiguration } from '../model/theme';
 
 export const getGeoObjFeature = (apiResult: ApiResult): Geometry | undefined => {
     if (!Object.keys(apiResult).length) return;
@@ -54,6 +55,11 @@ export const positionFeatureStyle = (): Style =>
 export const apiFeatureStyle = (): Style =>
     new Style({
         ...defaultStyles(undefined, { width: 2 }),
+    });
+
+export const extraFeatureStyle = (): Style =>
+    new Style({
+        ...defaultStyles(undefined, { width: 2, color: ThemeConfiguration.secondary.dark }),
     });
 
 const defaultStyles = (_fill?: FillOptions, _stroke?: StrokeOptions) => {
