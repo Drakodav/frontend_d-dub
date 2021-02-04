@@ -29,7 +29,7 @@ export const ApiDef: ApiType[] = [
         selector: 'short_name',
         infoView: {
             selector: 'id',
-            query: 'route/stops/?route_id=',
+            query: 'query/trip_stops/?route_id=',
             type: 'stops',
         },
     },
