@@ -9,7 +9,7 @@ import { TRANSITION_DURATION } from '../model/constants';
 import { Chips } from './Chips';
 import { InfoListView } from './InfoListView';
 import { ApiResult } from '../model/api.model';
-import { selectSearchResults } from '../store/reducers/searchInput';
+import { getSearchResults } from '../store/reducers/searchInput';
 
 const useStyles = (state: typeof initState) =>
     makeStyles(({ palette, shadows }) => ({
@@ -18,7 +18,7 @@ const useStyles = (state: typeof initState) =>
             position: 'absolute',
             maxHeight: `${window.innerHeight}px`,
             backgroundColor: palette.common.white,
-            padding: '0px 10px',
+            padding: '0px',
             bottom: 0,
             left: 0,
             zIndex: 10,
@@ -192,7 +192,7 @@ export function MobileView() {
         }));
     }, [windowHeight]);
 
-    const apiResult: ApiResult = useSelector(selectSearchResults);
+    const apiResult: ApiResult = useSelector(getSearchResults);
 
     const memoizedInfoListView = useMemo(() => !!Object.keys(apiResult).length && <InfoListView />, [apiResult]);
     const memoizedApiSearchInput = useMemo(

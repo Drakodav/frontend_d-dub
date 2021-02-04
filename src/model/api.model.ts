@@ -1,4 +1,5 @@
 import { GeoJSONGeometry } from 'ol/format/GeoJSON';
+import Point from 'ol/geom/Point';
 
 export const GtfsApiRoute = 'https://api.thev-lad.com/api/gtfs/';
 // process.env.NODE_ENV === 'production' ? 'https://api.thev-lad.com/api/gtfs/' : 'http://127.0.0.1:8000/api/gtfs/';
@@ -47,4 +48,12 @@ export type ApiResult = {
     long_name?: string;
     name?: string;
     stop_sequence?: string;
+};
+
+export type ApiStop = {
+    id: number;
+    stop_id: string;
+    name: string;
+    point: Point;
+    stop_sequence: number;
 };

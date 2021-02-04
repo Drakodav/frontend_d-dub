@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MapHandler } from '../handler/mapHandler';
 import { ApiResult } from '../model/api.model';
-import { selectSearchResults } from '../store/reducers/searchInput';
+import { getSearchResults } from '../store/reducers/searchInput';
 import { getControlsVisible, getMapDimensions, getWindowDimensions, setWindowDimensions } from '../store/reducers/map';
 import { getGeoObjFeature } from '../util/geo.util';
 import { TRANSITION_DURATION } from '../model/constants';
@@ -118,7 +118,7 @@ export const MapWrapper = () => {
     }, [mapHandler, locationPermission]);
 
     // update whats displayed on the map when a new apiResult comes in
-    const apiResult: ApiResult = useSelector(selectSearchResults);
+    const apiResult: ApiResult = useSelector(getSearchResults);
     useEffect(() => {
         const newFeature = !!apiResult && getGeoObjFeature(apiResult);
         newFeature ? mapHandler.setApiFeature(newFeature) : mapHandler.setApiFeature(undefined);
