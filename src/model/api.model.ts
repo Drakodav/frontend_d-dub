@@ -1,4 +1,5 @@
 import { GeoJSONGeometry } from 'ol/format/GeoJSON';
+import LineString from 'ol/geom/LineString';
 import Point from 'ol/geom/Point';
 
 export const GtfsApiRoute = 'https://api.thev-lad.com/api/gtfs/';
@@ -13,7 +14,7 @@ export type ApiType = {
     name: ApiNaming;
     query: string;
     selector: keyof ApiResult;
-    infoView?: ApiInfoExtra;
+    infoView?: ApiInfoExtra[];
 };
 
 export type ApiInfoExtra = {
@@ -27,11 +28,18 @@ export const ApiDef: ApiType[] = [
         name: ApiNaming.route,
         query: 'route/?short_name=',
         selector: 'short_name',
-        infoView: {
-            selector: 'id',
-            query: 'query/trip_stops/?route_id=',
-            type: 'stops',
-        },
+        infoView: [
+            {
+                selector: 'id',
+                query: 'query/trip_stops/?route_id=',
+                type: 'stops',
+            },
+            {
+                selector: 'id',
+                query: 'query/stop_departures/?stop_id=',
+                type: 'trips',
+            },
+        ],
     },
     {
         name: ApiNaming.stop,
@@ -58,4 +66,12 @@ export type ApiStop = {
     stop_sequence: number;
 };
 
-export type ApiDepartures = {};
+export type ApiDepartures = {
+    departure_time: string;
+    direction: string;
+    geometry: LineString;
+    headsign: string;
+    id: number;
+    short_name: string;
+    trip_id: string;
+};

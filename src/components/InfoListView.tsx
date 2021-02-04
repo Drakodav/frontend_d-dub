@@ -1,13 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { Button, Card } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import { getSearchType, getSearchResults, setSelectedStop, getSelectedStop } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
-import { ApiResult, ApiStop } from '../model/api.model';
+import { ApiDepartures, ApiResult, ApiStop } from '../model/api.model';
 import { MapHandler } from '../handler/mapHandler';
-import { getStopPointsFeature } from '../util/geo.util';
+import { getGeoObjFeature, getStopPointsFeature } from '../util/geo.util';
 
 const useStyles = (state: {}) =>
     makeStyles(({ palette, shadows }) => ({
@@ -30,8 +30,10 @@ const useStyles = (state: {}) =>
             width: '100%',
             height: '50px',
             textAlign: 'left',
-            padding: '10px 0px 0px 20px',
+            padding: '0px 20px 0px 20px',
             boxShadow: shadows[1],
+            display: 'flex',
+            placeContent: 'space-between',
         },
     }));
 
@@ -44,13 +46,13 @@ export const InfoListView = (props: Props) => {
 
     const classes = useStyles({})();
     const dispatch = useDispatch();
-    const ref = useRef<HTMLDivElement>(null);
 
     const searchType = useSelector(getSearchType);
     const apiResult = useSelector(getSearchResults);
     const selectedStop = useSelector(getSelectedStop);
 
     const [infoList, setInfoList] = useState<ApiResult[]>([]);
+    const [departureList, setDepartureList] = useState<ApiResult[]>([]);
 
     const gtfsHandler = useMemo(() => new GtfsHandler(searchType), [searchType]);
 
@@ -60,8 +62,8 @@ export const InfoListView = (props: Props) => {
     useEffect(() => {
         async function fetchRes() {
             if (infoView) {
-                const value = apiResult[infoView.selector] as string;
-                const infoResults = await gtfsHandler.fetchApiResults(value, infoView.query);
+                const value = apiResult[infoView[0].selector] as string;
+                const infoResults = await gtfsHandler.fetchApiResults(value, infoView[0].query);
                 setInfoList(() => infoResults);
                 const newFeature = getStopPointsFeature(infoResults);
                 mapHandler.setStopsFeature(newFeature);
@@ -70,6 +72,19 @@ export const InfoListView = (props: Props) => {
 
         fetchRes();
     }, [apiResult, gtfsHandler, infoView, mapHandler]);
+
+    useEffect(() => {
+        async function fetchRes() {
+            if (infoView && !!selectedStop) {
+                const value = (selectedStop as any)[(infoView[1].selector as unknown) as any] as string;
+                const departureResults = await gtfsHandler.fetchApiResults(value, infoView[1].query);
+                setDepartureList(() => departureResults);
+                console.log(departureResults);
+            }
+        }
+
+        fetchRes();
+    }, [selectedStop, gtfsHandler, infoView, mapHandler]);
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -82,9 +97,10 @@ export const InfoListView = (props: Props) => {
     const infoListElements = useMemo(
         () =>
             ((infoList as unknown) as ApiStop[]).map((item, i) => (
-                <Button onClick={() => handleItemClick(item)}>
-                    <Card className={classes.row} key={i}>
-                        {item.stop_sequence} {item.name}
+                <Button onClick={() => handleItemClick(item)} key={i}>
+                    <Card className={classes.row}>
+                        <p>{item.name}</p>
+                        <p>{item.stop_sequence}</p>
                     </Card>
                 </Button>
             )),
@@ -92,20 +108,42 @@ export const InfoListView = (props: Props) => {
         [infoList, classes.row]
     );
 
+    const departureListElements = useMemo(
+        () =>
+            ((departureList as unknown) as ApiDepartures[]).map((item, i) => (
+                <Button
+                    key={i}
+                    onClick={() => {
+                        const newFeature = getGeoObjFeature((item as unknown) as any);
+                        mapHandler.setStopsFeature(newFeature);
+                    }}
+                >
+                    <Card className={classes.row}>
+                        <p>{item.short_name}</p>
+                        <p>{item.departure_time}</p>
+                    </Card>
+                </Button>
+            )),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [departureList, classes.row]
+    );
+
     return !!Object.keys(selectedStop).length ? (
-        <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
-            {selectedStop.name}
+        <>
+            <Card className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
+                {departureListElements}
+            </Card>
             <Button
                 variant='contained'
                 color='primary'
-                style={{ alignSelf: 'flex-end' }}
+                style={{ alignSelf: 'flex-end', width: '100%', borderRadius: '0px' }}
                 onClick={() => dispatch(setSelectedStop({} as any))}
             >
                 Back
             </Button>
-        </Card>
+        </>
     ) : (
-        <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
+        <Card className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
             {infoListElements}
         </Card>
     );

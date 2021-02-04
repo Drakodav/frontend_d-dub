@@ -1,12 +1,10 @@
-import { GeoJSONMultiLineString, GeoJSONPoint } from 'ol/format/GeoJSON';
+import { GeoJSONMultiLineString, GeoJSONPoint, GeoJSONLineString } from 'ol/format/GeoJSON';
 import Geometry from 'ol/geom/Geometry';
-import MultiLineString from 'ol/geom/MultiLineString';
-import Point from 'ol/geom/Point';
+import { Point, MultiLineString, LineString, MultiPoint } from 'ol/geom';
 import { ApiResult } from '../model/api.model';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import { Options as FillOptions } from 'ol/style/Fill';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
-import MultiPoint from 'ol/geom/MultiPoint';
 import GeometryLayout from 'ol/geom/GeometryLayout';
 
 export const getGeoObjFeature = (apiResult: ApiResult): Geometry | undefined => {
@@ -15,6 +13,11 @@ export const getGeoObjFeature = (apiResult: ApiResult): Geometry | undefined => 
 
     if (apiResult?.geometry?.type === 'MultiLineString') {
         geometry = new MultiLineString((apiResult.geometry as GeoJSONMultiLineString).coordinates).transform(
+            'EPSG:4326',
+            'EPSG:3857'
+        );
+    } else if (apiResult?.geometry?.type === 'LineString') {
+        geometry = new LineString((apiResult.geometry as GeoJSONLineString).coordinates).transform(
             'EPSG:4326',
             'EPSG:3857'
         );
