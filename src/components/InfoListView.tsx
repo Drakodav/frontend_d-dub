@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { Button, Card } from '@material-ui/core';
@@ -36,6 +36,9 @@ const useStyles = (state: {}) =>
             display: 'flex',
             placeContent: 'space-between',
         },
+        rowButton: {
+            padding: '0.2px 0px',
+        },
     }));
 
 interface Props {
@@ -47,6 +50,8 @@ export const InfoListView = (props: Props) => {
 
     const classes = useStyles({})();
     const dispatch = useDispatch();
+
+    const ref = useRef() as React.MutableRefObject<HTMLDivElement>;
 
     const searchType = useSelector(getSearchType);
     const apiResult = useSelector(getSearchResults);
@@ -92,12 +97,13 @@ export const InfoListView = (props: Props) => {
 
     const handleItemClick = (stop: ApiStop) => {
         dispatch(setSelectedStop(stop));
+        ref.current?.scroll({ top: 0 });
     };
 
     const infoListElements = useMemo(
         () =>
             ((infoList as unknown) as ApiStop[]).map((item, i) => (
-                <Button onClick={() => handleItemClick(item)} key={i}>
+                <Button className={classes.rowButton} onClick={() => handleItemClick(item)} key={i}>
                     <Card className={classes.row}>
                         <p>{item.name}</p>
                         <p>{item.stop_sequence}</p>
@@ -113,6 +119,7 @@ export const InfoListView = (props: Props) => {
             ((departureList as unknown) as ApiDepartures[]).map((item, i) => (
                 <Button
                     key={i}
+                    className={classes.rowButton}
                     onClick={() => {
                         const newFeature = getGeoObjFeature((item as unknown) as any);
                         mapHandler.setFeature(newFeature, MapFeatureTypes.ExtraFeature);
@@ -130,8 +137,8 @@ export const InfoListView = (props: Props) => {
 
     return !!Object.keys(selectedStop).length ? (
         <>
-            <Card className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
-                <Button key={-1}>
+            <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
+                <Button className={classes.rowButton} key={-1}>
                     <Card className={classes.row} style={{ placeContent: 'center' }}>
                         <p>{selectedStop.name}</p>
                     </Card>
@@ -148,7 +155,7 @@ export const InfoListView = (props: Props) => {
             </Button>
         </>
     ) : (
-        <Card className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
+        <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
             {infoListElements}
         </Card>
     );
