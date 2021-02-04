@@ -49,9 +49,7 @@ export class MapHandler {
 
     private constructor() {
         this.tileLayer = new TileLayer({
-            source: new OSM({
-                url: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
-            }),
+            source: new OSM({}),
         });
 
         // create and add vector source layer
