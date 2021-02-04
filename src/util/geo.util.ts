@@ -6,6 +6,8 @@ import { ApiResult } from '../model/api.model';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import { Options as FillOptions } from 'ol/style/Fill';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
+import MultiPoint from 'ol/geom/MultiPoint';
+import GeometryLayout from 'ol/geom/GeometryLayout';
 
 export const getGeoObjFeature = (apiResult: ApiResult): Geometry | undefined => {
     if (!Object.keys(apiResult).length) return;
@@ -23,6 +25,13 @@ export const getGeoObjFeature = (apiResult: ApiResult): Geometry | undefined => 
     if (!!geometry) {
         return geometry;
     }
+};
+
+export const getStopPointsFeature = (stops: ApiResult[]): Geometry | undefined => {
+    if (!stops.length) return;
+
+    const points = stops.map((stop) => (stop.point as GeoJSONPoint).coordinates);
+    return new MultiPoint(points, GeometryLayout.XY).transform('EPSG:4326', 'EPSG:3857');
 };
 
 export const positionFeatureStyle = (): Style =>

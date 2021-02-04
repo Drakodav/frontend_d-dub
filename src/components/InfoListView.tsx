@@ -6,6 +6,8 @@ import { useSelector } from 'react-redux';
 import { getSearchType, selectSearchResults } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { ApiResult } from '../model/api.model';
+import { MapHandler } from '../handler/mapHandler';
+import { getStopPointsFeature } from '../util/geo.util';
 
 const useStyles = (state: {}) =>
     makeStyles(({ palette, shadows }) => ({
@@ -49,6 +51,7 @@ export const InfoListView = (props: Props) => {
     const gtfsHandler = useMemo(() => new GtfsHandler(searchType), [searchType]);
 
     const { infoView } = gtfsHandler.getObj();
+    const mapHandler = MapHandler.getInstance();
 
     const apiResult: ApiResult = useSelector(selectSearchResults);
 
@@ -58,11 +61,17 @@ export const InfoListView = (props: Props) => {
                 const value = apiResult[infoView.selector] as string;
                 const infoResults = await gtfsHandler.fetchApiResults(value, infoView.query);
                 setInfoList(() => infoResults);
+                const newFeature = getStopPointsFeature(infoResults);
+                mapHandler.setStopsFeature(newFeature);
             }
         }
 
         fetchRes();
-    }, [apiResult, gtfsHandler, infoView]);
+    }, [apiResult, gtfsHandler, infoView, mapHandler]);
+
+    const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+    };
 
     const infoListElements = useMemo(
         () =>
@@ -73,11 +82,6 @@ export const InfoListView = (props: Props) => {
             )),
         [infoList, classes.row]
     );
-
-    const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-        e.stopPropagation();
-    };
-
     return (
         <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
             {infoListElements}

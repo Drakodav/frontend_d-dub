@@ -19,6 +19,7 @@ import {
     MinZoom,
     Padding,
     DublinBoundary,
+    Projection,
 } from '../model/constants';
 
 type MapCallbacks = {
@@ -28,16 +29,17 @@ type MapCallbacks = {
 
 export class MapHandler {
     private static instance: MapHandler;
-    private map: Map;
+    private map: Map = new Map({});
     private view: View;
     private tileLayer: TileLayer;
 
     private featuresLayer: VectorLayer;
-    private LocationLayer: VectorLayer;
+    private apiFeature: Feature = new Feature();
+    private stopsFeature: Feature = new Feature();
 
-    private apiFeature: Feature;
-    private accuracyFeature: Feature;
-    private positionFeature: Feature;
+    private LocationLayer: VectorLayer;
+    private accuracyFeature: Feature = new Feature();
+    private positionFeature: Feature = new Feature();
 
     private currLocation: number[] = [];
     private id: number | undefined;
@@ -46,23 +48,17 @@ export class MapHandler {
     private mapElement!: React.MutableRefObject<HTMLDivElement>;
 
     private constructor() {
-        this.map = new Map({});
-
         this.tileLayer = new TileLayer({
             source: new OSM(),
         });
 
         // create and add vector source layer
-        this.apiFeature = new Feature();
-        this.accuracyFeature = new Feature();
-        this.positionFeature = new Feature();
-
         this.apiFeature.setStyle(apiFeatureStyle());
         this.positionFeature.setStyle(positionFeatureStyle());
 
         this.featuresLayer = new VectorLayer({
             source: new VectorSource({
-                features: [this.apiFeature],
+                features: [this.apiFeature, this.stopsFeature],
             }),
         });
 
@@ -78,12 +74,12 @@ export class MapHandler {
             zoom: MinZoom,
             maxZoom: MaxZoom,
             minZoom: MinZoom,
+            projection: Projection,
         });
     }
 
     static getInstance(): MapHandler {
         if (!MapHandler.instance) {
-            // if (!(mapElement && mapCallbacks)) throw Error('Map must be initialized with a mapElement argument');
             MapHandler.instance = new MapHandler();
         }
         return MapHandler.instance;
@@ -157,15 +153,19 @@ export class MapHandler {
         }
     };
 
-    addFeatures = (features: Feature<Geometry>[]) => {
-        this.featuresLayer.getSource().addFeatures(features);
-    };
-
     setApiFeature = (newFeature: Geometry | undefined): void => {
         this.apiFeature.setGeometry(newFeature);
+        this.fitFeature(newFeature);
+    };
 
-        !!newFeature &&
-            this.view.fit(newFeature.getExtent(), {
+    setStopsFeature = (newFeature: Geometry | undefined): void => {
+        this.stopsFeature.setGeometry(newFeature);
+        this.fitFeature(newFeature);
+    };
+
+    private fitFeature = (feature: Geometry | undefined): void => {
+        !!feature &&
+            this.view.fit(feature.getExtent(), {
                 padding: Padding,
                 maxZoom: MaxZoom,
                 duration: MAP_TRANSITION,
