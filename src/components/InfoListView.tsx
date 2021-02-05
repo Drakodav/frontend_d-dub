@@ -78,7 +78,7 @@ export const InfoListView = (props: Props) => {
         }
 
         fetchRes();
-    }, [apiResult, gtfsHandler, infoView, mapHandler]);
+    }, [apiResult, gtfsHandler, infoView, mapHandler, searchType]);
 
     useEffect(() => {
         async function fetchRes() {
@@ -91,7 +91,7 @@ export const InfoListView = (props: Props) => {
         }
 
         fetchRes();
-    }, [selectedStop, gtfsHandler, infoView, mapHandler]);
+    }, [selectedStop, gtfsHandler, infoView, mapHandler, searchType]);
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         e.stopPropagation();

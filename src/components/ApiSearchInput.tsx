@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import AsyncSelect from 'react-select/async';
 import { OptionTypeBase, ValueType } from 'react-select/src/types';
 import { ApiResult } from '../model/api.model';
-import { getSearchType, resetSearchInput, setSearchResults } from '../store/reducers/searchInput';
+import { getSearchType, resetSearchInput } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { makeStyles } from '@material-ui/styles';
 import { MapHandler } from '../handler/mapHandler';
