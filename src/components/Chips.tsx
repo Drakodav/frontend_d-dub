@@ -4,7 +4,7 @@ import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import { ApiDef } from '../model/api.model';
 import { useDispatch, useSelector } from 'react-redux';
-import { getSearchType, setSearchType } from '../store/reducers/searchInput';
+import { getSearchType, setSearchType, switchDirection } from '../store/reducers/searchInput';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -44,7 +44,18 @@ export const Chips = ({ className }: Props) => {
                 color={item.name === searchType ? 'primary' : 'default'}
                 onClick={() => item.name !== searchType && dispatch(setSearchType(item.name))}
             />
-        ));
+        )).concat(
+            <div style={{ alignSelf: 'flex-end' }}>
+                <Chip
+                    key={'direction'}
+                    label={'direction'}
+                    clickable
+                    className={classes.chip}
+                    color='default'
+                    onClick={() => dispatch(switchDirection())}
+                />
+            </div>
+        );
     }, [dispatch, searchType, classes.chip]);
 
     return <div className={`${classes.root} ${className}`}>{chipsArray}</div>;

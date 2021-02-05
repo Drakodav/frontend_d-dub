@@ -3,7 +3,13 @@ import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { Button, Card } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
-import { getSearchType, getSearchResults, setSelectedStop, getSelectedStop } from '../store/reducers/searchInput';
+import {
+    getSearchType,
+    getSearchResults,
+    setSelectedStop,
+    getSelectedStop,
+    getDirection,
+} from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { ApiDepartures, ApiNaming, ApiResult, ApiStop } from '../model/api.model';
 import { MapHandler } from '../handler/mapHandler';
@@ -57,6 +63,7 @@ export const InfoListView = (props: Props) => {
     const searchType = useSelector(getSearchType);
     const apiResult = useSelector(getSearchResults);
     const selectedStop = useSelector(getSelectedStop);
+    const busDirection = useSelector(getDirection);
 
     const [infoList, setInfoList] = useState<ApiResult[]>([]);
     const [departureList, setDepartureList] = useState<ApiResult[]>([]);
@@ -70,7 +77,7 @@ export const InfoListView = (props: Props) => {
         async function fetchRes() {
             if (infoView && Object.keys(apiResult).length && searchType === ApiNaming.route) {
                 const value = apiResult[infoView[1].selector] as string;
-                const infoResults = await gtfsHandler.fetchApiResults(value, infoView[1].query);
+                const infoResults = await gtfsHandler.fetchApiResults(value, infoView[1].query, busDirection);
                 setInfoList(() => infoResults);
                 const newFeature = getStopPointsFeature(infoResults);
                 mapHandler.setFeature(newFeature, MapFeatureTypes.StopsFeature);
@@ -78,20 +85,20 @@ export const InfoListView = (props: Props) => {
         }
 
         fetchRes();
-    }, [apiResult, gtfsHandler, infoView, mapHandler, searchType]);
+    }, [apiResult, gtfsHandler, infoView, mapHandler, searchType, busDirection]);
 
     useEffect(() => {
         async function fetchRes() {
             if (infoView && Object.keys(selectedStop).length) {
                 const id = searchType === ApiNaming.route ? 2 : 0;
                 const value = (selectedStop as ApiResult)[infoView[id].selector] as string;
-                const departureResults = await gtfsHandler.fetchApiResults(value, infoView[id].query);
+                const departureResults = await gtfsHandler.fetchApiResults(value, infoView[id].query, busDirection);
                 setDepartureList(() => departureResults);
             }
         }
 
         fetchRes();
-    }, [selectedStop, gtfsHandler, infoView, mapHandler, searchType]);
+    }, [selectedStop, gtfsHandler, infoView, mapHandler, searchType, busDirection]);
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         e.stopPropagation();

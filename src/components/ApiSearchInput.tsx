@@ -3,8 +3,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AsyncSelect from 'react-select/async';
 import { OptionTypeBase, ValueType } from 'react-select/src/types';
-import { ApiResult } from '../model/api.model';
-import { getSearchType, resetSearchInput } from '../store/reducers/searchInput';
+import { ApiNaming, ApiResult } from '../model/api.model';
+import { getDirection, getSearchType, resetSearchInput } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { makeStyles } from '@material-ui/styles';
 import { MapHandler } from '../handler/mapHandler';
@@ -39,6 +39,7 @@ export const ApiSearchInput = (props: Props) => {
     const [inputValue, setInputValue] = useState({ value: null, label: null });
 
     const searchType = useSelector(getSearchType);
+    const busDirection = useSelector(getDirection);
 
     const resetState = useCallback(() => {
         setApiResults(() => []);
@@ -58,12 +59,24 @@ export const ApiSearchInput = (props: Props) => {
     // uppercase heading
     const heading = searchType.charAt(0).toUpperCase() + searchType.slice(1);
 
-    const setResultToMap = (value: string) => {
+    const setResultToMap = async (value: string) => {
         const result = gtfsHandler.getSingleApiResult(apiResults, value);
         if (result) {
+            let newResult = result;
+
+            const { infoView } = gtfsHandler.getObj();
+            if (searchType === ApiNaming.route && infoView) {
+                const trips = (await gtfsHandler.fetchApiResults(
+                    result[infoView[0].selector] as string,
+                    infoView[0].query,
+                    busDirection
+                )) as ApiResult[];
+                newResult = trips[0];
+            }
+
             gtfsHandler.setResults(dispatch, result);
 
-            const newFeature = getGeoObjFeature(result);
+            const newFeature = getGeoObjFeature(newResult);
             mapHandler.setFeature(newFeature, MapFeatureTypes.ApiFeature);
         }
     };
