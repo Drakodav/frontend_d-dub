@@ -129,7 +129,7 @@ export const InfoListView = (props: Props) => {
                 >
                     <Card className={classes.row}>
                         <p>{item.short_name}</p>
-                        <p>{item.departure_time}</p>
+                        <p>due in {item.departure_time}</p>
                     </Card>
                 </Button>
             )),
