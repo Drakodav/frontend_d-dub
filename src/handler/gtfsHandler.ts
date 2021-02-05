@@ -1,4 +1,6 @@
-import { ApiDef, ApiNaming, ApiResult, ApiType, GtfsApiRoute } from '../model/api.model';
+import { Dispatch } from 'react';
+import { ApiDef, ApiNaming, ApiResult, ApiStop, ApiType, GtfsApiRoute } from '../model/api.model';
+import { setSearchResults, setSelectedStop } from '../store/reducers/searchInput';
 import { levenshtein } from '../util/util';
 
 export type SelectOptions = { value: string; label: string };
@@ -35,8 +37,14 @@ export class GtfsHandler {
         return currValue;
     };
 
-    fetchApiResults = async (value: string, query: string = this.obj.query): Promise<ApiResult[]> => {
-        const response = (await fetch(`${GtfsApiRoute}${query}${value}`)).json();
+    fetchApiResults = async (
+        value: string,
+        query: string = this.obj.query,
+        direction?: number
+    ): Promise<ApiResult[]> => {
+        const dir = direction ? `&direction=${direction}` : '';
+
+        const response = (await fetch(`${GtfsApiRoute}${query}${value}${dir}`)).json();
         const results: ApiResult[] = (((await response) as any).results as []) ?? ((await response) as []);
         if (results?.length > 0) {
             return results;
@@ -69,6 +77,19 @@ export class GtfsHandler {
                 (a, b) =>
                     levenshtein(a.value.toLowerCase(), inputValue) - levenshtein(b.value.toLowerCase(), inputValue)
             );
+    };
+
+    setResults = (dispatch: Dispatch<any>, result: ApiResult) => {
+        switch (this.obj.name) {
+            case ApiNaming.route:
+                dispatch(setSearchResults(result));
+                break;
+
+            case ApiNaming.stop:
+                dispatch(setSearchResults(result));
+                dispatch(setSelectedStop((result as unknown) as ApiStop));
+                break;
+        }
     };
 
     getObj = (): ApiType => this.obj;

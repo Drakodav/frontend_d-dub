@@ -61,7 +61,8 @@ export const ApiSearchInput = (props: Props) => {
     const setResultToMap = (value: string) => {
         const result = gtfsHandler.getSingleApiResult(apiResults, value);
         if (result) {
-            dispatch(setSearchResults(result));
+            gtfsHandler.setResults(dispatch, result);
+
             const newFeature = getGeoObjFeature(result);
             mapHandler.setFeature(newFeature, MapFeatureTypes.ApiFeature);
         }

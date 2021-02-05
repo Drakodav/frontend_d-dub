@@ -3,9 +3,9 @@ import { ApiNaming, ApiResult, ApiStop } from '../../model/api.model';
 import { RootState } from './rootReducer';
 
 const initialState = {
-    searchType: ApiNaming.route as string,
+    searchType: ApiNaming.route as ApiNaming,
     apiResults: {} as ApiResult,
-    selectedStop: {} as ApiStop,
+    selectedStop: {} as ApiStop | ApiResult,
 };
 
 const searchSlice = createSlice({
@@ -15,7 +15,7 @@ const searchSlice = createSlice({
         setSearchResults: (state, action: PayloadAction<ApiResult>) => {
             state.apiResults = action.payload;
         },
-        setSearchType: (state, action: PayloadAction<string>) => {
+        setSearchType: (state, action: PayloadAction<ApiNaming>) => {
             state.searchType = action.payload;
             state.apiResults = {};
         },

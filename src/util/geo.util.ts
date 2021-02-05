@@ -13,17 +13,20 @@ export const getGeoObjFeature = (apiResult: ApiResult): Geometry | undefined => 
     let geometry: Geometry = (undefined as unknown) as Geometry;
 
     if (apiResult?.geometry?.type === 'MultiLineString') {
-        geometry = new MultiLineString((apiResult.geometry as GeoJSONMultiLineString).coordinates).transform(
-            'EPSG:4326',
-            'EPSG:3857'
-        );
+        geometry = new MultiLineString(
+            (apiResult.geometry as GeoJSONMultiLineString).coordinates,
+            GeometryLayout.XY
+        ).transform('EPSG:4326', 'EPSG:3857');
     } else if (apiResult?.geometry?.type === 'LineString') {
-        geometry = new LineString((apiResult.geometry as GeoJSONLineString).coordinates).transform(
+        geometry = new LineString((apiResult.geometry as GeoJSONLineString).coordinates, GeometryLayout.XY).transform(
             'EPSG:4326',
             'EPSG:3857'
         );
     } else if (apiResult?.point?.type === 'Point') {
-        geometry = new Point((apiResult?.point as GeoJSONPoint).coordinates).transform('EPSG:4326', 'EPSG:3857');
+        geometry = new Point((apiResult?.point as GeoJSONPoint).coordinates, GeometryLayout.XY).transform(
+            'EPSG:4326',
+            'EPSG:3857'
+        );
     }
 
     if (!!geometry) {

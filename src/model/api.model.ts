@@ -21,6 +21,7 @@ export type ApiInfoExtra = {
     query: string;
     selector: keyof ApiResult;
     type: string;
+    direction: boolean;
 };
 
 export const ApiDef: ApiType[] = [
@@ -31,13 +32,21 @@ export const ApiDef: ApiType[] = [
         infoView: [
             {
                 selector: 'id',
+                query: 'query/route_trip/?route_id=',
+                type: 'trips',
+                direction: true,
+            },
+            {
+                selector: 'id',
                 query: 'query/trip_stops/?route_id=',
                 type: 'stops',
+                direction: true,
             },
             {
                 selector: 'id',
                 query: 'query/stop_departures/?stop_id=',
                 type: 'trips',
+                direction: false,
             },
         ],
     },
@@ -45,6 +54,14 @@ export const ApiDef: ApiType[] = [
         name: ApiNaming.stop,
         query: 'stop/?name=',
         selector: 'name',
+        infoView: [
+            {
+                selector: 'id',
+                query: 'query/stop_departures/?stop_id=',
+                type: 'trips',
+                direction: false,
+            },
+        ],
     },
 ];
 
