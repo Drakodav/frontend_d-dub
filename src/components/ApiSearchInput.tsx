@@ -65,11 +65,11 @@ export const ApiSearchInput = (props: Props) => {
         if (result) {
             let newResult = result;
 
-            const { infoView } = gtfsHandler.getObj();
-            if (searchType === ApiNaming.route && infoView) {
+            const { queries } = gtfsHandler.getObj();
+            if (searchType === ApiNaming.route && queries) {
                 const trips = (await gtfsHandler.fetchApiResults(
-                    result[infoView[0].selector] as string,
-                    infoView[0].query,
+                    result[queries[0].selector] as string,
+                    queries[0].query,
                     busDirection
                 )) as ApiResult[];
                 newResult = trips[0];

@@ -34,17 +34,20 @@ const useStyles = (state: {}) =>
             alignContent: ' flex-start',
         },
         row: {
-            borderRadius: '2px',
             width: '100%',
             height: '50px',
             textAlign: 'left',
             padding: '0px 20px 0px 20px',
+            border: 'none',
+            borderRadius: '0px',
             boxShadow: shadows[1],
             display: 'flex',
             placeContent: 'space-between',
         },
         rowButton: {
-            padding: '0.2px 0px',
+            border: 'none',
+            borderRadius: '0px',
+            padding: '0.4px 0px',
         },
     }));
 
@@ -71,13 +74,13 @@ export const InfoListView = (props: Props) => {
     const gtfsHandler = useMemo(() => new GtfsHandler(searchType), [searchType]);
 
     const mapHandler = MapHandler.getInstance();
-    const { infoView } = gtfsHandler.getObj();
+    const { queries } = gtfsHandler.getObj();
 
     useEffect(() => {
         async function fetchRes() {
-            if (infoView && Object.keys(apiResult).length && searchType === ApiNaming.route) {
-                const value = apiResult[infoView[1].selector] as string;
-                const infoResults = await gtfsHandler.fetchApiResults(value, infoView[1].query, busDirection);
+            if (queries && Object.keys(apiResult).length && searchType === ApiNaming.route) {
+                const value = apiResult[queries[1].selector] as string;
+                const infoResults = await gtfsHandler.fetchApiResults(value, queries[1].query, busDirection);
                 setInfoList(() => infoResults);
                 const newFeature = getStopPointsFeature(infoResults);
                 mapHandler.setFeature(newFeature, MapFeatureTypes.StopsFeature);
@@ -85,20 +88,20 @@ export const InfoListView = (props: Props) => {
         }
 
         fetchRes();
-    }, [apiResult, gtfsHandler, infoView, mapHandler, searchType, busDirection]);
+    }, [apiResult, gtfsHandler, queries, mapHandler, searchType, busDirection]);
 
     useEffect(() => {
         async function fetchRes() {
-            if (infoView && Object.keys(selectedStop).length) {
+            if (queries && Object.keys(selectedStop).length) {
                 const id = searchType === ApiNaming.route ? 2 : 0;
-                const value = (selectedStop as ApiResult)[infoView[id].selector] as string;
-                const departureResults = await gtfsHandler.fetchApiResults(value, infoView[id].query, busDirection);
+                const value = (selectedStop as ApiResult)[queries[id].selector] as string;
+                const departureResults = await gtfsHandler.fetchApiResults(value, queries[id].query, busDirection);
                 setDepartureList(() => departureResults);
             }
         }
 
         fetchRes();
-    }, [selectedStop, gtfsHandler, infoView, mapHandler, searchType, busDirection]);
+    }, [selectedStop, gtfsHandler, queries, mapHandler, searchType, busDirection]);
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -160,7 +163,7 @@ export const InfoListView = (props: Props) => {
                     <Button
                         variant='contained'
                         color='primary'
-                        style={{ alignSelf: 'flex-end', width: '100%', borderRadius: '0px' }}
+                        style={{ alignSelf: 'flex-end', width: '100%', borderRadius: '0px', height: '60px' }}
                         onClick={() => dispatch(setSelectedStop({} as any))}
                     >
                         Back
