@@ -99,8 +99,13 @@ export const InfoListView = (props: Props) => {
                 setDepartureList(() => departureResults);
             }
         }
-
         fetchRes();
+
+        const interval = setInterval(() => {
+            fetchRes();
+        }, 1000 * 30);
+
+        return () => clearInterval(interval);
     }, [selectedStop, gtfsHandler, queries, mapHandler, searchType, busDirection]);
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
