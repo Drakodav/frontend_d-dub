@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AsyncSelect from 'react-select/async';
-import { OptionTypeBase, ValueType } from 'react-select/src/types';
+import { OptionsType, OptionTypeBase, ValueType } from 'react-select/src/types';
 import { ApiNaming, ApiResult } from '../model/api.model';
 import { getDirection, getSearchType, resetSearchInput } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/styles';
 import { MapHandler } from '../handler/mapHandler';
 import { getGeoObjFeature } from '../util/geo.util';
 import { MapFeatureTypes } from '../model/constants';
+import debounce from 'debounce-promise';
 
 type Props = {
     className: string;
@@ -64,15 +65,15 @@ export const ApiSearchInput = (props: Props) => {
         if (result) {
             let newResult = result;
 
-            // const { infoView } = gtfsHandler.getObj();
-            // if (searchType === ApiNaming.route && infoView) {
-            //     const trips = (await gtfsHandler.fetchApiResults(
-            //         result[infoView[0].selector] as string,
-            //         infoView[0].query,
-            //         busDirection
-            //     )) as ApiResult[];
-            //     newResult = trips[0];
-            // }
+            const { infoView } = gtfsHandler.getObj();
+            if (searchType === ApiNaming.route && infoView) {
+                const trips = (await gtfsHandler.fetchApiResults(
+                    result[infoView[0].selector] as string,
+                    infoView[0].query,
+                    busDirection
+                )) as ApiResult[];
+                newResult = trips[0];
+            }
 
             gtfsHandler.setResults(dispatch, result);
 
@@ -81,30 +82,30 @@ export const ApiSearchInput = (props: Props) => {
         }
     };
 
-    const loadOptions = (value: string) =>
-        new Promise(async (resolve) => {
-            let newApiResults = apiResults;
-            if (!(value in search)) {
-                const mergedArray = [...apiResults, ...(await gtfsHandler.fetchApiResults(value))];
-                // mergedArray have duplicates, lets remove the duplicates using Set
-                let set = new Set();
-                newApiResults = mergedArray.filter((item) => {
-                    if (!set.has(item.id)) {
-                        set.add(item.id);
-                        return true;
-                    }
-                    return false;
-                }, set);
-                setApiResults(newApiResults);
-                if (search.indexOf(value) === -1) setSearch([...search, value]);
-            }
-            const options = gtfsHandler.getResultOptions(newApiResults, value);
+    const loadOptions = async (value: string, callback: (options: OptionsType<{}>) => void) => {
+        let newApiResults = apiResults;
+        if (!(value in search)) {
+            const mergedArray = [...apiResults, ...(await gtfsHandler.fetchApiResults(value))];
+            // mergedArray have duplicates, lets remove the duplicates using Set
+            let set = new Set();
+            newApiResults = mergedArray.filter((item) => {
+                if (!set.has(item.id)) {
+                    set.add(item.id);
+                    return true;
+                }
+                return false;
+            }, set);
+            setApiResults(newApiResults);
+            if (search.indexOf(value) === -1) setSearch([...search, value]);
+        }
+        const options = gtfsHandler.getResultOptions(newApiResults, value);
 
-            if (!!options) {
-                setDefaultOptions(options);
-                resolve(options);
-            }
-        });
+        if (!!options) {
+            setDefaultOptions(options);
+            return callback(options);
+        }
+    };
+    const debouncedSearch = debounce(loadOptions, 800, { leading: false });
 
     const handleChange = (selectedOption: ValueType<OptionTypeBase, false>, { action }: any) => {
         switch (action) {
@@ -127,7 +128,7 @@ export const ApiSearchInput = (props: Props) => {
                 className={classes.input}
                 cacheOptions={false}
                 defaultOptions={defaultOptions}
-                loadOptions={loadOptions}
+                loadOptions={debouncedSearch}
                 onChange={handleChange}
                 inputMode='numeric'
                 pattern='[0-9]*'
