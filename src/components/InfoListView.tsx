@@ -68,8 +68,8 @@ export const InfoListView = (props: Props) => {
     const selectedStop = useSelector(getSelectedStop);
     const busDirection = useSelector(getDirection);
 
-    const [infoList, setInfoList] = useState<ApiResult[]>([]);
-    const [departureList, setDepartureList] = useState<ApiResult[]>([]);
+    const [infoList, setInfoList] = useState<ApiStop[]>([]);
+    const [departureList, setDepartureList] = useState<ApiDepartures[]>([]);
 
     const gtfsHandler = useMemo(() => new GtfsHandler(searchType), [searchType]);
 
@@ -81,7 +81,7 @@ export const InfoListView = (props: Props) => {
             if (queries && Object.keys(apiResult).length && searchType === ApiNaming.route) {
                 const value = apiResult[queries[1].selector] as string;
                 const infoResults = await gtfsHandler.fetchApiResults(value, queries[1].query, busDirection);
-                setInfoList(() => infoResults);
+                setInfoList(() => (infoResults as unknown) as ApiStop[]);
                 const newFeature = getStopPointsFeature(infoResults);
                 mapHandler.setFeature(newFeature, MapFeatureTypes.StopsFeature);
             }
@@ -96,7 +96,7 @@ export const InfoListView = (props: Props) => {
                 const id = searchType === ApiNaming.route ? 2 : 0;
                 const value = (selectedStop as ApiResult)[queries[id].selector] as string;
                 const departureResults = await gtfsHandler.fetchApiResults(value, queries[id].query, busDirection);
-                setDepartureList(() => departureResults);
+                setDepartureList(() => (departureResults as unknown) as ApiDepartures[]);
             }
         }
         fetchRes();
@@ -119,7 +119,7 @@ export const InfoListView = (props: Props) => {
 
     const infoListElements = useMemo(
         () =>
-            ((infoList as unknown) as ApiStop[]).map((item, i) => (
+            infoList.map((item, i) => (
                 <Button className={classes.rowButton} onClick={() => handleItemClick(item)} key={i}>
                     <Card className={classes.row}>
                         <p>{item.name}</p>
@@ -133,7 +133,7 @@ export const InfoListView = (props: Props) => {
 
     const departureListElements = useMemo(
         () =>
-            ((departureList as unknown) as ApiDepartures[]).map((item, i) => (
+            departureList.map((item, i) => (
                 <Button
                     key={i}
                     className={classes.rowButton}

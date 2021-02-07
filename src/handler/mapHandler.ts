@@ -49,6 +49,13 @@ export class MapHandler {
     private mapCallbacks!: MapCallbacks;
     private mapElement!: React.MutableRefObject<HTMLDivElement>;
 
+    static getInstance(): MapHandler {
+        if (!MapHandler.instance) {
+            MapHandler.instance = new MapHandler();
+        }
+        return MapHandler.instance;
+    }
+
     private constructor() {
         this.tileLayer = new TileLayer({
             source: new OSM({}),
@@ -80,13 +87,6 @@ export class MapHandler {
             minZoom: MinZoom,
             projection: Projection,
         });
-    }
-
-    static getInstance(): MapHandler {
-        if (!MapHandler.instance) {
-            MapHandler.instance = new MapHandler();
-        }
-        return MapHandler.instance;
     }
 
     init = (mapElement: React.MutableRefObject<HTMLDivElement>, mapCallbacks: MapCallbacks): void => {
