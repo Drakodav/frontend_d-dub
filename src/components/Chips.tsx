@@ -1,13 +1,21 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Chip from '@material-ui/core/Chip';
 import { ApiDef } from '../model/api.model';
+import { KeyboardArrowUp } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { getSearchType, setSearchType, setSelectedStop, switchDirection } from '../store/reducers/searchInput';
+import {
+    getDirection,
+    getSearchType,
+    setSearchType,
+    setSelectedStop,
+    switchDirection,
+} from '../store/reducers/searchInput';
+import { TRANSITION_DURATION } from '../model/constants';
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
+const useStyles = (state: { direction: number }) =>
+    makeStyles(({ shadows, spacing }) => ({
         root: {
             display: 'flex',
             justifyContent: 'center',
@@ -15,24 +23,41 @@ const useStyles = makeStyles((theme: Theme) =>
             alignSelf: 'flex-start',
             margin: '5px 20px ',
             '& > *': {
-                margin: theme.spacing(0.5),
+                margin: spacing(0.5),
             },
         },
         chip: {
-            boxShadow: theme.shadows[4],
+            boxShadow: shadows[4],
         },
-    })
-);
+        direction: {
+            boxShadow: shadows[4],
+            display: 'flex',
+            flex: '1',
+            flexDirection: 'row-reverse',
+            '& span': {
+                paddingRight: '0px',
+            },
+            paddingRight: '8px',
+        },
+        arrow: {
+            margin: '0px',
+            padding: '0px',
+            transform: state.direction === 0 ? 'rotate(540deg)' : 'none',
+            transition: `transform ${TRANSITION_DURATION}ms`,
+        },
+    }));
 
 interface Props {
     className: string;
 }
 
 export const Chips = ({ className }: Props) => {
-    const classes = useStyles();
     const dispatch = useDispatch();
 
     const searchType = useSelector(getSearchType);
+    const direction = useSelector(getDirection);
+
+    const classes = useStyles({ direction })();
 
     const chipsArray: JSX.Element[] = useMemo(() => {
         return ApiDef.map((item, i) => (
@@ -47,10 +72,11 @@ export const Chips = ({ className }: Props) => {
         )).concat(
             <div style={{ alignSelf: 'flex-end' }}>
                 <Chip
+                    icon={<KeyboardArrowUp className={classes.arrow} />}
                     key={'direction'}
                     label={'direction'}
                     clickable
-                    className={classes.chip}
+                    className={classes.direction}
                     color='default'
                     onClick={() => {
                         dispatch(switchDirection());
@@ -59,7 +85,7 @@ export const Chips = ({ className }: Props) => {
                 />
             </div>
         );
-    }, [dispatch, searchType, classes.chip]);
+    }, [dispatch, searchType, classes]);
 
     return <div className={`${classes.root} ${className}`}>{chipsArray}</div>;
 };
