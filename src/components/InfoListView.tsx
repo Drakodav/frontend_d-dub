@@ -5,10 +5,10 @@ import { Button, Card } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getSearchType,
-    getSearchResults,
     setSelectedStop,
     getSelectedStop,
     getDirection,
+    getSelectedTrip,
 } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { ApiDepartures, ApiNaming, ApiResult, ApiStop } from '../model/api.model';
@@ -64,7 +64,7 @@ export const InfoListView = (props: Props) => {
     const ref = useRef() as React.MutableRefObject<HTMLDivElement>;
 
     const searchType = useSelector(getSearchType);
-    const apiResult = useSelector(getSearchResults);
+    const selectedTrip = useSelector(getSelectedTrip);
     const selectedStop = useSelector(getSelectedStop);
     const busDirection = useSelector(getDirection);
 
@@ -78,8 +78,8 @@ export const InfoListView = (props: Props) => {
 
     useEffect(() => {
         async function fetchRes() {
-            if (queries && Object.keys(apiResult).length && searchType === ApiNaming.route) {
-                const value = apiResult[queries[1].selector] as string;
+            if (queries && Object.keys(selectedTrip).length && searchType === ApiNaming.route) {
+                const value = selectedTrip[queries[1].selector] as string;
                 const infoResults = await gtfsHandler.fetchApiResults(value, queries[1].query, busDirection);
                 setInfoList(() => (infoResults as unknown) as ApiStop[]);
                 const newFeature = getStopPointsFeature(infoResults);
@@ -88,7 +88,7 @@ export const InfoListView = (props: Props) => {
         }
 
         fetchRes();
-    }, [apiResult, gtfsHandler, queries, mapHandler, searchType, busDirection]);
+    }, [selectedTrip, gtfsHandler, queries, mapHandler, searchType, busDirection]);
 
     useEffect(() => {
         async function fetchRes() {
@@ -139,7 +139,7 @@ export const InfoListView = (props: Props) => {
                     className={classes.rowButton}
                     onClick={() => {
                         const newFeature = getGeoObjFeature((item as unknown) as any);
-                        mapHandler.setFeature(newFeature, MapFeatureTypes.ExtraFeature);
+                        mapHandler.setFeature(newFeature, MapFeatureTypes.ExtraTripFeature);
                     }}
                 >
                     <Card className={classes.row}>

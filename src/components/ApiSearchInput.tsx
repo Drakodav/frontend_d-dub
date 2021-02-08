@@ -3,13 +3,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AsyncSelect from 'react-select/async';
 import { OptionsType, OptionTypeBase, ValueType } from 'react-select/src/types';
-import { ApiNaming, ApiResult } from '../model/api.model';
+import { ApiResult } from '../model/api.model';
 import { getDirection, getSearchType, resetSearchInput } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { makeStyles } from '@material-ui/styles';
 import { MapHandler } from '../handler/mapHandler';
-import { getGeoObjFeature } from '../util/geo.util';
-import { MapFeatureTypes } from '../model/constants';
 import debounce from 'debounce-promise';
 
 type Props = {
@@ -63,22 +61,7 @@ export const ApiSearchInput = (props: Props) => {
     const setResultToMap = async (value: string) => {
         const result = gtfsHandler.getSingleApiResult(apiResults, value);
         if (result) {
-            let newResult = result;
-
-            if (searchType === ApiNaming.route) {
-                const { queries } = gtfsHandler.getObj();
-                const trips = (await gtfsHandler.fetchApiResults(
-                    result[queries![0].selector] as string,
-                    queries![0].query,
-                    busDirection
-                )) as ApiResult[];
-                trips.length && (newResult = trips[0]);
-            }
-
-            gtfsHandler.setResults(dispatch, result);
-
-            const newFeature = getGeoObjFeature(newResult);
-            mapHandler.setFeature(newFeature, MapFeatureTypes.ApiFeature);
+            gtfsHandler.setSearchInputResults(dispatch, result, busDirection, mapHandler);
         }
     };
 

@@ -1,7 +1,10 @@
 import { Dispatch } from 'react';
-import { ApiDef, ApiNaming, ApiResult, ApiStop, ApiType, GtfsApiRoute } from '../model/api.model';
-import { setSearchResults, setSelectedStop } from '../store/reducers/searchInput';
+import { ApiDef, ApiNaming, ApiResult, ApiStop, ApiTrip, ApiType, GtfsApiRoute } from '../model/api.model';
+import { MapFeatureTypes } from '../model/constants';
+import { setSearchResults, setSelectedStop, setSelectedTrip } from '../store/reducers/searchInput';
+import { getGeoObjFeature } from '../util/geo.util';
 import { levenshtein } from '../util/util';
+import { MapHandler } from './mapHandler';
 
 export type SelectOptions = { value: string; label: string };
 
@@ -79,15 +82,36 @@ export class GtfsHandler {
             );
     };
 
-    setResults = (dispatch: Dispatch<any>, result: ApiResult) => {
+    setSearchInputResults = async (
+        dispatch: Dispatch<any>,
+        result: ApiResult,
+        busDirection: number,
+        mapHandler: MapHandler
+    ) => {
+        dispatch(setSearchResults(result));
         switch (this.obj.name) {
             case ApiNaming.route:
-                dispatch(setSearchResults(result));
+                const { queries } = this.obj;
+                const trips = (await this.fetchApiResults(
+                    result[queries![0].selector] as string,
+                    queries![0].query,
+                    busDirection
+                )) as ApiTrip[];
+
+                if (trips.length) {
+                    const trip = trips[0];
+                    dispatch(setSelectedTrip(trip));
+
+                    const newFeature = getGeoObjFeature(trip);
+                    mapHandler.setFeature(newFeature, MapFeatureTypes.TripFeature);
+                }
                 break;
 
             case ApiNaming.stop:
-                dispatch(setSearchResults(result));
                 dispatch(setSelectedStop((result as unknown) as ApiStop));
+
+                const newFeature = getGeoObjFeature(result);
+                mapHandler.setFeature(newFeature, MapFeatureTypes.StopFeature);
                 break;
         }
     };

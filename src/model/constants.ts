@@ -18,9 +18,10 @@ export const GeoOptions = {
 };
 
 export enum MapFeatureTypes {
-    ApiFeature,
+    TripFeature,
+    StopFeature,
     StopsFeature,
-    ExtraFeature,
+    ExtraTripFeature,
     AccuracyFeature,
     PositionFeature,
 }

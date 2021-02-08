@@ -9,7 +9,7 @@ import { ObjectEvent } from 'ol/Object';
 import { fromLonLat } from 'ol/proj';
 import OSM from 'ol/source/OSM';
 import VectorSource from 'ol/source/Vector';
-import { apiFeatureStyle, extraFeatureStyle, positionFeatureStyle } from '../util/geo.util';
+import { tripFeatureStyle, extraTripFeatureStyle, positionFeatureStyle } from '../util/geo.util';
 import {
     CENTER_LOCATION,
     TRANSITION_DURATION,
@@ -35,9 +35,10 @@ export class MapHandler {
     private tileLayer: TileLayer;
 
     private featuresLayer: VectorLayer;
-    private apiFeature: Feature = new Feature();
+    private tripFeature: Feature = new Feature();
     private stopsFeature: Feature = new Feature();
-    private extraFeature: Feature = new Feature();
+    private stopFeature: Feature = new Feature();
+    private extraTripFeature: Feature = new Feature();
 
     private LocationLayer: VectorLayer;
     private accuracyFeature: Feature = new Feature();
@@ -62,14 +63,14 @@ export class MapHandler {
         });
 
         // create and add vector source layer
-        this.apiFeature.setStyle(apiFeatureStyle());
+        this.tripFeature.setStyle(tripFeatureStyle());
         this.positionFeature.setStyle(positionFeatureStyle());
 
-        this.extraFeature.setStyle(extraFeatureStyle());
+        this.extraTripFeature.setStyle(extraTripFeatureStyle());
 
         this.featuresLayer = new VectorLayer({
             source: new VectorSource({
-                features: [this.apiFeature, this.stopsFeature, this.extraFeature],
+                features: [this.tripFeature, this.stopsFeature, this.stopFeature, this.extraTripFeature],
             }),
         });
 
@@ -161,20 +162,23 @@ export class MapHandler {
         let feat: Feature;
 
         switch (featureType) {
-            case MapFeatureTypes.ApiFeature:
-                feat = this.apiFeature;
+            case MapFeatureTypes.TripFeature:
+                feat = this.tripFeature;
                 break;
             case MapFeatureTypes.StopsFeature:
                 feat = this.stopsFeature;
                 break;
-            case MapFeatureTypes.AccuracyFeature:
-                feat = this.accuracyFeature;
+            case MapFeatureTypes.ExtraTripFeature:
+                feat = this.extraTripFeature;
                 break;
-            case MapFeatureTypes.ExtraFeature:
-                feat = this.extraFeature;
+            case MapFeatureTypes.StopFeature:
+                feat = this.stopFeature;
                 break;
             case MapFeatureTypes.PositionFeature:
                 feat = this.positionFeature;
+                break;
+            case MapFeatureTypes.AccuracyFeature:
+                feat = this.accuracyFeature;
                 break;
         }
 

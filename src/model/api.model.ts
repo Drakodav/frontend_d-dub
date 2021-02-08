@@ -38,7 +38,7 @@ export const ApiDef: ApiType[] = [
             },
             {
                 selector: 'id',
-                query: 'query/trip_stops/?route_id=',
+                query: 'query/trip_stops/?trip_id=',
                 type: 'stops',
                 direction: true,
             },
@@ -65,31 +65,44 @@ export const ApiDef: ApiType[] = [
     },
 ];
 
-export type ApiResult = {
+export interface ApiResult {
     geometry?: GeoJSONGeometry;
     point?: GeoJSONGeometry;
     id?: number;
     short_name?: string;
     long_name?: string;
     name?: string;
-    stop_sequence?: string;
-};
+}
 
-export type ApiStop = {
+export interface ApiStop extends ApiResult {
     id: number;
     stop_id: string;
     name: string;
-    point: Point;
+    point: GeoJSONGeometry & Point;
     stop_sequence: number;
-};
+}
 
-export type ApiDepartures = {
+export interface ApiTrip extends ApiResult {
+    id: number;
+    trip_id: string;
+    headsign: string;
+    short_name?: string;
+    direction: number;
+    geometry: GeoJSONGeometry & LineString;
+    wheelchair_accessible?: string;
+    bikes_allowed?: string;
+    route_id: number;
+    sevice_id: number;
+    shape_id: number;
+}
+
+export interface ApiDepartures extends ApiResult {
     departure_time: string;
     direction: string;
-    geometry: LineString;
+    geometry: GeoJSONGeometry & LineString;
     headsign: string;
     id: number;
     short_name: string;
     trip_id: string;
     time_delta?: { arrival: number; departure: number };
-};
+}

@@ -55,12 +55,12 @@ export const positionFeatureStyle = (): Style =>
         }),
     });
 
-export const apiFeatureStyle = (): Style =>
+export const tripFeatureStyle = (): Style =>
     new Style({
         ...defaultStyles(undefined, { width: 2 }),
     });
 
-export const extraFeatureStyle = (): Style =>
+export const extraTripFeatureStyle = (): Style =>
     new Style({
         ...defaultStyles(undefined, { width: 2, color: ThemeConfiguration.secondary.dark }),
     });
