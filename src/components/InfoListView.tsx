@@ -144,7 +144,19 @@ export const InfoListView = (props: Props) => {
                 >
                     <Card className={classes.row}>
                         <p>{item.short_name}</p>
-                        <p>due in {item.departure_time}</p>
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                placeContent: 'space-around',
+                                lineHeight: '0px',
+                            }}
+                        >
+                            <p>due in {item.departure_time}</p>
+                            {item.time_delta && (
+                                <p style={{ fontSize: '8px' }}>realtime {item.time_delta.arrival / 60}</p>
+                            )}
+                        </div>
                     </Card>
                 </Button>
             )),
@@ -163,7 +175,7 @@ export const InfoListView = (props: Props) => {
                                 <p>{selectedStop.name}</p>
                             </Card>
                         </Button>
-                        {departureListElements}
+                        {departureListElements ?? <p>No Live Departures available</p>}
                     </Card>
                     <Button
                         variant='contained'
@@ -190,7 +202,7 @@ export const InfoListView = (props: Props) => {
                                 <p>{selectedStop.name}</p>
                             </Card>
                         </Button>
-                        {departureListElements}
+                        {departureListElements ?? <p>No Live Departures available</p>}
                     </Card>
                 </>
             ) : (

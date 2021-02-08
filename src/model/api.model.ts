@@ -91,4 +91,5 @@ export type ApiDepartures = {
     id: number;
     short_name: string;
     trip_id: string;
+    time_delta?: { arrival: number; departure: number };
 };
