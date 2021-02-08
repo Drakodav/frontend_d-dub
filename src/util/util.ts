@@ -52,7 +52,9 @@ export const departureFormatting = (item: ApiDeparture): string => {
     const time = getDateFromHours(departure_time);
     time.setMinutes(time.getMinutes() + delta);
 
-    const newTime = `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+    const newTime = `${time.getHours() < 10 ? '0'.concat(time.getHours().toString()) : time.getHours()}:${
+        time.getMinutes() < 10 ? '0'.concat(time.getMinutes().toString()) : time.getMinutes()
+    }:${time.getSeconds() < 10 ? '0'.concat(time.getSeconds().toString()) : time.getSeconds()}`;
 
     return newTime;
 };
