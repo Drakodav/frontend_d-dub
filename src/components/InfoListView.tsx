@@ -9,6 +9,7 @@ import { ApiDeparture, ApiNaming, ApiResult, ApiStop } from '../model/api.model'
 import { MapHandler } from '../handler/mapHandler';
 import { getGeoObjFeature, getStopPointsFeature } from '../util/geo.util';
 import { MapFeatureTypes } from '../model/constants';
+import { departureFormatting, getHeadsign, showDepartureRow } from '../util/util';
 
 const useStyles = (state: {}) =>
     makeStyles(({ palette, shadows }) => ({
@@ -42,6 +43,7 @@ const useStyles = (state: {}) =>
             border: 'none',
             borderRadius: '0px',
             padding: '0.4px 0px',
+            fontSize: '0.85rem',
         },
     }));
 
@@ -124,33 +126,39 @@ export const InfoListView = (props: Props) => {
 
     const departureListElements = useMemo(
         () =>
-            departureList.map((item, i) => (
-                <Button
-                    key={i}
-                    className={classes.rowButton}
-                    onClick={() => {
-                        const newFeature = getGeoObjFeature((item as unknown) as any);
-                        mapHandler.setFeature(newFeature, MapFeatureTypes.ExtraTripFeature);
-                    }}
-                >
-                    <Card className={classes.row}>
-                        <p>{item.short_name}</p>
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                placeContent: 'space-around',
-                                lineHeight: '0px',
-                            }}
-                        >
-                            <p>due in {item.departure_time}</p>
-                            {item.time_delta && (
-                                <p style={{ fontSize: '8px' }}>realtime {item.time_delta.arrival / 60}</p>
-                            )}
-                        </div>
-                    </Card>
-                </Button>
-            )),
+            departureList.map((item, i) =>
+                showDepartureRow(item) ? (
+                    <Button
+                        key={i}
+                        className={classes.rowButton}
+                        onClick={() => {
+                            const newFeature = getGeoObjFeature((item as unknown) as any);
+                            mapHandler.setFeature(newFeature, MapFeatureTypes.ExtraTripFeature);
+                        }}
+                    >
+                        <Card className={classes.row}>
+                            <p style={{ width: '40px' }}>{item.short_name}</p>
+                            <p style={{ flex: 1, alignSelf: 'center' }}>{getHeadsign(item.headsign, item.direction)}</p>
+
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    placeContent: 'space-around',
+                                    lineHeight: '0px',
+                                }}
+                            >
+                                <p>due at {item.departure_time}</p>
+                                {item.time_delta && (
+                                    <p style={{ fontSize: '0.5rem' }}>realtime {departureFormatting(item)}</p>
+                                )}
+                            </div>
+                        </Card>
+                    </Button>
+                ) : (
+                    <></>
+                )
+            ),
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [departureList, classes.row]
     );

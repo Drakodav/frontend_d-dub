@@ -1,3 +1,5 @@
+import { ApiDeparture } from '../model/api.model';
+
 // compares the distance from string a to b
 // useful for better string matching and sorting
 export const levenshtein = (a: string, b: string): number => {
@@ -33,4 +35,42 @@ export const levenshtein = (a: string, b: string): number => {
         }
     }
     return matrix[bn][an];
+};
+
+export const getHeadsign = (headsign: string, direction: string) => headsign.split(' - ')[direction === '0' ? 1 : 0];
+
+function getDateFromHours(time: string) {
+    const times = time.split(':').map((i) => parseInt(i));
+    let now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...times);
+}
+
+export const departureFormatting = (item: ApiDeparture): string => {
+    const { departure_time, time_delta } = item;
+    const delta = time_delta!.arrival / 60;
+
+    const time = getDateFromHours(departure_time);
+    time.setMinutes(time.getMinutes() + delta);
+
+    const newTime = `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`;
+
+    return newTime;
+};
+
+export const showDepartureRow = (item: ApiDeparture): boolean => {
+    const { departure_time, time_delta } = item;
+
+    const departureTime = getDateFromHours(departure_time);
+    const currentTime = new Date();
+
+    if (time_delta) {
+        const delta = time_delta!.arrival / 60;
+        departureTime.setMinutes(departureTime.getMinutes() + delta);
+    }
+
+    if (currentTime > departureTime) {
+        return false;
+    }
+
+    return true;
 };
