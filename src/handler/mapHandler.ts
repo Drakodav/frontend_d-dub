@@ -1,4 +1,7 @@
-import { Feature, View } from 'ol';
+import { Dispatch } from '@reduxjs/toolkit';
+import { Feature, Overlay, View } from 'ol';
+import { FeatureLike } from 'ol/Feature';
+import { MultiPoint } from 'ol/geom';
 import Geometry from 'ol/geom/Geometry';
 import Point from 'ol/geom/Point';
 import { circular } from 'ol/geom/Polygon';
@@ -6,26 +9,29 @@ import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import Map from 'ol/Map';
 import { ObjectEvent } from 'ol/Object';
-import { fromLonLat } from 'ol/proj';
+import { fromLonLat, transform } from 'ol/proj';
 import OSM from 'ol/source/OSM';
 import VectorSource from 'ol/source/Vector';
-import { tripFeatureStyle, extraTripFeatureStyle, positionFeatureStyle } from '../util/geo.util';
+import { ApiStop } from '../model/api.model';
 import {
     CENTER_LOCATION,
-    TRANSITION_DURATION,
-    MAP_TRANSITION,
+    DublinBoundary,
     GeoOptions,
+    MapFeatureTypes,
+    MAP_TRANSITION,
     MaxZoom,
     MinZoom,
     Padding,
-    DublinBoundary,
     Projection,
-    MapFeatureTypes,
+    TRANSITION_DURATION,
 } from '../model/constants';
+import { setSelectedStop } from '../store/reducers/searchInput';
+import { extraTripFeatureStyle, positionFeatureStyle, tripFeatureStyle } from '../util/geo.util';
 
 type MapCallbacks = {
     setRotation: (value: React.SetStateAction<boolean>) => void;
     setLocation: (value: React.SetStateAction<string>) => void;
+    dispatch: Dispatch<any>;
 };
 
 export class MapHandler {
@@ -33,6 +39,7 @@ export class MapHandler {
     private map: Map = new Map({});
     private view: View;
     private tileLayer: TileLayer;
+    private mapPopup: Overlay = new Overlay({});
 
     private featuresLayer: VectorLayer;
     private tripFeature: Feature = new Feature();
@@ -62,6 +69,13 @@ export class MapHandler {
             source: new OSM({}),
         });
 
+        this.stopsFeature.setGeometryName(MapFeatureTypes.StopsFeature.toString());
+        this.tripFeature.setGeometryName(MapFeatureTypes.TripFeature.toString());
+        this.extraTripFeature.setGeometryName(MapFeatureTypes.ExtraTripFeature.toString());
+        this.stopFeature.setGeometryName(MapFeatureTypes.StopFeature.toString());
+        this.accuracyFeature.setGeometryName(MapFeatureTypes.AccuracyFeature.toString());
+        this.positionFeature.setGeometryName(MapFeatureTypes.PositionFeature.toString());
+
         // create and add vector source layer
         this.tripFeature.setStyle(tripFeatureStyle());
         this.positionFeature.setStyle(positionFeatureStyle());
@@ -90,16 +104,75 @@ export class MapHandler {
         });
     }
 
-    init = (mapElement: React.MutableRefObject<HTMLDivElement>, mapCallbacks: MapCallbacks): void => {
+    init = (
+        mapElement: React.MutableRefObject<HTMLDivElement>,
+        mapPopup: React.MutableRefObject<HTMLDivElement>,
+        mapCallbacks: MapCallbacks
+    ): void => {
         this.mapElement = mapElement;
         this.mapCallbacks = mapCallbacks;
+        this.mapPopup = new Overlay({
+            element: mapPopup.current,
+            autoPan: true,
+            autoPanAnimation: { duration: TRANSITION_DURATION },
+        });
 
         this.map = new Map({
             target: this.mapElement.current,
             layers: [this.tileLayer, this.featuresLayer, this.LocationLayer],
             view: this.view,
             controls: [],
+            overlays: [this.mapPopup],
         });
+
+        const content = document.getElementById('popup-content');
+        const closer = document.getElementById('popup-close');
+        if (closer && content) {
+            closer.onclick = () => {
+                this.mapPopup.setPosition(undefined);
+                closer?.blur();
+                return false;
+            };
+
+            this.map.on('singleclick', (event) => {
+                if (this.map.hasFeatureAtPixel(event.pixel) === true) {
+                    this.map.forEachFeatureAtPixel(event.pixel, (feature: FeatureLike) => {
+                        let currFeat: Geometry | undefined;
+                        currFeat = feature.getProperties()[MapFeatureTypes.StopsFeature]
+                            ? (feature.getGeometry() as MultiPoint)
+                            : undefined;
+
+                        currFeat =
+                            !currFeat && feature.getProperties()[MapFeatureTypes.StopFeature]
+                                ? (feature.getGeometry() as Point)
+                                : currFeat;
+
+                        const stops: ApiStop[] = feature.getGeometry()?.getProperties()?.stops;
+                        if (currFeat && stops) {
+                            const coordinate = currFeat.getClosestPoint(event.coordinate);
+
+                            stops.forEach((stop) => {
+                                if (
+                                    transform(stop.point.coordinates, 'EPSG:4326', 'EPSG:3857').toString() ===
+                                    coordinate.toString()
+                                ) {
+                                    content!.innerHTML = `${stop.name}`;
+                                    content!.onclick = () => {
+                                        mapCallbacks.dispatch(setSelectedStop(stop));
+                                        this.mapPopup.setPosition(undefined);
+                                    };
+                                    this.mapPopup.setPosition(coordinate);
+                                }
+                            });
+                            console.log(currFeat);
+                        }
+                    });
+                } else {
+                    this.mapPopup.setPosition(undefined);
+                    closer?.blur();
+                }
+            });
+        }
 
         this.view.on('change:rotation', (e: ObjectEvent) => {
             this.mapCallbacks.setRotation((e.target as View).getRotation() !== 0 ? true : false);
@@ -195,11 +268,13 @@ export class MapHandler {
             });
     };
 
+    // set the size of the map
     setSize = (width: number, height: number): void => {
         if (width === 0 && height === 0) return;
         this.map.setSize([width, height]);
     };
 
+    // not used but for future may be useful
     panMapByPixel(x: number, y: number) {
         let newCenterInPx;
         let center = this.view.getCenter();
@@ -239,8 +314,6 @@ export class MapHandler {
     };
 
     resetRotation = (): void => this.view.animate({ rotation: 0, duration: MAP_TRANSITION });
-
-    updateSize = (): void => this.map.updateSize();
 
     gotoCenter = (coords: number[]) =>
         this.view.animate({

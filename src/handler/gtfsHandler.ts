@@ -111,6 +111,7 @@ export class GtfsHandler {
                 dispatch(setSelectedStop((result as unknown) as ApiStop));
 
                 const newFeature = getGeoObjFeature(result);
+                newFeature?.setProperties({ stops: [result] });
                 mapHandler.setFeature(newFeature, MapFeatureTypes.StopFeature);
                 break;
         }

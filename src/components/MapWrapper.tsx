@@ -1,4 +1,4 @@
-import { IconButton, makeStyles } from '@material-ui/core';
+import { Button, Card, IconButton, makeStyles } from '@material-ui/core';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MapHandler } from '../handler/mapHandler';
@@ -72,6 +72,20 @@ const useStyles = (props: StyleProps) =>
         gpsGranted: makeGpsIcon(props.location === 'granted'),
         gpsPrompted: makeGpsIcon(props.location === 'prompt'),
         gpsDenied: makeGpsIcon(props.location === 'denied'),
+        popup: {
+            display: 'flex',
+            flex: '1',
+            padding: '5px',
+            flexDirection: 'row',
+            fontSize: '12px',
+            maxWidth: `${props.windowWidth / 3}px`,
+        },
+        close_button: {
+            alignSelf: 'flex-start',
+            padding: '0px 5px',
+            justifyContent: 'flex-start',
+            minWidth: 'auto',
+        },
     }));
 
 export const MapWrapper = () => {
@@ -88,6 +102,8 @@ export const MapWrapper = () => {
     const classes = useStyles({ ...windowDim, visible, rotated, location: locationPermission, offset })();
 
     const mapElement = useRef() as React.MutableRefObject<HTMLDivElement>;
+    const mapPopup = useRef() as React.MutableRefObject<HTMLDivElement>;
+
     const mapHandler: MapHandler = useMemo(() => {
         return MapHandler.getInstance();
     }, []);
@@ -97,9 +113,10 @@ export const MapWrapper = () => {
         const mapCallbacks = {
             setRotation: setRotation,
             setLocation: setLocationPermission,
+            dispatch: dispatch,
         };
-        mapHandler.init(mapElement, mapCallbacks);
-    }, [mapHandler]);
+        mapHandler.init(mapElement, mapPopup, mapCallbacks);
+    }, [mapHandler, dispatch]);
 
     // resize map every time the window size changes
     useEffect(() => {
@@ -178,6 +195,12 @@ export const MapWrapper = () => {
             />
 
             <div ref={mapElement} className={classes.map} />
+            <Card ref={mapPopup} className={classes.popup}>
+                <Button id='popup-content' style={{ fontSize: '12px' }}></Button>
+                <Button id='popup-close' className={classes.close_button}>
+                    X
+                </Button>
+            </Card>
         </>
     );
 };

@@ -1,17 +1,11 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import { Button, Card } from '@material-ui/core';
+import { Button, Card, Fade } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    getSearchType,
-    setSelectedStop,
-    getSelectedStop,
-    getDirection,
-    getSelectedTrip,
-} from '../store/reducers/searchInput';
+import { getSearchType, setSelectedStop, getSelectedStop, getSelectedTrip } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
-import { ApiDepartures, ApiNaming, ApiResult, ApiStop } from '../model/api.model';
+import { ApiDeparture, ApiNaming, ApiResult, ApiStop } from '../model/api.model';
 import { MapHandler } from '../handler/mapHandler';
 import { getGeoObjFeature, getStopPointsFeature } from '../util/geo.util';
 import { MapFeatureTypes } from '../model/constants';
@@ -58,18 +52,16 @@ interface Props {
 export const InfoListView = (props: Props) => {
     const { className } = props;
 
-    const classes = useStyles({})();
     const dispatch = useDispatch();
-
     const ref = useRef() as React.MutableRefObject<HTMLDivElement>;
 
     const searchType = useSelector(getSearchType);
     const selectedTrip = useSelector(getSelectedTrip);
     const selectedStop = useSelector(getSelectedStop);
-    const busDirection = useSelector(getDirection);
 
+    const classes = useStyles({})();
     const [infoList, setInfoList] = useState<ApiStop[]>([]);
-    const [departureList, setDepartureList] = useState<ApiDepartures[]>([]);
+    const [departureList, setDepartureList] = useState<ApiDeparture[]>([]);
 
     const gtfsHandler = useMemo(() => new GtfsHandler(searchType), [searchType]);
 
@@ -80,23 +72,22 @@ export const InfoListView = (props: Props) => {
         async function fetchRes() {
             if (queries && Object.keys(selectedTrip).length && searchType === ApiNaming.route) {
                 const value = selectedTrip[queries[1].selector] as string;
-                const infoResults = await gtfsHandler.fetchApiResults(value, queries[1].query, busDirection);
-                setInfoList(() => (infoResults as unknown) as ApiStop[]);
-                const newFeature = getStopPointsFeature(infoResults);
+                const stopsList = (await gtfsHandler.fetchApiResults(value, queries[1].query)) as ApiStop[];
+                setInfoList(() => stopsList);
+                const newFeature = getStopPointsFeature(stopsList);
                 mapHandler.setFeature(newFeature, MapFeatureTypes.StopsFeature);
             }
         }
-
         fetchRes();
-    }, [selectedTrip, gtfsHandler, queries, mapHandler, searchType, busDirection]);
+    }, [selectedTrip, gtfsHandler, queries, mapHandler, searchType]);
 
     useEffect(() => {
         async function fetchRes() {
             if (queries && Object.keys(selectedStop).length) {
                 const id = searchType === ApiNaming.route ? 2 : 0;
                 const value = (selectedStop as ApiResult)[queries[id].selector] as string;
-                const departureResults = await gtfsHandler.fetchApiResults(value, queries[id].query, busDirection);
-                setDepartureList(() => (departureResults as unknown) as ApiDepartures[]);
+                const departureResults = await gtfsHandler.fetchApiResults(value, queries[id].query);
+                setDepartureList(() => departureResults as ApiDeparture[]);
             }
         }
         fetchRes();
@@ -106,7 +97,7 @@ export const InfoListView = (props: Props) => {
         }, 1000 * 30);
 
         return () => clearInterval(interval);
-    }, [selectedStop, gtfsHandler, queries, mapHandler, searchType, busDirection]);
+    }, [selectedStop, gtfsHandler, queries, mapHandler, searchType]);
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -123,7 +114,7 @@ export const InfoListView = (props: Props) => {
                 <Button className={classes.rowButton} onClick={() => handleItemClick(item)} key={i}>
                     <Card className={classes.row}>
                         <p>{item.name}</p>
-                        <p>{item.stop_sequence}</p>
+                        <p>{i + 1}</p>
                     </Card>
                 </Button>
             )),
@@ -165,37 +156,44 @@ export const InfoListView = (props: Props) => {
     );
 
     let component: JSX.Element;
+    const departureView: boolean = !!Object.keys(selectedStop).length;
     switch (searchType) {
         case ApiNaming.route:
-            component = !!Object.keys(selectedStop).length ? (
+            component = (
                 <>
-                    <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
-                        <Button className={classes.rowButton} key={-1}>
-                            <Card className={classes.row} style={{ placeContent: 'center' }}>
-                                <p>{selectedStop.name}</p>
+                    <Fade in={departureView} mountOnEnter unmountOnExit>
+                        <>
+                            <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
+                                <Button className={classes.rowButton} key={-1}>
+                                    <Card className={classes.row} style={{ placeContent: 'center' }}>
+                                        <p>{selectedStop.name}</p>
+                                    </Card>
+                                </Button>
+                                {departureListElements ?? <p>No Live Departures available</p>}
                             </Card>
-                        </Button>
-                        {departureListElements ?? <p>No Live Departures available</p>}
-                    </Card>
-                    <Button
-                        variant='contained'
-                        color='primary'
-                        style={{ alignSelf: 'flex-end', width: '100%', borderRadius: '0px', height: '60px' }}
-                        onClick={() => dispatch(setSelectedStop({} as any))}
-                    >
-                        Back
-                    </Button>
+                            <Button
+                                variant='contained'
+                                color='primary'
+                                style={{ alignSelf: 'flex-end', width: '100%', borderRadius: '0px', height: '60px' }}
+                                onClick={() => dispatch(setSelectedStop({} as any))}
+                            >
+                                Back
+                            </Button>
+                        </>
+                    </Fade>
+                    <Fade in={!departureView} mountOnEnter unmountOnExit>
+                        <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
+                            {infoListElements}
+                        </Card>
+                    </Fade>
                 </>
-            ) : (
-                <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
-                    {infoListElements}
-                </Card>
             );
+
             break;
 
         case ApiNaming.stop:
-            component = !!Object.keys(selectedStop).length ? (
-                <>
+            component = (
+                <Fade in={departureView} mountOnEnter unmountOnExit>
                     <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
                         <Button className={classes.rowButton} key={-1}>
                             <Card className={classes.row} style={{ placeContent: 'center' }}>
@@ -204,9 +202,7 @@ export const InfoListView = (props: Props) => {
                         </Button>
                         {departureListElements ?? <p>No Live Departures available</p>}
                     </Card>
-                </>
-            ) : (
-                <></>
+                </Fade>
             );
             break;
     }

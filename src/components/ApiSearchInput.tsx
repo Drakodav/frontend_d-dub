@@ -35,7 +35,7 @@ export const ApiSearchInput = (props: Props) => {
     const [apiResults, setApiResults] = useState<ApiResult[]>([]);
     const [defaultOptions, setDefaultOptions] = useState<{}[]>();
     const [search, setSearch] = useState<string[]>([]);
-    const [inputValue, setInputValue] = useState({ value: null, label: null });
+    const [inputValue, setInputValue] = useState<{ value: string; label: string }>({} as any);
 
     const searchType = useSelector(getSearchType);
     const busDirection = useSelector(getDirection);
@@ -61,9 +61,15 @@ export const ApiSearchInput = (props: Props) => {
     const setResultToMap = async (value: string) => {
         const result = gtfsHandler.getSingleApiResult(apiResults, value);
         if (result) {
-            gtfsHandler.setSearchInputResults(dispatch, result, busDirection, mapHandler);
+            await gtfsHandler.setSearchInputResults(dispatch, result, busDirection, mapHandler);
         }
     };
+
+    // re-run search resuls when bus direction changes
+    useEffect(() => {
+        !!inputValue?.value && setResultToMap(inputValue.value as string);
+        // eslint-disable-next-line
+    }, [busDirection]);
 
     const loadOptions = async (value: string, callback: (options: OptionsType<{}>) => void) => {
         let newApiResults = apiResults;

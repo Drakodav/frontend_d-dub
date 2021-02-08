@@ -1,6 +1,4 @@
-import { GeoJSONGeometry } from 'ol/format/GeoJSON';
-import LineString from 'ol/geom/LineString';
-import Point from 'ol/geom/Point';
+import { GeoJSONGeometry, GeoJSONLineString, GeoJSONPoint } from 'ol/format/GeoJSON';
 
 export const GtfsApiRoute = 'https://api.thev-lad.com/api/gtfs/';
 // process.env.NODE_ENV === 'production' ? 'https://api.thev-lad.com/api/gtfs/' : 'http://127.0.0.1:8000/api/gtfs/';
@@ -40,7 +38,7 @@ export const ApiDef: ApiType[] = [
                 selector: 'id',
                 query: 'query/trip_stops/?trip_id=',
                 type: 'stops',
-                direction: true,
+                direction: false,
             },
             {
                 selector: 'id',
@@ -65,20 +63,20 @@ export const ApiDef: ApiType[] = [
     },
 ];
 
-export interface ApiResult {
+export type ApiResult = {
     geometry?: GeoJSONGeometry;
     point?: GeoJSONGeometry;
     id?: number;
     short_name?: string;
     long_name?: string;
     name?: string;
-}
+};
 
 export interface ApiStop extends ApiResult {
     id: number;
     stop_id: string;
     name: string;
-    point: GeoJSONGeometry & Point;
+    point: GeoJSONPoint;
     stop_sequence: number;
 }
 
@@ -88,7 +86,7 @@ export interface ApiTrip extends ApiResult {
     headsign: string;
     short_name?: string;
     direction: number;
-    geometry: GeoJSONGeometry & LineString;
+    geometry: GeoJSONLineString;
     wheelchair_accessible?: string;
     bikes_allowed?: string;
     route_id: number;
@@ -96,10 +94,10 @@ export interface ApiTrip extends ApiResult {
     shape_id: number;
 }
 
-export interface ApiDepartures extends ApiResult {
+export interface ApiDeparture extends ApiResult {
     departure_time: string;
     direction: string;
-    geometry: GeoJSONGeometry & LineString;
+    geometry: GeoJSONLineString;
     headsign: string;
     id: number;
     short_name: string;

@@ -1,7 +1,7 @@
 import { GeoJSONMultiLineString, GeoJSONPoint, GeoJSONLineString } from 'ol/format/GeoJSON';
 import Geometry from 'ol/geom/Geometry';
 import { Point, MultiLineString, LineString, MultiPoint } from 'ol/geom';
-import { ApiResult } from '../model/api.model';
+import { ApiResult, ApiStop } from '../model/api.model';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import { Options as FillOptions } from 'ol/style/Fill';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
@@ -34,11 +34,14 @@ export const getGeoObjFeature = (apiResult: ApiResult): Geometry | undefined => 
     }
 };
 
-export const getStopPointsFeature = (stops: ApiResult[]): Geometry | undefined => {
+export const getStopPointsFeature = (stops: ApiStop[]): Geometry | undefined => {
     if (!stops.length) return;
 
     const points = stops.map((stop) => (stop.point as GeoJSONPoint).coordinates);
-    return new MultiPoint(points, GeometryLayout.XY).transform('EPSG:4326', 'EPSG:3857');
+    const newFeature = new MultiPoint(points, GeometryLayout.XY).transform('EPSG:4326', 'EPSG:3857');
+    newFeature.setProperties({ stops });
+
+    return newFeature;
 };
 
 export const positionFeatureStyle = (): Style =>
