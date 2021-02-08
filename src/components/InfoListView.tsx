@@ -159,7 +159,7 @@ export const InfoListView = (props: Props) => {
     const departureView: boolean = !!Object.keys(selectedStop).length;
     switch (searchType) {
         case ApiNaming.route:
-            component = (
+            component = departureView ? (
                 <>
                     <Fade in={departureView} mountOnEnter unmountOnExit>
                         <>
@@ -181,6 +181,9 @@ export const InfoListView = (props: Props) => {
                             </Button>
                         </>
                     </Fade>
+                </>
+            ) : (
+                <>
                     <Fade in={!departureView} mountOnEnter unmountOnExit>
                         <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
                             {infoListElements}

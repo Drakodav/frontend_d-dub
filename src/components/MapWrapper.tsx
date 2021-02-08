@@ -196,7 +196,9 @@ export const MapWrapper = () => {
 
             <div ref={mapElement} className={classes.map} />
             <Card ref={mapPopup} className={classes.popup}>
-                <Button id='popup-content' style={{ fontSize: '12px' }}></Button>
+                <Button id='popup-content' style={{ fontSize: '12px' }}>
+                    Stop
+                </Button>
                 <Button id='popup-close' className={classes.close_button}>
                     X
                 </Button>

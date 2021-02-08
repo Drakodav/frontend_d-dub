@@ -156,7 +156,7 @@ export class MapHandler {
                                     transform(stop.point.coordinates, 'EPSG:4326', 'EPSG:3857').toString() ===
                                     coordinate.toString()
                                 ) {
-                                    content!.innerHTML = `${stop.name}`;
+                                    content.getElementsByTagName('span')[0].innerText = stop.name;
                                     content!.onclick = () => {
                                         mapCallbacks.dispatch(setSelectedStop(stop));
                                         this.mapPopup.setPosition(undefined);
@@ -164,7 +164,6 @@ export class MapHandler {
                                     this.mapPopup.setPosition(coordinate);
                                 }
                             });
-                            console.log(currFeat);
                         }
                     });
                 } else {
