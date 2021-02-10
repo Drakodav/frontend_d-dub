@@ -97,6 +97,7 @@ export interface ApiTrip extends ApiResult {
 export interface ApiDeparture extends ApiResult {
     departure_time: string;
     direction: string;
+    stop_sequence: number;
     geometry: GeoJSONLineString;
     headsign: string;
     id: number;

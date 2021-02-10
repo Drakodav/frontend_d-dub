@@ -9,7 +9,8 @@ import { ApiDeparture, ApiNaming, ApiResult, ApiStop } from '../model/api.model'
 import { MapHandler } from '../handler/mapHandler';
 import { getGeoObjFeature, getStopPointsFeature } from '../util/geo.util';
 import { MapFeatureTypes } from '../model/constants';
-import { departureFormatting, getHeadsign, showDepartureRow } from '../util/util';
+import { departureFormatting, getHeadsign, showDepartureRow, sortDepartures } from '../util/util';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 const useStyles = (state: {}) =>
     makeStyles(({ palette, shadows }) => ({
@@ -64,6 +65,8 @@ export const InfoListView = (props: Props) => {
     const classes = useStyles({})();
     const [infoList, setInfoList] = useState<ApiStop[]>([]);
     const [departureList, setDepartureList] = useState<ApiDeparture[]>([]);
+    const [refresh, setRefresh] = useState<boolean>(false);
+    const [count, setCount] = useState<number>(0);
 
     const gtfsHandler = useMemo(() => new GtfsHandler(searchType), [searchType]);
 
@@ -100,14 +103,23 @@ export const InfoListView = (props: Props) => {
                 mapHandler.setFeature(stopFeature, MapFeatureTypes.StopFeature);
             }
         }
-        fetchRes();
+
+        if (count === 0 && Object.keys(selectedStop).length) {
+            fetchRes();
+            setCount(() => 1);
+        }
+
+        if (refresh) {
+            fetchRes();
+            setRefresh(() => false);
+        }
 
         const interval = setInterval(() => {
             fetchRes();
-        }, 1000 * 30);
+        }, 1000 * 60);
 
         return () => clearInterval(interval);
-    }, [selectedStop, gtfsHandler, queries, mapHandler, searchType]);
+    }, [selectedStop, gtfsHandler, queries, mapHandler, searchType, refresh, count]);
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -134,7 +146,7 @@ export const InfoListView = (props: Props) => {
 
     const departureListElements = useMemo(
         () =>
-            departureList.map((item, i) =>
+            departureList.sort(sortDepartures).map((item, i) =>
                 showDepartureRow(item) ? (
                     <Button
                         key={i}
@@ -156,9 +168,13 @@ export const InfoListView = (props: Props) => {
                                     lineHeight: '0px',
                                 }}
                             >
-                                <p>due at {item.departure_time}</p>
-                                {item.time_delta && (
-                                    <p style={{ fontSize: '0.5rem' }}>realtime {departureFormatting(item)}</p>
+                                {item.time_delta ? (
+                                    <>
+                                        <p>live {departureFormatting(item)}</p>
+                                        <p style={{ fontSize: '0.5rem' }}>due {item.departure_time}</p>
+                                    </>
+                                ) : (
+                                    <p>due {item.departure_time}</p>
                                 )}
                             </div>
                         </Card>
@@ -171,6 +187,18 @@ export const InfoListView = (props: Props) => {
         [departureList, classes.row]
     );
 
+    const departureComponent = (
+        <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
+            <Button className={classes.rowButton} key={-1} onClick={() => setRefresh(() => true)}>
+                <Card className={classes.row} style={{ placeContent: 'center', alignItems: 'center' }}>
+                    <p>{selectedStop.name}</p>
+                    <RefreshIcon style={{ paddingLeft: 'inherit' }} />
+                </Card>
+            </Button>
+            {departureListElements ?? <p>No Live Departures available</p>}
+        </Card>
+    );
+
     let component: JSX.Element;
     const departureView: boolean = !!Object.keys(selectedStop).length;
     switch (searchType) {
@@ -179,19 +207,15 @@ export const InfoListView = (props: Props) => {
                 <>
                     <Fade in={departureView} mountOnEnter unmountOnExit>
                         <>
-                            <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
-                                <Button className={classes.rowButton} key={-1}>
-                                    <Card className={classes.row} style={{ placeContent: 'center' }}>
-                                        <p>{selectedStop.name}</p>
-                                    </Card>
-                                </Button>
-                                {departureListElements ?? <p>No Live Departures available</p>}
-                            </Card>
+                            {departureComponent}
                             <Button
                                 variant='contained'
                                 color='primary'
                                 style={{ alignSelf: 'flex-end', width: '100%', borderRadius: '0px', height: '60px' }}
-                                onClick={() => dispatch(setSelectedStop({} as any))}
+                                onClick={() => {
+                                    dispatch(setSelectedStop({} as any));
+                                    setCount(() => 0);
+                                }}
                             >
                                 Back
                             </Button>
@@ -211,18 +235,7 @@ export const InfoListView = (props: Props) => {
             break;
 
         case ApiNaming.stop:
-            component = (
-                <Fade in={departureView} mountOnEnter unmountOnExit>
-                    <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
-                        <Button className={classes.rowButton} key={-1}>
-                            <Card className={classes.row} style={{ placeContent: 'center' }}>
-                                <p>{selectedStop.name}</p>
-                            </Card>
-                        </Button>
-                        {departureListElements ?? <p>No Live Departures available</p>}
-                    </Card>
-                </Fade>
-            );
+            component = departureComponent;
             break;
     }
 

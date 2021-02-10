@@ -45,12 +45,20 @@ const getDateFromHours = (time: string) => {
     return new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...times);
 };
 
-export const departureFormatting = (item: ApiDeparture): string => {
+const getDepartureTime = (item: ApiDeparture): Date => {
     const { departure_time, time_delta } = item;
-    const delta = time_delta!.arrival / 60;
 
-    const time = getDateFromHours(departure_time);
-    time.setMinutes(time.getMinutes() + delta);
+    const departureTime = getDateFromHours(departure_time);
+
+    if (time_delta) {
+        const delta = time_delta!.arrival / 60;
+        departureTime.setMinutes(departureTime.getMinutes() + delta);
+    }
+    return departureTime;
+};
+
+export const departureFormatting = (item: ApiDeparture): string => {
+    const time = getDepartureTime(item);
 
     const newTime = `${time.getHours() < 10 ? '0'.concat(time.getHours().toString()) : time.getHours()}:${
         time.getMinutes() < 10 ? '0'.concat(time.getMinutes().toString()) : time.getMinutes()
@@ -60,19 +68,17 @@ export const departureFormatting = (item: ApiDeparture): string => {
 };
 
 export const showDepartureRow = (item: ApiDeparture): boolean => {
-    const { departure_time, time_delta } = item;
+    const departureTime = getDepartureTime(item);
 
-    const departureTime = getDateFromHours(departure_time);
-    const currentTime = new Date();
-
-    if (time_delta) {
-        const delta = time_delta!.arrival / 60;
-        departureTime.setMinutes(departureTime.getMinutes() + delta);
-    }
-
-    if (currentTime > departureTime) {
+    if (new Date() > departureTime) {
         return false;
     }
 
     return true;
 };
+
+export function sortDepartures(a: ApiDeparture, b: ApiDeparture): number {
+    const x = getDepartureTime(a);
+    const y = getDepartureTime(b);
+    return x < y ? -1 : x > y ? 1 : 0;
+}
