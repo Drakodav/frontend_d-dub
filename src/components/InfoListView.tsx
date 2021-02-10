@@ -66,12 +66,13 @@ export const InfoListView = (props: Props) => {
     const [infoList, setInfoList] = useState<ApiStop[]>([]);
     const [departureList, setDepartureList] = useState<ApiDeparture[]>([]);
     const [refresh, setRefresh] = useState<boolean>(false);
-    const [count, setCount] = useState<number>(0);
 
     const gtfsHandler = useMemo(() => new GtfsHandler(searchType), [searchType]);
 
     const mapHandler = MapHandler.getInstance();
     const { queries } = gtfsHandler.getObj();
+
+    const isSelectedStop = !!Object.keys(selectedStop).length;
 
     // when we have a trip selected we can fetch all the related stops
     useEffect(() => {
@@ -92,7 +93,7 @@ export const InfoListView = (props: Props) => {
     // when we have a selected stop then we can fetch the departure list for that stop
     useEffect(() => {
         async function fetchRes() {
-            if (queries && Object.keys(selectedStop).length) {
+            if (queries && isSelectedStop) {
                 const id = searchType === ApiNaming.route ? 2 : 0;
                 const value = (selectedStop as ApiResult)[queries[id].selector] as string;
                 const departureResults = await gtfsHandler.fetchApiResults(value, queries[id].query);
@@ -104,22 +105,17 @@ export const InfoListView = (props: Props) => {
             }
         }
 
-        if (count === 0 && Object.keys(selectedStop).length) {
-            fetchRes();
-            setCount(() => 1);
-        }
-
         if (refresh) {
             fetchRes();
             setRefresh(() => false);
-        }
+        } else fetchRes();
 
         const interval = setInterval(() => {
             fetchRes();
         }, 1000 * 60);
 
         return () => clearInterval(interval);
-    }, [selectedStop, gtfsHandler, queries, mapHandler, searchType, refresh, count]);
+    }, [selectedStop, gtfsHandler, queries, mapHandler, searchType, refresh, isSelectedStop]);
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         e.stopPropagation();
@@ -200,7 +196,7 @@ export const InfoListView = (props: Props) => {
     );
 
     let component: JSX.Element;
-    const departureView: boolean = !!Object.keys(selectedStop).length;
+    const departureView: boolean = isSelectedStop;
     switch (searchType) {
         case ApiNaming.route:
             component = departureView ? (
@@ -212,10 +208,7 @@ export const InfoListView = (props: Props) => {
                                 variant='contained'
                                 color='primary'
                                 style={{ alignSelf: 'flex-end', width: '100%', borderRadius: '0px', height: '60px' }}
-                                onClick={() => {
-                                    dispatch(setSelectedStop({} as any));
-                                    setCount(() => 0);
-                                }}
+                                onClick={() => dispatch(setSelectedStop({} as any))}
                             >
                                 Back
                             </Button>
