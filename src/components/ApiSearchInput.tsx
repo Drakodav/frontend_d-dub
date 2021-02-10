@@ -94,7 +94,7 @@ export const ApiSearchInput = (props: Props) => {
             return callback(options);
         }
     };
-    const debouncedSearch = debounce(loadOptions, 800, { leading: false });
+    const debouncedSearch = debounce(loadOptions, 200, { leading: false });
 
     const handleChange = (selectedOption: ValueType<OptionTypeBase, false>, { action }: any) => {
         switch (action) {
@@ -111,7 +111,13 @@ export const ApiSearchInput = (props: Props) => {
     };
 
     return (
-        <div className={`${className} ${classes.search}`}>
+        <div
+            className={`${className} ${classes.search}`}
+            onTouchMove={(e: React.TouchEvent<HTMLDivElement>) => {
+                // hardcoded fix but it works
+                ((e.target as any)?.id as string).includes('react-select-3-option-') && e.stopPropagation();
+            }}
+        >
             <AsyncSelect
                 value={inputValue}
                 className={classes.input}
