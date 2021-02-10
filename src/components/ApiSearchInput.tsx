@@ -114,8 +114,7 @@ export const ApiSearchInput = (props: Props) => {
         <div
             className={`${className} ${classes.search}`}
             onTouchMove={(e: React.TouchEvent<HTMLDivElement>) => {
-                // hardcoded fix but it works
-                ((e.target as any)?.id as string).includes('react-select-3-option-') && e.stopPropagation();
+                e.stopPropagation();
             }}
         >
             <AsyncSelect
