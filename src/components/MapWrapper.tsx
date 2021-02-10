@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MapHandler } from '../handler/mapHandler';
 import { ApiResult } from '../model/api.model';
-import { getSearchResults } from '../store/reducers/searchInput';
+import { getSearchResults, getSearchType } from '../store/reducers/searchInput';
 import { getControlsVisible, getMapDimensions, getWindowDimensions, setWindowDimensions } from '../store/reducers/map';
 import { TRANSITION_DURATION } from '../model/constants';
 import { GpsFixedRounded, GpsOffRounded, GpsNotFixedRounded, ExploreRounded } from '@material-ui/icons';
@@ -135,12 +135,13 @@ export const MapWrapper = () => {
 
     // If there is no apiResult then there should also be no features displayed on the map
     const apiResult: ApiResult = useSelector(getSearchResults);
+    const searchType: string = useSelector(getSearchType);
     useEffect(() => {
-        if (!Object.keys(apiResult).length) {
+        if (!Object.keys(apiResult).length && searchType) {
             mapHandler.resetFeaturesLayer();
             return;
         }
-    }, [apiResult, mapHandler]);
+    }, [apiResult, mapHandler, searchType]);
 
     // used for dynamic map width and height resizing
     useEffect(() => {

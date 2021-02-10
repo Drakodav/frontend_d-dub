@@ -70,12 +70,15 @@ export const InfoListView = (props: Props) => {
     const mapHandler = MapHandler.getInstance();
     const { queries } = gtfsHandler.getObj();
 
+    // when we have a trip selected we can fetch all the related stops
     useEffect(() => {
         async function fetchRes() {
             if (queries && Object.keys(selectedTrip).length && searchType === ApiNaming.route) {
                 const value = selectedTrip[queries[1].selector] as string;
                 const stopsList = (await gtfsHandler.fetchApiResults(value, queries[1].query)) as ApiStop[];
                 setInfoList(() => stopsList);
+
+                // set the stops markers on the map
                 const newFeature = getStopPointsFeature(stopsList);
                 mapHandler.setFeature(newFeature, MapFeatureTypes.StopsFeature);
             }
@@ -83,6 +86,7 @@ export const InfoListView = (props: Props) => {
         fetchRes();
     }, [selectedTrip, gtfsHandler, queries, mapHandler, searchType]);
 
+    // when we have a selected stop then we can fetch the departure list for that stop
     useEffect(() => {
         async function fetchRes() {
             if (queries && Object.keys(selectedStop).length) {
@@ -90,6 +94,10 @@ export const InfoListView = (props: Props) => {
                 const value = (selectedStop as ApiResult)[queries[id].selector] as string;
                 const departureResults = await gtfsHandler.fetchApiResults(value, queries[id].query);
                 setDepartureList(() => departureResults as ApiDeparture[]);
+
+                // set the stop marker on the map
+                const stopFeature = getStopPointsFeature([selectedStop]);
+                mapHandler.setFeature(stopFeature, MapFeatureTypes.StopFeature);
             }
         }
         fetchRes();

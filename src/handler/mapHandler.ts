@@ -26,7 +26,7 @@ import {
     TRANSITION_DURATION,
 } from '../model/constants';
 import { setSelectedStop } from '../store/reducers/searchInput';
-import { extraTripFeatureStyle, positionFeatureStyle, tripFeatureStyle } from '../util/geo.util';
+import { extraTripFeatureStyle, positionFeatureStyle, stopFeatureStyle, tripFeatureStyle } from '../util/geo.util';
 
 type MapCallbacks = {
     setRotation: (value: React.SetStateAction<boolean>) => void;
@@ -79,6 +79,7 @@ export class MapHandler {
         // create and add vector source layer
         this.tripFeature.setStyle(tripFeatureStyle());
         this.positionFeature.setStyle(positionFeatureStyle());
+        this.stopFeature.setStyle(stopFeatureStyle());
 
         this.extraTripFeature.setStyle(extraTripFeatureStyle());
 

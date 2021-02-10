@@ -49,10 +49,10 @@ export const positionFeatureStyle = (): Style =>
         image: new CircleStyle({
             radius: 6,
             fill: new Fill({
-                color: '#3399CC',
+                color: ThemeConfiguration.primary.dark,
             }),
             stroke: new Stroke({
-                color: '#fff',
+                color: ThemeConfiguration.common.white,
                 width: 2,
             }),
         }),
@@ -60,12 +60,17 @@ export const positionFeatureStyle = (): Style =>
 
 export const tripFeatureStyle = (): Style =>
     new Style({
-        ...defaultStyles(undefined, { width: 2 }),
+        ...defaultStyles(undefined, { width: 2, color: ThemeConfiguration.primary.dark }),
+    });
+
+export const stopFeatureStyle = (): Style =>
+    new Style({
+        ...defaultStyles(undefined, { width: 2, color: ThemeConfiguration.secondary.dark }),
     });
 
 export const extraTripFeatureStyle = (): Style =>
     new Style({
-        ...defaultStyles(undefined, { width: 2, color: ThemeConfiguration.secondary.dark }),
+        ...defaultStyles(undefined, { width: 2 }),
     });
 
 const defaultStyles = (_fill?: FillOptions, _stroke?: StrokeOptions) => {
