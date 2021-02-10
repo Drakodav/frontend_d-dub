@@ -39,11 +39,11 @@ export const levenshtein = (a: string, b: string): number => {
 
 export const getHeadsign = (headsign: string, direction: string) => headsign.split(' - ')[direction === '0' ? 1 : 0];
 
-function getDateFromHours(time: string) {
+const getDateFromHours = (time: string) => {
     const times = time.split(':').map((i) => parseInt(i));
     let now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...times);
-}
+};
 
 export const departureFormatting = (item: ApiDeparture): string => {
     const { departure_time, time_delta } = item;
