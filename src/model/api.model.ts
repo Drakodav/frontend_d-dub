@@ -25,12 +25,12 @@ export type ApiInfoExtra = {
 export const ApiDef: ApiType[] = [
     {
         name: ApiNaming.route,
-        query: 'route/?short_name=',
+        query: 'query/routes/?short_name=',
         selector: 'short_name',
         queries: [
             {
                 selector: 'id',
-                query: 'query/route_trip/?route_id=',
+                query: 'query/route_trips/?route_id=',
                 type: 'trips',
                 direction: true,
             },

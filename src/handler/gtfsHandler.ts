@@ -48,7 +48,7 @@ export class GtfsHandler {
         const dir = direction ? `&direction=${direction}` : '';
 
         const response = (await fetch(`${GtfsApiRoute}${query}${value}${dir}`)).json();
-        const results: ApiResult[] = (((await response) as any).results as []) ?? ((await response) as []);
+        const results: ApiResult[] = ((await response) as any).results as [];
         if (results?.length > 0) {
             return results;
         }
