@@ -56,7 +56,7 @@ const useStyles = (props: StyleProps) =>
             zIndex: 1,
             position: 'fixed',
             borderRadius: '50%',
-            color: palette.primary.dark,
+            color: palette.primary.main,
             backgroundColor: palette.common.white,
             display: 'flex',
             flexDirection: 'row',

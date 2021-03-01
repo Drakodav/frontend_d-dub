@@ -15,15 +15,16 @@ import VectorSource from 'ol/source/Vector';
 import { ApiStop } from '../model/api.model';
 import {
     CENTER_LOCATION,
-    DublinBoundary,
     GeoOptions,
     MapFeatureTypes,
     MAP_TRANSITION,
     MaxZoom,
     MinZoom,
     Padding,
-    Projection,
+    getIrelandProjection,
     TRANSITION_DURATION,
+    sourceProjection,
+    destinationProjection,
 } from '../model/constants';
 import { setSelectedStop } from '../store/reducers/searchInput';
 import { extraTripFeatureStyle, positionFeatureStyle, stopFeatureStyle, tripFeatureStyle } from '../util/geo.util';
@@ -95,13 +96,14 @@ export class MapHandler {
             }),
         });
 
+        const { proj, extent } = getIrelandProjection();
         this.view = new View({
-            center: fromLonLat(CENTER_LOCATION),
-            extent: DublinBoundary,
-            zoom: MinZoom,
+            center: CENTER_LOCATION,
+            projection: proj,
+            extent: extent,
+            zoom: 6,
             maxZoom: MaxZoom,
             minZoom: MinZoom,
-            projection: Projection,
         });
     }
 
@@ -154,8 +156,11 @@ export class MapHandler {
 
                             stops.forEach((stop) => {
                                 if (
-                                    transform(stop.point.coordinates, 'EPSG:4326', 'EPSG:3857').toString() ===
-                                    coordinate.toString()
+                                    transform(
+                                        stop.point.coordinates,
+                                        sourceProjection,
+                                        destinationProjection
+                                    ).toString() === coordinate.toString()
                                 ) {
                                     content.getElementsByTagName('span')[0].innerText = stop.name;
                                     content!.onclick = () => {
@@ -209,9 +214,9 @@ export class MapHandler {
         const accuracy = circular(coords, pos.coords.accuracy);
 
         this.mapCallbacks.setLocation('granted');
-        this.currLocation = fromLonLat(coords);
-        this.positionFeature.setGeometry(new Point(fromLonLat(coords)));
-        this.accuracyFeature.setGeometry(accuracy.transform('EPSG:4326', this.view.getProjection()));
+        this.currLocation = fromLonLat(coords, destinationProjection);
+        this.positionFeature.setGeometry(new Point(fromLonLat(coords, destinationProjection)));
+        this.accuracyFeature.setGeometry(accuracy.transform(sourceProjection, this.view.getProjection()));
     };
 
     private updateGeoError = (error: GeolocationPositionError) => {

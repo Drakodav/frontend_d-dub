@@ -7,6 +7,7 @@ import { Options as FillOptions } from 'ol/style/Fill';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
 import GeometryLayout from 'ol/geom/GeometryLayout';
 import { ThemeConfiguration } from '../model/theme';
+import { sourceProjection, destinationProjection } from '../model/constants';
 
 export const getGeoObjFeature = (apiResult: ApiResult): Geometry | undefined => {
     if (!Object.keys(apiResult).length) return;
@@ -16,16 +17,16 @@ export const getGeoObjFeature = (apiResult: ApiResult): Geometry | undefined => 
         geometry = new MultiLineString(
             (apiResult.geometry as GeoJSONMultiLineString).coordinates,
             GeometryLayout.XY
-        ).transform('EPSG:4326', 'EPSG:3857');
+        ).transform(sourceProjection, destinationProjection);
     } else if (apiResult?.geometry?.type === 'LineString') {
         geometry = new LineString((apiResult.geometry as GeoJSONLineString).coordinates, GeometryLayout.XY).transform(
-            'EPSG:4326',
-            'EPSG:3857'
+            sourceProjection,
+            destinationProjection
         );
     } else if (apiResult?.point?.type === 'Point') {
         geometry = new Point((apiResult?.point as GeoJSONPoint).coordinates, GeometryLayout.XY).transform(
-            'EPSG:4326',
-            'EPSG:3857'
+            sourceProjection,
+            destinationProjection
         );
     }
 
@@ -38,7 +39,7 @@ export const getStopPointsFeature = (stops: ApiStop[]): Geometry | undefined => 
     if (!stops.length) return;
 
     const points = stops.map((stop) => (stop.point as GeoJSONPoint).coordinates);
-    const newFeature = new MultiPoint(points, GeometryLayout.XY).transform('EPSG:4326', 'EPSG:3857');
+    const newFeature = new MultiPoint(points, GeometryLayout.XY).transform(sourceProjection, destinationProjection);
     newFeature.setProperties({ stops });
 
     return newFeature;
@@ -49,7 +50,7 @@ export const positionFeatureStyle = (): Style =>
         image: new CircleStyle({
             radius: 6,
             fill: new Fill({
-                color: ThemeConfiguration.primary.dark,
+                color: ThemeConfiguration.primary.main,
             }),
             stroke: new Stroke({
                 color: ThemeConfiguration.common.white,
@@ -60,17 +61,17 @@ export const positionFeatureStyle = (): Style =>
 
 export const tripFeatureStyle = (): Style =>
     new Style({
-        ...defaultStyles(undefined, { width: 2, color: ThemeConfiguration.primary.dark }),
+        ...defaultStyles(undefined, { width: 2, color: ThemeConfiguration.primary.main }),
     });
 
 export const stopFeatureStyle = (): Style =>
     new Style({
-        ...defaultStyles(undefined, { width: 2, color: ThemeConfiguration.secondary.dark }),
+        ...defaultStyles(undefined, { width: 2, color: ThemeConfiguration.secondary.main }),
     });
 
 export const extraTripFeatureStyle = (): Style =>
     new Style({
-        ...defaultStyles(undefined, { width: 2 }),
+        ...defaultStyles(undefined, { width: 2, color: ThemeConfiguration.secondary.main }),
     });
 
 const defaultStyles = (_fill?: FillOptions, _stroke?: StrokeOptions) => {
