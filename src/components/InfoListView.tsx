@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import { Button, Card, Fade } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
-import { getSearchType, setSelectedStop, getSelectedStop, getSelectedTrip } from '../store/reducers/searchInput';
+import { getSearchType, setSelectedStop, getSelectedStop, getSelectedTrip, getML } from '../store/reducers/searchInput';
 import { GtfsHandler } from '../handler/gtfsHandler';
 import { ApiDeparture, ApiNaming, ApiResult, ApiStop } from '../model/api.model';
 import { MapHandler } from '../handler/mapHandler';
@@ -61,6 +61,7 @@ export const InfoListView = (props: Props) => {
     const searchType = useSelector(getSearchType);
     const selectedTrip = useSelector(getSelectedTrip);
     const selectedStop = useSelector(getSelectedStop);
+    const ml = useSelector(getML);
 
     const classes = useStyles({})();
     const [infoList, setInfoList] = useState<ApiStop[]>([]);
@@ -96,7 +97,8 @@ export const InfoListView = (props: Props) => {
             if (queries && isSelectedStop) {
                 const id = searchType === ApiNaming.route ? 2 : 0;
                 const value = (selectedStop as ApiResult)[queries[id].selector] as string;
-                const departureResults = await gtfsHandler.fetchApiResults(value, queries[id].query);
+                const query = ml ? 'query/stop_departures_prediction/?stop_id=' : queries[id].query;
+                const departureResults = await gtfsHandler.fetchApiResults(value, query);
                 setDepartureList(() => departureResults as ApiDeparture[]);
 
                 // set the stop marker on the map

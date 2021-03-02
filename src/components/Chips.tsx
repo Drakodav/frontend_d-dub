@@ -7,10 +7,12 @@ import { KeyboardArrowUp } from '@material-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     getDirection,
+    getML,
     getSearchType,
     setSearchType,
     setSelectedStop,
     switchDirection,
+    switchML,
 } from '../store/reducers/searchInput';
 import { TRANSITION_DURATION } from '../model/constants';
 
@@ -56,6 +58,7 @@ export const Chips = ({ className }: Props) => {
 
     const searchType = useSelector(getSearchType);
     const direction = useSelector(getDirection);
+    const ml = useSelector(getML);
 
     const classes = useStyles({ direction })();
 
@@ -69,7 +72,7 @@ export const Chips = ({ className }: Props) => {
                 color={item.name === searchType ? 'primary' : 'default'}
                 onClick={() => item.name !== searchType && dispatch(setSearchType(item.name))}
             />
-        )).concat(
+        )).concat([
             <div style={{ alignSelf: 'flex-end' }}>
                 <Chip
                     icon={<KeyboardArrowUp className={classes.arrow} />}
@@ -83,9 +86,21 @@ export const Chips = ({ className }: Props) => {
                         dispatch(setSelectedStop({} as any));
                     }}
                 />
-            </div>
-        );
-    }, [dispatch, searchType, classes]);
+            </div>,
+            <div style={{ alignSelf: 'flex-end' }}>
+                <Chip
+                    key={'prediction'}
+                    label={'ml'}
+                    clickable
+                    className={classes.chip}
+                    color={ml ? 'primary' : 'default'}
+                    onClick={() => {
+                        dispatch(switchML());
+                    }}
+                />
+            </div>,
+        ]);
+    }, [dispatch, searchType, classes, ml]);
 
     return <div className={`${classes.root} ${className}`}>{chipsArray}</div>;
 };
