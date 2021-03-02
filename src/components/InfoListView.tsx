@@ -117,7 +117,7 @@ export const InfoListView = (props: Props) => {
         }, 1000 * 60);
 
         return () => clearInterval(interval);
-    }, [selectedStop, gtfsHandler, queries, mapHandler, searchType, refresh, isSelectedStop]);
+    }, [selectedStop, gtfsHandler, queries, mapHandler, searchType, refresh, isSelectedStop, ml]);
 
     const onTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         e.stopPropagation();
