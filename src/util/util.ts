@@ -45,20 +45,32 @@ const getDateFromHours = (time: string) => {
     return new Date(now.getFullYear(), now.getMonth(), now.getDate(), ...times);
 };
 
-const getDepartureTime = (item: ApiDeparture): Date => {
-    const { departure_time, time_delta } = item;
-
+const getDepartureTime = (departure_time: string, time_delta?: number): Date => {
     const departureTime = getDateFromHours(departure_time);
 
     if (time_delta) {
-        const delta = time_delta!.arrival / 60;
+        const delta = time_delta / 60;
         departureTime.setMinutes(departureTime.getMinutes() + delta);
     }
     return departureTime;
 };
 
 export const departureFormatting = (item: ApiDeparture): string => {
-    const time = getDepartureTime(item);
+    const { departure_time, time_delta } = item;
+    const time = getDepartureTime(departure_time, time_delta?.arrival);
+
+    const newTime = `${time.getHours() < 10 ? '0'.concat(time.getHours().toString()) : time.getHours()}:${
+        time.getMinutes() < 10 ? '0'.concat(time.getMinutes().toString()) : time.getMinutes()
+    }:${time.getSeconds() < 10 ? '0'.concat(time.getSeconds().toString()) : time.getSeconds()}`;
+
+    return newTime;
+};
+
+export const predictedFormatting = (item: ApiDeparture): string | undefined => {
+    const { departure_time, p_time_delta } = item;
+    if (!p_time_delta) return undefined;
+
+    const time = getDepartureTime(departure_time, parseInt(p_time_delta));
 
     const newTime = `${time.getHours() < 10 ? '0'.concat(time.getHours().toString()) : time.getHours()}:${
         time.getMinutes() < 10 ? '0'.concat(time.getMinutes().toString()) : time.getMinutes()

@@ -9,7 +9,7 @@ import { ApiDeparture, ApiNaming, ApiResult, ApiStop } from '../model/api.model'
 import { MapHandler } from '../handler/mapHandler';
 import { getGeoObjFeature, getStopPointsFeature } from '../util/geo.util';
 import { MapFeatureTypes } from '../model/constants';
-import { departureFormatting, getHeadsign, showDepartureRow, sortDepartures } from '../util/util';
+import { departureFormatting, getHeadsign, predictedFormatting, showDepartureRow, sortDepartures } from '../util/util';
 import RefreshIcon from '@material-ui/icons/Refresh';
 
 const useStyles = (state: {}) =>
@@ -169,6 +169,7 @@ export const InfoListView = (props: Props) => {
                                 {item.time_delta ? (
                                     <>
                                         <p>live {departureFormatting(item)}</p>
+                                        {predictedFormatting(item) && <p>pred {predictedFormatting(item)}</p>}
                                         <p style={{ fontSize: '0.5rem' }}>due {item.departure_time}</p>
                                     </>
                                 ) : (
