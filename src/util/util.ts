@@ -80,7 +80,8 @@ export const predictedFormatting = (item: ApiDeparture): string | undefined => {
 };
 
 export const showDepartureRow = (item: ApiDeparture): boolean => {
-    const departureTime = getDepartureTime(item);
+    const { departure_time, time_delta } = item;
+    const departureTime = getDepartureTime(departure_time, time_delta?.arrival);
 
     if (new Date() > departureTime) {
         return false;
