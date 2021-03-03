@@ -91,7 +91,7 @@ export const showDepartureRow = (item: ApiDeparture): boolean => {
 };
 
 export function sortDepartures(a: ApiDeparture, b: ApiDeparture): number {
-    const x = getDepartureTime(a);
-    const y = getDepartureTime(b);
+    const x = getDepartureTime(a.departure_time, a.time_delta?.arrival);
+    const y = getDepartureTime(b.departure_time, b.time_delta?.arrival);
     return x < y ? -1 : x > y ? 1 : 0;
 }
