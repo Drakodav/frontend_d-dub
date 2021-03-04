@@ -104,5 +104,5 @@ export interface ApiDeparture extends ApiResult {
     short_name: string;
     trip_id: string;
     time_delta?: { arrival: number; departure: number };
-    p_time_delta?: string;
+    p_time_delta?: number;
 }

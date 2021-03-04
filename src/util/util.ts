@@ -68,9 +68,9 @@ export const departureFormatting = (item: ApiDeparture): string => {
 
 export const predictedFormatting = (item: ApiDeparture): string | undefined => {
     const { departure_time, p_time_delta } = item;
-    if (!p_time_delta) return undefined;
+    if (!p_time_delta || (p_time_delta as any) === '') return undefined;
 
-    const time = getDepartureTime(departure_time, parseInt(p_time_delta));
+    const time = getDepartureTime(departure_time, p_time_delta);
 
     const newTime = `${time.getHours() < 10 ? '0'.concat(time.getHours().toString()) : time.getHours()}:${
         time.getMinutes() < 10 ? '0'.concat(time.getMinutes().toString()) : time.getMinutes()
