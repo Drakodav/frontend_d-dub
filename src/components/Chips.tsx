@@ -50,10 +50,11 @@ const useStyles = (state: { direction: number }) =>
     }));
 
 interface Props {
-    className: string;
+    className?: string;
 }
 
 export const Chips = ({ className }: Props) => {
+    className = className ?? '';
     const dispatch = useDispatch();
 
     const searchType = useSelector(getSearchType);

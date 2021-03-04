@@ -46,14 +46,15 @@ const useStyles = (state: {}) =>
             padding: '0.4px 0px',
             fontSize: '0.85rem',
         },
+        cardAlt: {},
     }));
 
 interface Props {
     className?: string;
 }
 
-export const InfoListView = (props: Props) => {
-    const { className } = props;
+export const InfoListView = ({ className }: Props) => {
+    className = className ?? '';
 
     const dispatch = useDispatch();
     const ref = useRef() as React.MutableRefObject<HTMLDivElement>;
@@ -64,7 +65,7 @@ export const InfoListView = (props: Props) => {
     const ml = useSelector(getML);
 
     const classes = useStyles({})();
-    const [infoList, setInfoList] = useState<ApiStop[]>([]);
+    const [stopList, setStopList] = useState<ApiStop[]>([]);
     const [departureList, setDepartureList] = useState<ApiDeparture[]>([]);
     const [refresh, setRefresh] = useState<boolean>(false);
 
@@ -81,7 +82,7 @@ export const InfoListView = (props: Props) => {
             if (queries && Object.keys(selectedTrip).length && searchType === ApiNaming.route) {
                 const value = selectedTrip[queries[1].selector] as string;
                 const stopsList = (await gtfsHandler.fetchApiResults(value, queries[1].query)) as ApiStop[];
-                setInfoList(() => stopsList);
+                setStopList(() => stopsList);
 
                 // set the stops markers on the map
                 const newFeature = getStopPointsFeature(stopsList);
@@ -92,6 +93,7 @@ export const InfoListView = (props: Props) => {
     }, [selectedTrip, gtfsHandler, queries, mapHandler, searchType]);
 
     // when we have a selected stop then we can fetch the departure list for that stop
+    // we also refresh every set time in order to keep the user updated
     useEffect(() => {
         async function fetchRes() {
             if (queries && isSelectedStop) {
@@ -128,9 +130,9 @@ export const InfoListView = (props: Props) => {
         ref.current?.scroll({ top: 0 });
     };
 
-    const infoListElements = useMemo(
+    const stopListElements = useMemo(
         () =>
-            infoList.map((item, i) => (
+            stopList.map((item, i) => (
                 <Button className={classes.rowButton} onClick={() => handleItemClick(item)} key={i}>
                     <Card className={classes.row}>
                         <p>{item.name}</p>
@@ -139,7 +141,7 @@ export const InfoListView = (props: Props) => {
                 </Button>
             )),
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [infoList, classes.row]
+        [stopList, classes.row]
     );
 
     const departureListElements = useMemo(
@@ -201,30 +203,29 @@ export const InfoListView = (props: Props) => {
     );
 
     let component: JSX.Element;
-    const departureView: boolean = isSelectedStop;
     switch (searchType) {
         case ApiNaming.route:
-            component = departureView ? (
+            component = isSelectedStop ? (
                 <>
-                    <Fade in={departureView} mountOnEnter unmountOnExit>
-                        <>
+                    <Fade in={isSelectedStop} mountOnEnter unmountOnExit>
+                        <Card className={`${classes.card} ${className}`}>
                             {departureComponent}
                             <Button
                                 variant='contained'
                                 color='primary'
-                                style={{ alignSelf: 'flex-end', width: '100%', borderRadius: '0px', height: '60px' }}
+                                style={{ alignSelf: 'flex-end', width: '100%', borderRadius: '0px', height: '50px' }}
                                 onClick={() => dispatch(setSelectedStop({} as any))}
                             >
                                 Back
                             </Button>
-                        </>
+                        </Card>
                     </Fade>
                 </>
             ) : (
                 <>
-                    <Fade in={!departureView} mountOnEnter unmountOnExit>
+                    <Fade in={!isSelectedStop} mountOnEnter unmountOnExit>
                         <Card ref={ref} className={`${classes.card} ${className}`} onTouchMove={onTouchMove}>
-                            {infoListElements}
+                            {stopListElements}
                         </Card>
                     </Fade>
                 </>
