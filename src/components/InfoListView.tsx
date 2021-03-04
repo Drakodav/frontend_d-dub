@@ -167,11 +167,13 @@ export const InfoListView = (props: Props) => {
                                 }}
                             >
                                 {item.time_delta ? (
-                                    <>
+                                    <div style={{ lineHeight: '.3' }}>
                                         <p>live {departureFormatting(item)}</p>
-                                        {predictedFormatting(item) && <p>pred {predictedFormatting(item)}</p>}
+                                        {predictedFormatting(item) && (
+                                            <p style={{ fontSize: '0.6rem' }}>pred {predictedFormatting(item)}</p>
+                                        )}
                                         <p style={{ fontSize: '0.5rem' }}>due {item.departure_time}</p>
-                                    </>
+                                    </div>
                                 ) : (
                                     <p>due {item.departure_time}</p>
                                 )}
