@@ -27,7 +27,13 @@ import {
     destinationProjection,
 } from '../model/constants';
 import { setSelectedStop } from '../store/reducers/searchInput';
-import { extraTripFeatureStyle, positionFeatureStyle, stopFeatureStyle, tripFeatureStyle } from '../util/geo.util';
+import {
+    extraTripFeatureStyle,
+    positionFeatureStyle,
+    stopFeatureStyle,
+    stopsFeatureStyle,
+    tripFeatureStyle,
+} from '../util/geo.util';
 
 type MapCallbacks = {
     setRotation: (value: React.SetStateAction<boolean>) => void;
@@ -77,7 +83,8 @@ export class MapHandler {
         this.accuracyFeature.setGeometryName(MapFeatureTypes.AccuracyFeature.toString());
         this.positionFeature.setGeometryName(MapFeatureTypes.PositionFeature.toString());
 
-        // create and add vector source layer
+        // create and add vector source laye
+        this.stopsFeature.setStyle(stopsFeatureStyle());
         this.tripFeature.setStyle(tripFeatureStyle());
         this.positionFeature.setStyle(positionFeatureStyle());
         this.stopFeature.setStyle(stopFeatureStyle());

@@ -1,13 +1,13 @@
-import { GeoJSONMultiLineString, GeoJSONPoint, GeoJSONLineString } from 'ol/format/GeoJSON';
+import { GeoJSONLineString, GeoJSONMultiLineString, GeoJSONPoint } from 'ol/format/GeoJSON';
+import { LineString, MultiLineString, MultiPoint, Point } from 'ol/geom';
 import Geometry from 'ol/geom/Geometry';
-import { Point, MultiLineString, LineString, MultiPoint } from 'ol/geom';
-import { ApiResult, ApiStop } from '../model/api.model';
+import GeometryLayout from 'ol/geom/GeometryLayout';
 import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import { Options as FillOptions } from 'ol/style/Fill';
 import { Options as StrokeOptions } from 'ol/style/Stroke';
-import GeometryLayout from 'ol/geom/GeometryLayout';
+import { ApiResult, ApiStop } from '../model/api.model';
+import { destinationProjection, sourceProjection } from '../model/constants';
 import { ThemeConfiguration } from '../model/theme';
-import { sourceProjection, destinationProjection } from '../model/constants';
 
 export const getGeoObjFeature = (apiResult: ApiResult): Geometry | undefined => {
     if (!Object.keys(apiResult).length) return;
@@ -66,7 +66,29 @@ export const tripFeatureStyle = (): Style =>
 
 export const stopFeatureStyle = (): Style =>
     new Style({
-        ...defaultStyles(undefined, { width: 2, color: ThemeConfiguration.secondary.main }),
+        image: new CircleStyle({
+            radius: 7,
+            fill: new Fill({
+                color: ThemeConfiguration.secondary.main,
+            }),
+            stroke: new Stroke({
+                color: ThemeConfiguration.secondary.light,
+                width: 2,
+            }),
+        }),
+    });
+export const stopsFeatureStyle = (): Style =>
+    new Style({
+        image: new CircleStyle({
+            radius: 7,
+            fill: new Fill({
+                color: ThemeConfiguration.primary.main,
+            }),
+            stroke: new Stroke({
+                color: ThemeConfiguration.primary.light,
+                width: 2,
+            }),
+        }),
     });
 
 export const extraTripFeatureStyle = (): Style =>
