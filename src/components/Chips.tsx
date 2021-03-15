@@ -77,7 +77,7 @@ export const Chips = ({ className }: Props) => {
             <div style={{ alignSelf: 'flex-end' }}>
                 <Chip
                     icon={<KeyboardArrowUp className={classes.arrow} />}
-                    key={'direction'}
+                    key={-1}
                     label={'direction'}
                     clickable
                     className={classes.direction}
@@ -90,7 +90,7 @@ export const Chips = ({ className }: Props) => {
             </div>,
             <div style={{ alignSelf: 'flex-end' }}>
                 <Chip
-                    key={'prediction'}
+                    key={-2}
                     label={'ml'}
                     clickable
                     className={classes.chip}

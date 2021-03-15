@@ -7,8 +7,8 @@
         "@material-ui/icons": "^4.11.2",
         "@material-ui/styles": "^4.11.2",
         "@reduxjs/toolkit": "^1.2.5",
-        "@testing-library/jest-dom": "^5.11.4",
-        "@testing-library/react": "^11.1.0",
+        "@testing-library/jest-dom": "^5.11.9",
+        "@testing-library/react": "^11.2.5",
         "@testing-library/user-event": "^12.1.10",
         "@types/debounce-promise": "^3.1.3",
         "debounce-promise": "^3.1.2",
@@ -19,7 +19,7 @@
         "react-dom": "^17.0.1",
         "react-redux": "^7.2.0",
         "react-select": "^4.0.2",
-        "typescript": "^4.1.2",
+        "typescript": "^4.2.3",
         "web-vitals": "^0.2.4",
         "workbox-background-sync": "^5.1.3",
         "workbox-broadcast-update": "^5.1.3",
@@ -37,8 +37,8 @@
     "scripts": {
         "start": "react-scripts start",
         "build": "react-scripts build",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject",
+        "test": "rescripts test",
+        "test:coverage": "rescripts test --coverage --watchAll=false",
         "serve": "react-scripts build && serve -s build"
     },
     "eslintConfig": {
@@ -46,6 +46,12 @@
             "react-app",
             "react-app/jest"
         ]
+    },
+    "jest": {
+        "transform": {
+            "^.+\\.tsx?$": "ts-jest",
+            "^.+\\.jsx?$": "babel-jest"
+        }
     },
     "browserslist": {
         "production": [
@@ -60,15 +66,17 @@
         ]
     },
     "devDependencies": {
+        "@rescripts/cli": "^0.0.16",
         "@types/geojson": "^7946.0.7",
-        "@types/jest": "^26.0.15",
-        "@types/node": "^12.0.0",
+        "@types/jest": "^26.0.20",
+        "@types/node": "^14.14.34",
         "@types/ol": "^6.4.2",
         "@types/proj4": "^2.5.0",
         "@types/react": "^16.9.53",
         "@types/react-dom": "^16.9.8",
         "@types/react-redux": "^7.1.7",
         "@types/react-select": "^3.0.28",
+        "@types/redux-mock-store": "^1.0.2",
         "@typescript-eslint/eslint-plugin": "^4.0.0",
         "@typescript-eslint/parser": "^4.0.0",
         "babel-eslint": "^10.0.0",
@@ -79,8 +87,11 @@
         "eslint-plugin-jsx-a11y": "^6.3.1",
         "eslint-plugin-react": "^7.20.3",
         "eslint-plugin-react-hooks": "^4.0.8",
+        "jest-canvas-mock": "^2.3.1",
         "react-scripts": "^4.0.1",
+        "redux-mock-store": "^1.5.4",
         "styled-components": "^5.2.1",
+        "ts-jest": "^26.5.3",
         "tslib": "^2.1.0"
     }
 }

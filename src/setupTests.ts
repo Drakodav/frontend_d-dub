@@ -3,3 +3,9 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+
+import 'jest-canvas-mock';
+import { getIrelandProjection } from './model/constants';
+
+// projection needs to be defined before anytesting can occur
+getIrelandProjection();
