@@ -76,6 +76,7 @@ export class MapHandler {
             source: new OSM({}),
         });
 
+        // give each feature geometry an identifier
         this.stopsFeature.setGeometryName(MapFeatureTypes.StopsFeature.toString());
         this.tripFeature.setGeometryName(MapFeatureTypes.TripFeature.toString());
         this.extraTripFeature.setGeometryName(MapFeatureTypes.ExtraTripFeature.toString());
@@ -83,7 +84,7 @@ export class MapHandler {
         this.accuracyFeature.setGeometryName(MapFeatureTypes.AccuracyFeature.toString());
         this.positionFeature.setGeometryName(MapFeatureTypes.PositionFeature.toString());
 
-        // create and add vector source laye
+        // create and add vector source layers
         this.stopsFeature.setStyle(stopsFeatureStyle());
         this.tripFeature.setStyle(tripFeatureStyle());
         this.positionFeature.setStyle(positionFeatureStyle());
@@ -103,17 +104,18 @@ export class MapHandler {
             }),
         });
 
-        const { proj, extent } = getIrelandProjection();
+        const { proj } = getIrelandProjection();
         this.view = new View({
             center: CENTER_LOCATION,
             projection: proj,
-            extent: extent,
+            extent: proj.getExtent(),
             zoom: 6,
             maxZoom: MaxZoom,
             minZoom: MinZoom,
         });
     }
 
+    // the map must be initialised once the dom has loaded thats why it is not included in the constructor
     init = (
         mapElement: React.MutableRefObject<HTMLDivElement>,
         mapPopup: React.MutableRefObject<HTMLDivElement>,

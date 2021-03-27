@@ -67,7 +67,7 @@ export const Chips = ({ className }: Props) => {
         return ApiDef.map((item, i) => (
             <Chip
                 key={i}
-                label={item.name}
+                label={item.name.charAt(0).toUpperCase() + item.name.slice(1)}
                 clickable
                 className={classes.chip}
                 color={item.name === searchType ? 'primary' : 'default'}
@@ -78,7 +78,7 @@ export const Chips = ({ className }: Props) => {
                 <Chip
                     icon={<KeyboardArrowUp className={classes.arrow} />}
                     key={-1}
-                    label={'direction'}
+                    label={'Direction'}
                     clickable
                     className={classes.direction}
                     color='default'
@@ -91,7 +91,7 @@ export const Chips = ({ className }: Props) => {
             <div style={{ alignSelf: 'flex-end' }}>
                 <Chip
                     key={-2}
-                    label={'ml'}
+                    label={'ML'}
                     clickable
                     className={classes.chip}
                     color={ml ? 'primary' : 'default'}

@@ -1,8 +1,7 @@
 import { GeoJSONGeometry, GeoJSONLineString, GeoJSONPoint } from 'ol/format/GeoJSON';
 
-export const GtfsApiRoute =
-    // 'https://api.thev-lad.com/api/gtfs/';
-    process.env.NODE_ENV === 'production' ? 'https://api.thev-lad.com/api/gtfs/' : 'http://127.0.0.1:8000/api/gtfs/';
+export const GtfsApiRoute = 'https://api.thev-lad.com/api/gtfs/';
+// process.env.NODE_ENV === 'production' ? 'https://api.thev-lad.com/api/gtfs/' : 'http://127.0.0.1:8000/api/gtfs/';
 
 export enum ApiNaming {
     route = 'route',
