@@ -11,12 +11,14 @@ import {
 } from '../../util/geo.util';
 import 'jest-canvas-mock';
 
+const coordinates = [-7.31786633503889, 54.9966287583879];
+
 describe('geo utility testing', () => {
     it('geoObjFeature', () => {
         let apiResult: ApiResult = {
             geometry: {
                 type: 'LineString',
-                coordinates: [[-7.31786633503889, 54.9966287583879]],
+                coordinates: [coordinates],
             },
         };
         let geoObj = getGeoObjFeature(apiResult);
@@ -25,7 +27,7 @@ describe('geo utility testing', () => {
         apiResult = {
             geometry: {
                 type: 'MultiLineString',
-                coordinates: [[[-7.31786633503889, 54.9966287583879]]],
+                coordinates: [[coordinates]],
             },
         };
         geoObj = getGeoObjFeature(apiResult);
@@ -34,7 +36,7 @@ describe('geo utility testing', () => {
         apiResult = {
             point: {
                 type: 'Point',
-                coordinates: [-7.31786633503889, 54.9966287583879],
+                coordinates,
             },
         };
         geoObj = getGeoObjFeature(apiResult);
@@ -51,7 +53,7 @@ describe('geo utility testing', () => {
             name: 'Ulsterbus Depot, stop 158131',
             point: {
                 type: 'Point',
-                coordinates: [-7.31786633503889, 54.9966287583879],
+                coordinates,
             },
             stop_sequence: 1,
         };
