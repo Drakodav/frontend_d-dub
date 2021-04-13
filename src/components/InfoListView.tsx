@@ -175,10 +175,10 @@ export const InfoListView = ({ className }: Props) => {
                                         {predictedFormatting(item) && (
                                             <p style={{ fontSize: '0.6rem' }}>pred {predictedFormatting(item)}</p>
                                         )}
-                                        <p style={{ fontSize: '0.5rem' }}>due {item.departure_time}</p>
+                                        <p style={{ fontSize: '0.5rem' }}>due {departureFormatting(item)}</p>
                                     </div>
                                 ) : (
-                                    <p>due {item.departure_time}</p>
+                                    <p>due {departureFormatting(item)}</p>
                                 )}
                             </div>
                         </Card>
