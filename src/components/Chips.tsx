@@ -88,18 +88,18 @@ export const Chips = ({ className }: Props) => {
                     }}
                 />
             </div>,
-            <div style={{ alignSelf: 'flex-end' }}>
-                <Chip
-                    key={-2}
-                    label={'ML'}
-                    clickable
-                    className={classes.chip}
-                    color={ml ? 'primary' : 'default'}
-                    onClick={() => {
-                        dispatch(switchML());
-                    }}
-                />
-            </div>,
+            // <div style={{ alignSelf: 'flex-end' }}>
+            //     <Chip
+            //         key={-2}
+            //         label={'ML'}
+            //         clickable
+            //         className={classes.chip}
+            //         color={ml ? 'primary' : 'default'}
+            //         onClick={() => {
+            //             dispatch(switchML());
+            //         }}
+            //     />
+            // </div>,
         ]);
     }, [dispatch, searchType, classes, ml]);
 
